@@ -71,7 +71,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       keeps = c("a_pos","torque")
       period.data[[i]] <- temp[keeps] #list only position and torque data by period
       
-      if(sequence$type[i]=="fs"||"inv_fs"||"optomotor"||"class_patt"||"class_cola")
+      if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotor")
       {
         ## plot the torque and position time traces
         #par(mfrow=c(3, 1))
@@ -87,7 +87,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
         ggtitle(paste(flyname, "Period", i))
       
       #position
-      if(sequence$type[i]=="fs"||"inv_fs"||"optomotor"||"class_patt"||"class_cola")
+      if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotor")
       {
         poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
           geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
@@ -101,12 +101,12 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))}
       
       #for position
-      if(sequence$type[i]=="fs"||"class_patt"||"class_cola")
+      if(sequence$type[i]=="fs"||sequence$type[i]=="color")
       {
         t1 = sum(abs(temp$a_pos) >= 512 & abs(temp$a_pos) <= 1538)
         t2 = nrow(temp)-t1
         sequence$lambda[i] = (t1-t2)/(t1+t2)
-        if (sequence$contingency[i] == '1_3_Q'){sequence$lambda[i]=-sequence$lambda[i]}
+        if (sequence$contingency[i] == '2_4_Q'){sequence$lambda[i]=-sequence$lambda[i]}
         if(l==1){PIprofile[1,i]=sequence$lambda[i]}
       }
       #for torque
@@ -191,7 +191,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       ggtitle(paste("Period", i))
     
     #position
-    if(sequence$type[i]=="fs"||"inv_fs"||"optomotor"||"class_patt"||"class_cola")
+    if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotor")
     {
       poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
         geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
@@ -233,24 +233,6 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       ###make colnames in PIprofile for plotting###
       colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)
       
-      # Plot box&dotplot with notches
-      
-      print(ggplot(melt(PIprofile), aes(variable, value)) +
-        geom_boxplot(fill = unique(sequence$color), notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-        geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
-        ggtitle(paste("PI Profile, N=",length(xml_list))) +
-        ylim(-1,1)+theme_light(base_size = 18) + theme(panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-        theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods))
-      
-      # plot violin plot
-      print(ggplot(melt(PIprofile), aes(variable, value)) +
-        geom_violin(fill = unique(sequence$color), adjust = .6) +
-        stat_summary(fun.y = mean, geom = "point", position = position_dodge(width = .9),
-                     size = 6, shape = 4) +
-        ggtitle(paste("PI Profile, N=",length(xml_list))) +
-        ylim(-1,1)+theme_light(base_size = 18) + theme(panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-        theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods))
-      
       
       # plot bar plot with sem
       #compute summary statistics
@@ -263,14 +245,38 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       }
       # plot graph
       print(ggplot(error, aes(x=period, y=mean)) + 
-        geom_bar(position=position_dodge(), stat="identity", fill = unique(sequence$color), colour="black") +
-        geom_errorbar(aes(ymin=mean-sem, ymax=mean+sem),
-                      width=0,
-                      size=1.5,
-                      position=position_dodge(.9)) +
+      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+      geom_bar(fill = sequence$color, position=position_dodge(), stat="identity", colour="black") +
+      geom_errorbar(aes(ymin=mean-sem, ymax=mean+sem),
+                    width=0,
+                    size=1.5,
+                    position=position_dodge(.9)) +
+      ggtitle(paste("PI Profile, N=",length(xml_list))) +
+        scale_x_continuous(breaks = seq(1, NofPeriods, 1)) +
+        scale_y_continuous(breaks = seq(-1, 1, .2)) +
+      theme_light(base_size = 18) + theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+      theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods))
+      
+      # Plot box&dotplot with notches
+      print(ggplot(melt(PIprofile), aes(variable, value)) +
+        geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+        geom_boxplot(fill = sequence$color, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+        geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
         ggtitle(paste("PI Profile, N=",length(xml_list))) +
-        ylim(-1,1)+theme_light(base_size = 18) + theme(panel.grid.major.x = element_blank(),panel.grid.minor.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+          scale_y_continuous(breaks = seq(-1, 1, .2)) +
+        theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
         theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods))
-      dev.off()
+      
+      # plot violin plot
+      print(ggplot(melt(PIprofile), aes(variable, value)) +
+        geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+        geom_violin(width = 1.1) +
+        geom_boxplot(fill = sequence$color, width = 0.1, outlier.color="darkred") +
+        ggtitle(paste("PI Profile, N=",length(xml_list))) +
+          scale_y_continuous(breaks = seq(-1, 1, .2)) +
+        theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+        theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods))
+
+    dev.off()
     }
 } else {print("You have selected files with differing metadata")}
