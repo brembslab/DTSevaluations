@@ -234,16 +234,16 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)
       
       
-      # plot bar plot with sem
-      #compute summary statistics
+      ## plot bar plot with sem
+         # compute summary statistics
       error <- data.frame(period=integer(ncol(PIprofile)), mean=numeric(ncol(PIprofile)), sem=numeric(ncol(PIprofile)))
       for(e in 1:ncol(PIprofile))
       {
         error$period[e]=e
         error$mean[e]=mean(PIprofile[,e])
-        error$sem[e]=sd(PIprofile[,e]/sqrt(ncol(PIprofile)))
+        error$sem[e]=sd(PIprofile[,e]/sqrt(nrow(PIprofile)))
       }
-      # plot graph
+         # plot graph
       print(ggplot(error, aes(x=period, y=mean)) + 
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_bar(fill = sequence$color, position=position_dodge(), stat="identity", colour="black") +
@@ -257,7 +257,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       theme_light(base_size = 18) + theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
       theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods))
       
-      # Plot box&dotplot with notches
+      ## Plot box&dotplot with notches
       print(ggplot(melt(PIprofile), aes(variable, value)) +
         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
         geom_boxplot(fill = sequence$color, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
@@ -267,7 +267,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
         theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
         theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods))
       
-      # plot violin plot
+      ## plot violin plot
       print(ggplot(melt(PIprofile), aes(variable, value)) +
         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
         geom_violin(width = 1.1) +
