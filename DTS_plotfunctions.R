@@ -4,7 +4,7 @@
 
 trq_pos_traces <- function(temp)
 {
-  ##modify a_Pos to introduce gaps betwene -180° and 180°
+  ##modify a_Pos to introduce gaps between -180° and 180°
   pos <- temp$a_pos
   for(p in 2:nrow(temp))
   {
@@ -70,4 +70,24 @@ multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL)
                                       layout.pos.col = matchidx$col))
     }
   }
+}
+
+############ Function to annotate plots after stats #########
+
+#Wilcoxon annotations
+wilcox.annotate <- function(boxes, wilcoxon)
+{
+  annotate("text",
+              x=boxes,
+              y=1.1,
+              label=paste("p=",wilcoxon[boxes]))
+}
+
+#samplesizes annotations
+samplesizes.annotate <- function(boxes, samplesizes)
+{
+  annotate("text",
+           x=boxes,
+           y=-1.1,
+           label=paste("N=", samplesizes[boxes]))
 }

@@ -1,4 +1,4 @@
-################## An R-script to import DTS data and to plot it in several ways
+################## An R-script to import DTS data from one or more files and to plot them into a PDF file several ways
 
 library(ggplot2)
 library(tidyr)
@@ -18,6 +18,12 @@ grouped.data <- list()
 
 ############# read file list and plot graphs for each file #############################
 xml_list <- choose.files()
+#make sure the data are written in a subfolder of the data folder
+evaluation.path = paste(dirname(xml_list[1]),"evaluations", sep = "/")
+dir.create(evaluation.path, showWarnings = FALSE)
+setwd(evaluation.path)
+
+#start evaluating
 if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group have the identical experimental design
 {
   for (l in 1:length(xml_list)) 
@@ -267,6 +273,16 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
         theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
         theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods))
       
+      ## Plot box&dotplot without notches
+      print(ggplot(melt(PIprofile), aes(variable, value)) +
+              geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+              geom_boxplot(fill = sequence$color, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
+              geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
+              ggtitle(paste("PI Profile, N=",length(xml_list))) +
+              scale_y_continuous(breaks = seq(-1, 1, .2)) +
+              theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods))
+
       ## plot violin plot
       print(ggplot(melt(PIprofile), aes(variable, value)) +
         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
