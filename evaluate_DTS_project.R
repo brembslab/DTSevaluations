@@ -9,6 +9,9 @@ library(dplyr)
 library(gridExtra)
 library(yaml)
 library(ggsignif)
+library(effsize)
+library(pwr)
+library(BayesFactor)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -386,7 +389,9 @@ if(NofGroups>2){}
 
 if(!is.null(project.data[["statistics"]])) #check if there are statistics instructions
 {  
-learningscore=project.data[["statistics"]][[1]][["data"]] #get the PI that is going to be tested
+#get significance levels
+  signif = project.data[["statistics"]][["significance-levels"]]
+learningscore=project.data[["statistics"]][["learning-score"]][["data"]] #get the PI that is going to be tested
 #create new dataframe with only the chosen PI values
 PIstat <- list()
 for(x in 1:NofGroups)
@@ -396,17 +401,19 @@ for(x in 1:NofGroups)
 PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind))) #convert PI list to data.frame
 colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name')) #add group names as column names to PIstat
 ###generate important variables for ater plotting and anotation
-colorrange = c("khaki","olivedrab3", "cornflowerblue", "goldenrod1", "indianred1", "plum3")
+colorrange = project.data[["statistics"]][["color-range"]]
 boxcolors = c(colorrange[1:NofGroups])
 boxes<-c(1:NofGroups)
 samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))
 
-##### Wilcoxon test against zero #####
-if(project.data[["statistics"]][[2]][["data"]]==1) #check if instructions contain Wlcoxon test against zero
+##### Single group tests against zero #####
+if(project.data[["statistics"]][["single.groups"]][["data"]]==1) #check if instructions contain Wlcoxon test against zero
 {
   wilcoxon<-numeric()  
   for(x in 1:NofGroups){wilcoxon[x] = signif(wilcox.test(PIstat[[x]])$p.value, 3)} #test all groups against zero
-# calculate statistical power
+  #compute Bayes Factor for each group
+  bayes.results<-list()
+  for(x in 1:NofGroups){bayes.results[[x]]=extractBF(ttestBF(na.omit(PIstat[[x]])))}
     
 # plot PI box plot with power analysis and asterisks for Wilcoxon test against zero
   print(ggplot(melt(PIstat), aes(variable, value)) +
@@ -420,12 +427,24 @@ if(project.data[["statistics"]][[2]][["data"]]==1) #check if instructions contai
     samplesizes.annotate(boxes, samplesizes) +
     wilcox.annotate(boxes, wilcoxon))
 }
-##### Mann Whitney U-test between two independent samples #####
-if(project.data[["statistics"]][[3]][["data"]]==1 || NofGroups==2) #check if instructions contain U-test between two groups and if we have two grouos
+##### Tests between two independent samples #####
+if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #check if instructions contain U-test between two groups and if we have two grouos
 {
-    utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test
+    utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
+    w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)
+    #compute effect size Cohen's D
+    cohend = signif(cohen.d(na.omit(PIstat[,1]), na.omit(PIstat[,2]))$estimate, 3)
+    #calculate statistical power
+    alt = project.data[["statistics"]][["two.groups"]][["power"]]
+    power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
+    #calculate Bayes Factor
+    bayesF=extractBF(ttestBF(na.omit(PIprofile[[1]]), na.omit(PIprofile[[2]])))
+    #make tidy table of results
+    results.utest<-data.frame(values=c(signif[1], w.statistic, cohend, power, signif(bayesF$bf, 3), signif(bayesF$error, 3)))
+    rownames(results.utest)<-c("Significance level" ,"MW U-Test, W", "Cohen's D", "stat. Power", "Bayes Factor", "Bayes Factor error")
+    
 # plot two PIs with asterisks
-  print(ggplot(melt(PIstat), aes(variable, value)) +
+  plots.utest<-list(ggplot(melt(PIstat), aes(variable, value)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
       geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
@@ -433,8 +452,12 @@ if(project.data[["statistics"]][[3]][["data"]]==1 || NofGroups==2) #check if ins
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
       theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-      geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), map_signif_level= c("***"=0.0001,"**"=0.001, "*"=0.005)) +
+      geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1])) +
       samplesizes.annotate(boxes, samplesizes))
+
+  #add table with results and plot
+  plots.utest[[2]]<-tableGrob(results.utest)
+  grid.arrange(grobs = plots.utest, ncol=2)
 }
 
 
