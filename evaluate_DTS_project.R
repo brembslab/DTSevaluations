@@ -418,7 +418,7 @@ if(project.data[["statistics"]][["single.groups"]][["data"]]==1) #check if instr
   }
   results.bayes<-do.call("rbind", results.bayes) #fuse all Bayes results into one dataframe
   results.bayes <- results.bayes[-c(3,4)]# drop the date and code columns
-  results.bayes <- lapply(results.bayes[is.num], signif, 3) # reduce results to 3 significant digits
+#  results.bayes <- lapply(results.bayes[is.num], signif, 3) # reduce results to 3 significant digits
   
 # plot PI box plot with power analysis and asterisks for Wilcoxon test against zero
   plots.singles<-list(ggplot(melt(PIstat), aes(variable, value)) +
