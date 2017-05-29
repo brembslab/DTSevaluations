@@ -389,8 +389,7 @@ if(NofGroups>2){}
 
 if(!is.null(project.data[["statistics"]])) #check if there are statistics instructions
 {  
-#get significance levels
-  signif = project.data[["statistics"]][["significance-levels"]]
+signif = project.data[["statistics"]][["significance-levels"]] #get significance levels
 learningscore=project.data[["statistics"]][["learning-score"]][["data"]] #get the PI that is going to be tested
 #create new dataframe with only the chosen PI values
 PIstat <- list()
@@ -412,11 +411,17 @@ if(project.data[["statistics"]][["single.groups"]][["data"]]==1) #check if instr
   wilcoxon<-numeric()  
   for(x in 1:NofGroups){wilcoxon[x] = signif(wilcox.test(PIstat[[x]])$p.value, 3)} #test all groups against zero
   #compute Bayes Factor for each group
-  bayes.results<-list()
-  for(x in 1:NofGroups){bayes.results[[x]]=extractBF(ttestBF(na.omit(PIstat[[x]])))}
-    
+  results.bayes<-list()
+  for(x in 1:NofGroups){
+    results.bayes[[x]]=extractBF(ttestBF(na.omit(PIstat[[x]])))
+    row.names(results.bayes[[x]])[1] <- project.data[["resources"]][[x]][["name"]]
+  }
+  results.bayes<-do.call("rbind", results.bayes) #fuse all Bayes results into one dataframe
+  results.bayes <- results.bayes[-c(3,4)]# drop the date and code columns
+  results.bayes <- lapply(results.bayes[is.num], signif, 3) # reduce results to 3 significant digits
+  
 # plot PI box plot with power analysis and asterisks for Wilcoxon test against zero
-  print(ggplot(melt(PIstat), aes(variable, value)) +
+  plots.singles<-list(ggplot(melt(PIstat), aes(variable, value)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
     geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
     geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
@@ -426,6 +431,11 @@ if(project.data[["statistics"]][["single.groups"]][["data"]]==1) #check if instr
     theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
     samplesizes.annotate(boxes, samplesizes) +
     wilcox.annotate(boxes, wilcoxon))
+  
+#add table with results and plot
+    plots.singles[[2]]<-tableGrob(results.bayes)
+    grid.arrange(grobs = plots.singles, ncol=2)
+  
 }
 ##### Tests between two independent samples #####
 if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #check if instructions contain U-test between two groups and if we have two grouos
@@ -444,7 +454,7 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
     rownames(results.utest)<-c("Significance level" ,"MW U-Test, W", "Cohen's D", "stat. Power", "Bayes Factor", "Bayes Factor error")
     
 # plot two PIs with asterisks
-  plots.utest<-list(ggplot(melt(PIstat), aes(variable, value)) +
+  plots.2test<-list(ggplot(melt(PIstat), aes(variable, value)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
       geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
@@ -456,8 +466,8 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
       samplesizes.annotate(boxes, samplesizes))
 
   #add table with results and plot
-  plots.utest[[2]]<-tableGrob(results.utest)
-  grid.arrange(grobs = plots.utest, ncol=2)
+  plots.2test[[2]]<-tableGrob(results.utest)
+  grid.arrange(grobs = plots.2test, ncol=2)
 }
 
 
