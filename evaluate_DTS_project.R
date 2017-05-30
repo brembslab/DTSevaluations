@@ -348,7 +348,7 @@ for(x in 1:NofGroups)
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods)
+              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Experiment Sequence") + theme(aspect.ratio=4/NofPeriods)
   }  
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 
@@ -363,7 +363,7 @@ for(x in 1:NofGroups)
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods)
+              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Experiment Sequence") + theme(aspect.ratio=4/NofPeriods)
   }      
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 
@@ -378,7 +378,7 @@ for(x in 1:NofGroups)
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods)
+              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Experiment Sequence") + theme(aspect.ratio=4/NofPeriods)
   }
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 
@@ -391,6 +391,7 @@ if(!is.null(project.data[["statistics"]])) #check if there are statistics instru
 {  
 signif = project.data[["statistics"]][["significance-levels"]] #get significance levels
 learningscore=project.data[["statistics"]][["learning-score"]][["data"]] #get the PI that is going to be tested
+groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
 #create new dataframe with only the chosen PI values
 PIstat <- list()
 for(x in 1:NofGroups)
@@ -412,14 +413,13 @@ if(project.data[["statistics"]][["single.groups"]][["data"]]==1) #check if instr
   for(x in 1:NofGroups){wilcoxon[x] = signif(wilcox.test(PIstat[[x]])$p.value, 3)} #test all groups against zero
   #compute Bayes Factor for each group
   results.bayes<-list()
-  for(x in 1:NofGroups){
-    results.bayes[[x]]=extractBF(ttestBF(na.omit(PIstat[[x]])))
-    row.names(results.bayes[[x]])[1] <- project.data[["resources"]][[x]][["name"]]
-  }
+  for(x in 1:NofGroups){results.bayes[[x]]=extractBF(ttestBF(na.omit(PIstat[[x]])))} #extract BayesFactors for all groups
   results.bayes<-do.call("rbind", results.bayes) #fuse all Bayes results into one dataframe
   results.bayes <- results.bayes[-c(3,4)]# drop the date and code columns
-#  results.bayes <- lapply(results.bayes[is.num], signif, 3) # reduce results to 3 significant digits
-  
+  results.bayes <- as.data.frame(sapply(results.bayes , signif, 3)) # reduce results to 3 significant digits
+  #add group names as row names
+  row.names(results.bayes) <- groupnames
+
 # plot PI box plot with power analysis and asterisks for Wilcoxon test against zero
   plots.singles<-list(ggplot(melt(PIstat), aes(variable, value)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
@@ -428,7 +428,7 @@ if(project.data[["statistics"]][["single.groups"]][["data"]]==1) #check if instr
     ggtitle("Wilcoxon") +
     scale_y_continuous(breaks = seq(-1, 1, .2)) +
     theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-    theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+    theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
     samplesizes.annotate(boxes, samplesizes) +
     wilcox.annotate(boxes, wilcoxon))
   
@@ -461,7 +461,7 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
       ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-      theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1])) +
       samplesizes.annotate(boxes, samplesizes))
 
