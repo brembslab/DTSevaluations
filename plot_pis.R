@@ -2,6 +2,10 @@
 
 library(ggplot2)
 library(reshape2)
+library(ggsignif)
+library(effsize)
+library(pwr)
+library(BayesFactor)
 
 #read data file
 PIprofile <- read.csv(file=choose.files(), header=TRUE, sep=";")
@@ -77,3 +81,4 @@ ggplot(PIprofile, aes(x = "", y = PIprofile$TI8)) +
   scale_y_continuous(limits= c(-1,1), breaks = seq(-1, 1, .2)) +
   theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
   theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")
+

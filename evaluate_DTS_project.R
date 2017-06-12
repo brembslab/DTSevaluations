@@ -1,4 +1,4 @@
-################## An R-script to read YAML DTS project files, visualize and statistically evaluate data
+library################## An R-script to read YAML DTS project files, visualize and statistically evaluate data
 
 library(ggplot2)
 library(tidyr)
@@ -12,6 +12,8 @@ library(ggsignif)
 library(effsize)
 library(pwr)
 library(BayesFactor)
+library(genefilter)
+library(seewave)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -36,15 +38,16 @@ grouped.trqhistos <- list()   #Torque histograms for group in a list of length N
 grouped.poshistos <- list()   #Position histograms for group in a list of length NofPeriods
 grouped.PIprofiles <- list()  #PIProfile data frames in a list of length NofGroups
 grouped.periods <- list()     #Period designs in a list of length NofGroups
+grouped.spectra <- list()      #Power spectra in a list of length NofGroups
 
 for(x in 1:NofGroups)
 {
 xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/")
-#xml_list = gsub("/", "\\", xml_list, fixed=TRUE) #fix slashes so xmlParse can read the files
 
 #create/empty lists for collecting all single fly data by period
 period.data <- list()     #data grouped by period
 grouped.data <- list()    #total data grouped
+speclist <- list()
 
 #start evaluating
 if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group have the identical experimental design
@@ -59,6 +62,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     ##extract sequence meta-data
     NofPeriods = singleflydata[[5]]
     sequence <- singleflydata[[6]]
+    samplerate = as.numeric(as.character(singleflydata[[4]]$sample_rate))
     
     ##extract fly meta-data
     fly <- singleflydata[[3]]
@@ -165,7 +169,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     multiplot(plotlist = trqhistos, cols=2)
     #position
     multiplot(plotlist = poshistos, cols=2)
-    
+
     ##plot PI bargraph
     
     barplot(sequence$lambda, main = paste("Performance Indices", flyname),
@@ -173,7 +177,17 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
             ylab="PI [rel. units]",
             space=0,
             col = sequence$color)
+    
+    ## plot power spectrum and spectrogram ##
+    meanspec(rawdata$torque, f = samplerate, wl = 600) #plot mean power spectrum for each fly
+    title(paste("Torque-Powerspectrum", flyname))
+    spectro(rawdata$torque, f = samplerate, wl=600) #plot spectrogram for each fly
+    title(paste("Torque-Spectrogram", flyname))
+    speclist[[l]] = as.data.frame(meanspec(rawdata$torque, f = samplerate, wl = 600, plot = FALSE)) #collect each spectrum for later avweraging
+    
     dev.off()
+    
+    
     ##dyplot traces
     traces <- dytraces(rawdata)
     print(traces)
@@ -184,6 +198,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
     
+
   } #for number of flies
 
   ########### plot graphs for all experiments #####################
@@ -203,7 +218,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       }
     }
     pooled.data[[i]] <- period.data
-  }
+  } #for number of periods
   
   ## plot pooled position and torque histograms by period ##
   
@@ -270,6 +285,19 @@ colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods) #make colnames in PIprofile
 grouped.PIprofiles[[x]] = PIprofile #add PIprofile to list of grouped PIs
 PIprofile <- PIprofile[0,] #empty PIprofile
 
+#Power spectra
+spectemp <- do.call(cbind, speclist) #combine all power spectra
+colnames(spectemp)[1]<-"freq" #label the first x-axis as frequency
+spectemp$freq <- spectemp$freq*1000
+spectemp <- spectemp[, -grep("x", colnames(spectemp))] #drop all x-axes exept the one now labelled "freq"
+spectemp[length(spectemp)+1] <- rowMeans(spectemp[, grep("y", colnames(spectemp))]) #calculate the mean power spectrum in the group
+spectemp[length(spectemp)+1] <- rowSds(spectemp[, grep("y", colnames(spectemp))]) #calculate the standard deviation in the group
+spectemp[, grep("y", colnames(spectemp))] <- NULL #drop all raw data for summary data
+spectemp$group <- as.factor(rep(paste(project.data[["resources"]][[x]][["title"]]), nrow(spectemp))) #add grouping variable for later plotting
+colnames(spectemp)[2] <- "mean"
+colnames(spectemp)[3] <- "sd"
+grouped.spectra[[x]] = spectemp #save group mean/sd
+
 } #for nofGroups
 ####################################################
 ######## plots and statistical evaluations ########
@@ -308,7 +336,17 @@ for(x in 1:NofGroups)
     mtext(project.data[["resources"]][[x]][["title"]], line = 3, font=2, cex=2)
 }
 
-#plot bar plot with SEM
+#plot power spectra in single plot
+spectemp <- do.call("rbind", grouped.spectra) #create single data.frame from list of groups
+print(ggplot(spectemp, aes(x=freq, y=mean, group=group, colour=group, fill=group)) + 
+        geom_line() + 
+        geom_ribbon(aes(ymin=mean-sd, ymax=mean+sd), alpha=0.2) +
+        scale_x_continuous(breaks = seq(0, 10, 2), limits = c(0, 10)) +
+        ggtitle("Powerspectra") +
+        theme_light(base_size = 16) + theme(panel.grid.major.y = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+        theme(axis.text.y = element_text(size=16))+ ylab("mean rel. Power") + xlab("Frequency [Hz]"))
+
+#plot PI bar plot with SEM
 PIplots <- list()
 for(x in 1:NofGroups)
   {
@@ -420,7 +458,7 @@ if(project.data[["statistics"]][["single.groups"]][["data"]]==1) #check if instr
   #add group names as row names
   row.names(results.bayes) <- groupnames
 
-# plot PI box plot with power analysis and asterisks for Wilcoxon test against zero
+# plot PI box plot test against zero
   plots.singles<-list(ggplot(melt(PIstat), aes(variable, value)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
     geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
@@ -448,7 +486,7 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
     alt = project.data[["statistics"]][["two.groups"]][["power"]]
     power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
     #calculate Bayes Factor
-    bayesF=extractBF(ttestBF(na.omit(PIprofile[[1]]), na.omit(PIprofile[[2]])))
+    bayesF=extractBF(ttestBF(na.omit(PIstat[[1]]), na.omit(PIstat[[2]])))
     #make tidy table of results
     results.utest<-data.frame(values=c(signif[1], w.statistic, cohend, power, signif(bayesF$bf, 3), signif(bayesF$error, 3)))
     rownames(results.utest)<-c("Significance level" ,"MW U-Test, W", "Cohen's D", "stat. Power", "Bayes Factor", "Bayes Factor error")
