@@ -288,12 +288,12 @@ PIprofile <- PIprofile[0,] #empty PIprofile
 #Power spectra
 spectemp <- do.call(cbind, speclist) #combine all power spectra
 colnames(spectemp)[1]<-"freq" #label the first x-axis as frequency
-spectemp$freq <- spectemp$freq*1000
+spectemp$freq <- spectemp$freq*1000 #convert kHz to Hz
 spectemp <- spectemp[, -grep("x", colnames(spectemp))] #drop all x-axes exept the one now labelled "freq"
 spectemp[length(spectemp)+1] <- rowMeans(spectemp[, grep("y", colnames(spectemp))]) #calculate the mean power spectrum in the group
-spectemp[length(spectemp)+1] <- rowSds(spectemp[, grep("y", colnames(spectemp))]) #calculate the standard deviation in the group
+spectemp[length(spectemp)+1] <- rowSds(spectemp[, grep("y", colnames(spectemp))])/sqrt(length(project.data[["resources"]][[x]][["data"]])) #calculate the standard deviation in the group
 spectemp[, grep("y", colnames(spectemp))] <- NULL #drop all raw data for summary data
-spectemp$group <- as.factor(rep(paste(project.data[["resources"]][[x]][["title"]]), nrow(spectemp))) #add grouping variable for later plotting
+spectemp$group <- as.factor(rep(paste(project.data[["resources"]][[x]][["name"]], ", N=", length(project.data[["resources"]][[x]][["data"]]), sep = ""), nrow(spectemp))) #add grouping variable for later plotting
 colnames(spectemp)[2] <- "mean"
 colnames(spectemp)[3] <- "sd"
 grouped.spectra[[x]] = spectemp #save group mean/sd
@@ -304,6 +304,11 @@ grouped.spectra[[x]] = spectemp #save group mean/sd
 ###################################################
 
 ###### Plots ######
+
+###generate important variables for later plotting and annotation
+colorrange = project.data[["statistics"]][["color-range"]]
+boxcolors = c(colorrange[1:NofGroups])
+boxes<-c(1:NofGroups)
 
 pdf(file=paste(project.data$name,"pdf", sep = "."), paper="a4r", pointsize=1, width = 0, height = 0)
 #title page with meta-data
@@ -337,14 +342,28 @@ for(x in 1:NofGroups)
 }
 
 #plot power spectra in single plot
-spectemp <- do.call("rbind", grouped.spectra) #create single data.frame from list of groups
-print(ggplot(spectemp, aes(x=freq, y=mean, group=group, colour=group, fill=group)) + 
-        geom_line() + 
-        geom_ribbon(aes(ymin=mean-sd, ymax=mean+sd), alpha=0.2) +
-        scale_x_continuous(breaks = seq(0, 10, 2), limits = c(0, 10)) +
+spectemp <- do.call("rbind", grouped.spectra) #create single data.frame with grouping variable from list of groups
+print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) + 
+        geom_ribbon(aes(ymin=mean-sd, ymax=mean+sd, fill = group), alpha=0.5) +
+        scale_fill_manual(values = boxcolors) +
+        geom_line(aes(colour = group), size = 2) + 
+        scale_color_manual(values = boxcolors) +
+        scale_x_continuous(breaks = seq(0, 10, 2), limits = c(0, 10), expand=c(0,0)) +
+        scale_y_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1), expand=c(0,0)) +
         ggtitle("Powerspectra") +
-        theme_light(base_size = 16) + theme(panel.grid.major.y = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-        theme(axis.text.y = element_text(size=16))+ ylab("mean rel. Power") + xlab("Frequency [Hz]"))
+        guides(colour = guide_legend(override.aes = list(size=3))) +
+        theme_light(base_size = 16) + theme(legend.justification=c(1,0),
+                                            legend.position=c(0.94,0.75), 
+                                            legend.title=element_blank(), 
+                                            legend.key.size = unit(4, 'lines'),
+                                            legend.key = element_rect(size = 8),
+                                            legend.box.background = element_rect(fill="white"),
+                                            legend.box.margin = margin(6, 6, 6, 6),
+                                            legend.text=element_text(size=14), 
+                                            panel.grid.major.y = element_blank(),
+                                            panel.grid.minor = element_blank(),
+                                            panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+        theme(axis.text.y = element_text(size=12))+ ylab("mean rel. Power") + xlab("Frequency [Hz]"))
 
 #plot PI bar plot with SEM
 PIplots <- list()
@@ -430,18 +449,13 @@ if(!is.null(project.data[["statistics"]])) #check if there are statistics instru
 signif = project.data[["statistics"]][["significance-levels"]] #get significance levels
 learningscore=project.data[["statistics"]][["learning-score"]][["data"]] #get the PI that is going to be tested
 groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
+
 #create new dataframe with only the chosen PI values
 PIstat <- list()
-for(x in 1:NofGroups)
-{
-  PIstat[[x]] <- grouped.PIprofiles[[x]][[learningscore]]
-}
+for(x in 1:NofGroups){PIstat[[x]] <- grouped.PIprofiles[[x]][[learningscore]]}
 PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind))) #convert PI list to data.frame
 colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name')) #add group names as column names to PIstat
-###generate important variables for ater plotting and anotation
-colorrange = project.data[["statistics"]][["color-range"]]
-boxcolors = c(colorrange[1:NofGroups])
-boxes<-c(1:NofGroups)
+#get easy to access sample sizes
 samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))
 
 ##### Single group tests against zero #####
@@ -498,7 +512,7 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
       geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
       ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
-      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
       theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1])) +
       samplesizes.annotate(boxes, samplesizes))
