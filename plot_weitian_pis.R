@@ -7,7 +7,7 @@ library(reshape2)
 PIprofile <- read.csv(file=choose.files(), header=TRUE, sep="\t")
 
 #drop all columns not performance indices
-PIprofile$Nr <- NULL
+PIprofile$genotype <- NULL
 
 #Define colors for graphs
 
@@ -20,7 +20,7 @@ for(e in 1:ncol(PIprofile))
 {
   error$period[e]=e
   error$mean[e]=mean(PIprofile[,e])
-  error$sem[e]=sd(PIprofile[,e]/sqrt(ncol(PIprofile)))
+  error$sem[e]=sd(PIprofile[,e]/sqrt(nrow(PIprofile)))
 }
 # plot graph
 ggplot(error, aes(x=period, y=mean)) + 

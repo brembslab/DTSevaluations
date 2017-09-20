@@ -267,7 +267,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       print(ggplot(melt(PIprofile), aes(variable, value)) +
         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
         geom_boxplot(fill = sequence$color, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-        geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
+        geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3),  shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
         ggtitle(paste("PI Profile, N=",length(xml_list))) +
           scale_y_continuous(breaks = seq(-1, 1, .2)) +
         theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -277,7 +277,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       print(ggplot(melt(PIprofile), aes(variable, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = sequence$color, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
+              geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3),  shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               ggtitle(paste("PI Profile, N=",length(xml_list))) +
               scale_y_continuous(breaks = seq(-1, 1, .2)) +
               theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
