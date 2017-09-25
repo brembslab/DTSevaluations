@@ -91,3 +91,30 @@ samplesizes.annotate <- function(boxes, samplesizes)
            y=-1.1,
            label=paste("N=", samplesizes[boxes]))
 }
+
+########### Function to calculate Falso Positive Risk
+
+#======================================================
+calc.FPR =  function(samplesizes,pval,sigma,prior,delta1){
+  sdiff=sqrt(sigma^2/samplesizes[1] + sigma^2/samplesizes[2])
+  df=(samplesizes[1]-1)+(samplesizes[2]-1)
+  # Note FPR doesn't need calculation of power for p-equals case  
+  #  
+  #under H0, use central t distribution
+  tcrit=qt((1-pval/2),df,ncp=0)
+  x0=tcrit
+  y0=dt(x0,df,0)
+  #
+  # under H1 use non-central t distribution
+  ncp1=delta1/sdiff    #non-centrality paramater
+  x1=x0  #tcrit
+  y1=dt(x1,df,ncp=ncp1)
+  
+  # Calc false positive risk
+  p0=2*y0
+  p1=y1
+  FPR=((1-prior)*p0)/(((1-prior)*p0) + prior*p1)
+  FPR
+  output=c(FPR,x0,y0,x1,y1)
+  return(output)
+}

@@ -447,6 +447,7 @@ if(NofGroups>2){}
 if(!is.null(project.data[["statistics"]])) #check if there are statistics instructions
 {  
 signif = project.data[["statistics"]][["significance-levels"]] #get significance levels
+priorval = project.data[["statistics"]][["priors"]]# get priors for FPR calculation
 learningscore=project.data[["statistics"]][["learning-score"]][["data"]] #get the PI that is going to be tested
 groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
 
@@ -457,6 +458,8 @@ PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind))) #convert PI list to data.
 colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name')) #add group names as column names to PIstat
 #get easy to access sample sizes
 samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))
+#get easy access to standard deviations
+SDs<-as.numeric(apply(PIstat, 2, function(x) sd(na.omit(x))))
 
 ##### Single group tests against zero #####
 if(project.data[["statistics"]][["single.groups"]][["data"]]==1) #check if instructions contain Wlcoxon test against zero
@@ -501,9 +504,40 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
     power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
     #calculate Bayes Factor
     bayesF=extractBF(ttestBF(na.omit(PIstat[[1]]), na.omit(PIstat[[2]])))
-    #make tidy table of results
-    results.utest<-data.frame(values=c(signif[1], w.statistic, cohend, power, signif(bayesF$bf, 3), signif(bayesF$error, 3)))
-    rownames(results.utest)<-c("Significance level" ,"MW U-Test, W", "Cohen's D", "stat. Power", "Bayes Factor", "Bayes Factor error")
+    #calculate FPR for priors set in project file#
+    #run first prior  
+      prior=priorval[1]
+      out=calc.FPR(samplesizes,utest,mean(SDs),prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      fpz1=out[1]
+    #run second prior  
+      prior=priorval[2]
+      out=calc.FPR(samplesizes,utest,mean(SDs),prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      fpz2=out[1]
+    #Power and likelihood ratio: NB for two sided test, need 2*y0
+      LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
+      FPRpower=power.t.test(n=round(mean(samplesizes),0),sd=mean(SDs),delta=abs(cohend),sig.level=signif[1], type="two.sample",alternative="one.sided",power=NULL)$power
+      
+      #make tidy table of results
+    results.utest<-data.frame(values=c(signif[1],
+                                       w.statistic,
+                                       cohend,
+                                       power,
+                                       signif(bayesF$bf, 3),
+                                       signif(bayesF$error, 3),
+                                       signif(fpz1, 3),
+                                       signif(fpz2, 3),
+                                       signif(LR, 3),
+                                       signif(FPRpower, 3)))
+    rownames(results.utest)<-c("Significance level",
+                               "MW U-Test, W",
+                               "Cohen's D",
+                               "stat. Power",
+                               "Bayes Factor",
+                               "Bayes Factor error",
+                               paste("FP risk, prior ",priorval[1]),
+                               paste("FP risk, prior ",priorval[2]),
+                               "Likelihood Ratio",
+                               "DCpower")
     
 # plot two PIs with asterisks
   plots.2test<-list(ggplot(melt(PIstat), aes(variable, value)) +
