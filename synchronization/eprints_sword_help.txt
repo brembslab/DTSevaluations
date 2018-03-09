@@ -1,0 +1,27 @@
+python eprints_sword.py --help
+Zeigt die Hilfe an:
+    usage: eprints_sword.py [-h] [--path PATH] [--epid EPID] [--user USER]
+                        [--verbose]
+
+    Eprits SWORD client
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    --path PATH, -p PATH  Verzeichnis zum Hochladen
+    --epid EPID, -i EPID  Eprints Id zum anhengen oder false um neuen Eintrag zu
+                            erstellen
+    --user USER, -u USER  Eprints username
+    --verbose, -v         Zusaetzliche Informationen anzeigen
+
+
+Beispielaufruf:
+
+python eprints_sword.py -p /home/winterc/colorlearnijng/xml/ -u winterc -v
+
+Anmerkungen:
+
+Die eprintid wird aus dem/in das XML gelesen/geschrieben.
+Das Passwort könnten wir zum automatisierten hochladen auch in der Datei speichern.
+Wenn alle Messungen abgeschlossen sind kann der xml Datei die Node 'finished' hinzugefügt werden.
+In dem Fall werden keine Dateien mehr in Eprints hochgeladen.
+Ebenso wird nichts hochgeladen wenn die Dateien im Eprints neuer sind als die im Verzeichnis der xml.

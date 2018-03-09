@@ -26,9 +26,10 @@ for(x in 1:NofGroups)
 
 ###### statistical evaluations ######
 
-signif = c(0.005, 0.001, 0.0001) #set significance levels
+signif = c(0.05, 0.01, 0.001) #set significance levels
 learningscore=8 #set learning score to be evaluated
 groupnames = c("radish", "Canton S")  #set a vector with all group names
+priorval = c(0.5,0.1) #create the two priors for FPR calculations
 #create new dataframe with only the chosen PI values
 PIstat <- list()
 for(x in 1:NofGroups)
@@ -59,7 +60,7 @@ samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))
   plots.singles<-list(ggplot(melt(PIstat), aes(variable, value)) +
                         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
                         geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-                        geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
+                        geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
                         ggtitle("Wilcoxon") +
                         scale_y_continuous(breaks = seq(-1, 1, .2)) +
                         theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -82,15 +83,42 @@ samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))
   power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
   #calculate Bayes Factor
   bayesF=extractBF(ttestBF(na.omit(PIstat[[1]]), na.omit(PIstat[[2]])))
-  #make tidy table of results
-  results.utest<-data.frame(values=c(signif[1], w.statistic, cohend, power, signif(bayesF$bf, 3), signif(bayesF$error, 3)))
-  rownames(results.utest)<-c("Significance level" ,"MW U-Test, W", "Cohen's D", "stat. Power", "Bayes Factor", "Bayes Factor error")
+  #calculate FPR for priors set in project file#
+  #run first prior  
+  prior=priorval[1]
+  out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+  fpz1=out[1]
+  #run second prior  
+  prior=priorval[2]
+  out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+  fpz2=out[1]
+  #Power and likelihood ratio: NB for two sided test, need 2*y0
+  LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
   
+  #make tidy table of results
+  results.utest<-data.frame(values=c(signif[1],
+                                     w.statistic,
+                                     cohend,
+                                     power,
+                                     signif(bayesF$bf, 3),
+                                     signif(bayesF$error, 3),
+                                     signif(fpz1, 3),
+                                     signif(fpz2, 3),
+                                     signif(LR, 3)))
+  rownames(results.utest)<-c("Significance level",
+                             "MW U-Test, W",
+                             "Cohen's D",
+                             "stat. Power",
+                             "Bayes Factor",
+                             "Bayes Factor error",
+                             paste("FP risk, prior ",priorval[1]),
+                             paste("FP risk, prior ",priorval[2]),
+                             "Likelihood Ratio")
   # plot two PIs with asterisks
   plots.2test<-list(ggplot(melt(PIstat), aes(variable, value)) +
                       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
                       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-                      geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
+                      geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
                       ggtitle(paste("U-Test, p=", utest)) +
                       scale_y_continuous(breaks = seq(-1, 1, .2)) +
                       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +

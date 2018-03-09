@@ -46,7 +46,7 @@ ggplot(error, aes(x=period, y=mean)) +
 ggplot(melt(PIprofile), aes(variable, value)) +
         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
         geom_boxplot(fill = barcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-        geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
+        geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
         ggtitle(paste("PI Profile, N=",nrow(PIprofile))) +
         scale_y_continuous(breaks = seq(-1, 1, .2)) +
         theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -56,7 +56,7 @@ ggplot(melt(PIprofile), aes(variable, value)) +
 ggplot(melt(PIprofile), aes(variable, value)) +
   geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
   geom_boxplot(fill = barcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-  geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), cex=2, color="grey80") +
+  geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
   ggtitle(paste("PI Profile, N=",nrow(PIprofile))) +
   scale_y_continuous(breaks = seq(-1, 1, .2)) +
   theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -71,14 +71,3 @@ ggplot(melt(PIprofile), aes(variable, value)) +
         scale_y_continuous(breaks = seq(-1, 1, .2)) +
         theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
         theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/ncol(PIprofile))
-
-## Plot box&dotplot without notches, just first test PI after training
-ggplot(PIprofile, aes(x = "", y = PIprofile$TI8)) +
-  geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-  geom_boxplot(fill = "lightyellow", notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-  geom_jitter(data = PIprofile, aes(x = "", y = PIprofile$TI8), position=position_jitter(0.3), cex=2, color="grey80") +
-  ggtitle(paste("Learning score, N=",nrow(PIprofile))) +
-  scale_y_continuous(limits= c(-1,1), breaks = seq(-1, 1, .2)) +
-  theme_light(base_size = 18) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-  theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")
-

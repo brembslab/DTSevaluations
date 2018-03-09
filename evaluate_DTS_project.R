@@ -507,16 +507,15 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
     #calculate FPR for priors set in project file#
     #run first prior  
       prior=priorval[1]
-      out=calc.FPR(samplesizes,utest,mean(SDs),prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
       fpz1=out[1]
     #run second prior  
       prior=priorval[2]
-      out=calc.FPR(samplesizes,utest,mean(SDs),prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
       fpz2=out[1]
     #Power and likelihood ratio: NB for two sided test, need 2*y0
       LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
-      FPRpower=power.t.test(n=round(mean(samplesizes),0),sd=mean(SDs),delta=abs(cohend),sig.level=signif[1], type="two.sample",alternative="one.sided",power=NULL)$power
-      
+
       #make tidy table of results
     results.utest<-data.frame(values=c(signif[1],
                                        w.statistic,
@@ -526,8 +525,7 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
                                        signif(bayesF$error, 3),
                                        signif(fpz1, 3),
                                        signif(fpz2, 3),
-                                       signif(LR, 3),
-                                       signif(FPRpower, 3)))
+                                       signif(LR, 3)))
     rownames(results.utest)<-c("Significance level",
                                "MW U-Test, W",
                                "Cohen's D",
@@ -536,8 +534,7 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
                                "Bayes Factor error",
                                paste("FP risk, prior ",priorval[1]),
                                paste("FP risk, prior ",priorval[2]),
-                               "Likelihood Ratio",
-                               "DCpower")
+                               "Likelihood Ratio")
     
 # plot two PIs with asterisks
   plots.2test<-list(ggplot(melt(PIstat), aes(variable, value)) +
@@ -548,7 +545,9 @@ if(project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2) #c
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
       theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-      geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1])) +
+      geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
+                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                  textsize=8, vjust=0.5) +
       samplesizes.annotate(boxes, samplesizes))
 
   #add table with results and plot
