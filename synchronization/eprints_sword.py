@@ -6,6 +6,7 @@ import zipfile
 import re
 import json
 from datetime import datetime, date
+from zipfile import ZIP_DEFLATED
 
 try:
     import yaml
@@ -19,11 +20,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 BASE_URL = 'https://epub-test.uni-regensburg.de'
 VERIFY = False #Verify ssl certificate on request, has to be set false for the test server and should be true with valid ssl certificate
 
-# muss evtl installiert werden
+#packages that might have to be installed
 try:
     import requests
 except:
-    print("python requests nicht installiert.\npip install requests")
+    print("python requests not installed.\npip install requests")
     exit()
 
 try:
@@ -52,21 +53,40 @@ Sends a request to epub to upload one or multiple files
         eprints username
     epid : mixed
         default: false 
-            erstellt neuen Eintrag
+            creates new entry
         int: 
-            Haenge files an eprint id an
+            attach files to eprint with given id
         
 """
 
 def get_content_type(f):    
-    #lies Content-type aus datei - evtl sollte man dafuer magic verwenden
+    #get the Content-type for a file- maybe magic should be used instead
+    filename, file_extension = os.path.splitext(f)
+    #mime_type.guess sometimes returns incorrect types in windows
+    if file_extension == ".zip":
+        return "application/zip"
+    
     mime_type = mimetypes.guess_type(f)[0]
     if mime_type == None:
         mime_type = 'text/plain'
     
     return mime_type
 
+def pretty_print_POST(req):
+    """
+    At this point it is completely built and ready
+    to be fired; it is "prepared".
 
+    However pay attention at the formatting used in 
+    this function because it is programmed to be pretty 
+    printed and may differ from the actual request.
+    """
+    print('{}\n{}\n{}\n\n{}'.format(
+        '-----------START-----------',
+        req.method + ' ' + req.url,
+        '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+        req.body,
+    ))
 def send_sword_request( data, content_type, send_file=False, headers={}, url=BASE_URL + '/id/contents', action='POST'):
     """Send a single SWORD request"""
     s = requests.Session()
@@ -78,7 +98,8 @@ def send_sword_request( data, content_type, send_file=False, headers={}, url=BAS
         f=data
         path, filename = os.path.split(f)
         
-        files = {'file': (filename, open(f, 'rb'), content_type) }             
+        zip = open(f, 'rb')
+        files = {'file': (filename, zip, content_type)}             
         fc = {'Content-Disposition': 'attachment; filename=' + filename}
         headers.update(fc)
         r = requests.Request(action, url, files=files, headers=headers, auth=(user, password))  
@@ -88,6 +109,8 @@ def send_sword_request( data, content_type, send_file=False, headers={}, url=BAS
     if verbose:
         print(headers)
     prepared = r.prepare()
+    if verbose:
+        pretty_print_POST(prepared)
     
     #verify ssl certificate
     resp = s.send(prepared, verify=VERIFY)
@@ -96,22 +119,29 @@ def send_sword_request( data, content_type, send_file=False, headers={}, url=BAS
         print(resp.raise_for_status())
         print(resp.headers)
     
+    zip.close()
+    
     if resp.status_code == 200 or resp.status_code == 201:
-        return resp.headers['Location']
+        if 'Location' in resp.headers:
+            return resp.headers['Location']
+        else:
+            return 0;
     else:
         return -1
 
     
-def get_document_ids(epid, yaml_timestamp):
+def get_document_ids(epid, yaml_timestamp=False, type='fileid'):
     """
     Gets ids for the pdf and xml zip in eprints
 
     Parameters
     ----------
-    epid: int
+    epid : int
         Eprint entry for the current measurements
     yaml_timestamp : date
         changedate of the yamlfile
+	type : string
+		If type is fileid return the ids of the file regardless of
 
     Returns
     -------
@@ -153,7 +183,11 @@ def get_document_ids(epid, yaml_timestamp):
         for match in re.findall(regex, response):
             m = re.search('(?<=\/document\/)\d+', match)
             
-            #lese fileids für die docids, weil eprints
+            if type!='fileid':
+                docid.append(m.group(0))
+                continue
+            
+            #read fileids; Eprints stores the files with ids, independent from the eprint id
             url = BASE_URL + "/id/document/" + str(m.group(0)) + "/contents"
             
             r = requests.Request('GET', url, headers=headers, auth=(user, password) ) 
@@ -168,12 +202,13 @@ def get_document_ids(epid, yaml_timestamp):
                 ep_timestamp = re.search('(?<=\<updated\>).*(?=T)', resp.text)
                 ep_timestamp = datetime.strptime(ep_timestamp.group(0), "%Y-%m-%d").date()
                 if verbose:
-                    print("Yamlfile zuletzt geaendert: " + date.strftime(yaml_timestamp, "%Y-%m-%d"))
+                    if yaml_timestamp:
+                        print("Yamlfile zuletzt geaendert: " + date.strftime(yaml_timestamp, "%Y-%m-%d"))
                     print("Eprints Datei zuletzt geaendert: " + date.strftime(ep_timestamp, "%Y-%m-%d"))
                 
-                #Vergleiche zeitstempel der Datei mit dem aus Eprints
-                #wenn beide gleich oder yamlfile neuer müssen keine updates gemacht werden
-                if yaml_timestamp <= ep_timestamp:
+                #Compare timestamps of file with Eprints
+                #if equal or yaml is newer, no update is needed
+                if yaml_timestamp and yaml_timestamp <= ep_timestamp:
                     return -1
                 
                 m = re.search('(?<=file\/)\d+', resp.text)
@@ -186,10 +221,9 @@ def get_document_ids(epid, yaml_timestamp):
     
 
 def create_zips(path):
-    #lese xml bzw pdf aus verzeichnis
-    #zippe beide
-    xmlzip = zipfile.ZipFile(path + 'xml.zip', 'w', zipfile.ZIP_DEFLATED)
-    pdfzip = zipfile.ZipFile(path + 'pdf.zip', 'w', zipfile.ZIP_DEFLATED)
+    #read xml and pdf files and zip both
+    xmlzip = zipfile.ZipFile(path + 'xml.zip', 'w', ZIP_DEFLATED)
+    pdfzip = zipfile.ZipFile(path + 'pdf.zip', 'w', ZIP_DEFLATED)
     
     for root, dirs, files in os.walk(path):
         for file in files:
@@ -201,7 +235,7 @@ def create_zips(path):
             elif extension in '.pdf':
                 pdfzip.write(os.path.join(root, file), file)
             elif extension in '.yml':
-                #todo: bei mehreren yamlfiles wirf fehler
+                #TODO: throw error when more than one yaml file present
                 yamlfile=os.path.join(root,file)
                 xmlzip.write(os.path.join(root, file), file)
                 pdfzip.write(os.path.join(root, file), file)
@@ -209,7 +243,8 @@ def create_zips(path):
 
     xmlzip.close()
     pdfzip.close()
-    return yamlfile
+    
+    return [yamlfile, xmlzip.filename, pdfzip.filename]
 
 def create_ep_xml(xmlcontent):
     #Create atom xml file to create a new eprint
@@ -220,6 +255,17 @@ def create_ep_xml(xmlcontent):
     stream.close()
     
     return filename
+
+#remove files after upload
+def cleanup():
+    try:
+        #TODO: werden Dateien entfernt wenn eine davon nicht gefunden wird?
+        os.remove(ep_xml_file)
+        os.remove(pdfzip)
+        os.remove(xmlzip)
+        #pass
+    except FileNotFoundError:
+        pass
     
     
 ## MAIN ##
@@ -236,11 +282,11 @@ epid = args.epid
 user = args.user
 verbose = args.verbose
 
-#Wenn path nich angegeben lese von cmd
+#If no path set, read from cmd
 if path == None:
     path = input("Datei/Verzeichnis: ")
 
-#verzeichnis/datei zum einlesen vorhanden?
+#file/folder exist?
 assert os.path.exists(path), "Pfad nicht gefunden: " + str(path)
 assert os.path.isdir(path), "Kein korrekter Verzeichnispfad " + str(path)
 
@@ -252,24 +298,27 @@ if user == None:
 if epid == None:
     epid = False
 
-#Nutzerpasswort
+#User password
+#TODO: we need some way to save this
 password = getpass.getpass('Password:')
 
-yamlfile = create_zips(path)
+[yamlfile, xmlzip, pdfzip] = create_zips(path)
+
+if verbose:
+	print(yamlfile)
 
 changeddate = date.fromtimestamp(os.path.getmtime(yamlfile))
-
-print(yamlfile)
 
 stream = open(yamlfile, "r")
 doc = yaml.load(stream)
 title = doc['title']
 author_list = doc['author']
 author={}
-#TODO: Lese bzw schreibe finalisiert flag
 
+#read/write finished flag
 if 'finished' in doc.keys():
     print("Messung abgeschlossen!")
+    cleanup()
     exit()
 
 if 'epid' in doc.keys():
@@ -281,9 +330,9 @@ for line in author_list:
 #print(yaml.dump(doc))
 stream.close()
 
-#lege nur eine neue epid an
+#create a new Eprints id
 
-#sende metadaten als xml request
+#send metadata as xml request
 first_name = author['firstName']
 last_name = author['lastName']
 
@@ -304,7 +353,7 @@ ep_xml = """<?xml version='1.0' encoding='utf-8'?>
 """ % (title, first_name, last_name)
 
 
-#TODO: hole author infos(rz-kennung, orcid) aus eprints
+#TODO: get more infos from Eprints (Author, rz-kennung, orcid)
 ep_xml_file = create_ep_xml(ep_xml)
 
 headers={}
@@ -316,6 +365,7 @@ headers.update({'Content-Type': 'application/vnd.eprints.data+xml'})
 #es gibt schon einen Eintrag auf epub
 
 if not epid:
+    #create new entry
     data = open(ep_xml_file, 'rb').read()
     epid = send_sword_request(data, content_type='application/vnd.eprints.data+xml', send_file=False, headers=headers)
 
@@ -327,6 +377,7 @@ if not epid:
 
     print("Eprint mit id " + epid + " angelegt")
 else:
+    #Eprint entry already exists
     print("Eprint mit id " + str(epid) + " wird aktualisiert")
         
     
@@ -335,7 +386,7 @@ stream = open(yamlfile, "r")
 doc = yaml.load(stream)
 stream.close
 
-#wenn epid noch nicht drin
+#if new eprint was generated, update the yamlfile with its id
 if not ('epid' in doc.keys()):
     #doc.update({'epid': epid})
     yaml_file = open(yamlfile, 'a') #append to file
@@ -370,35 +421,48 @@ docids = get_document_ids(epid, changeddate)
 if docids:
     if docids == -1:
         print("Dateien bereits aktuell")
+        cleanup()
         #print("Nothing to do here. *fliesaway*")
         exit()
     else:
-        #ueberpruefe ob dateien vorhanden und loesche bzw update die dann
+        #check if files present and delete/update them
         for document in docids:
             print(document)
 
-#TODO: Update dateien; Aber nur wenn geändert
-#lade zipdateien hoch
-#TODO: url https://epub-test.uni-regensburg.de/id/document/1194/contents
+
 #url = BASE_URL + "/id/document/" + str(docids[0]) + "/contents"
 
+#upload zipfiles
 headers={}
-up_file = path + 'xml.zip'
+up_file = pdfzip
+send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
+#curl_send_file(pdfzip, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents")
+#docid = send_sword_request_pycurl(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
+headers={}
+up_file = xmlzip
+send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
+
+
+#headers={}
+#up_file = pdfzip
 if docids and len(docids) >= 1:
     send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/file/" + str(docids[0]), action='PUT')
 else:
     send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
 
-up_file = path + 'pdf.zip'
+
+#headers={}
+#up_file = xmlzip
 if docids and len(docids) >= 2:
     
     send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/file/" + str(docids[1]), action='PUT')
 else:
     send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
 
-#Lösche XML Dateien nach dem Hochladen
-os.remove(pdfzip)
-os.remove(xmlzip)
+
+
+#delete files after upload
+cleanup()
 
 #if os.path.isdir(path):
 #    for f in os.listdir(path):
