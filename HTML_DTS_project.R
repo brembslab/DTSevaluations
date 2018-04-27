@@ -1,4 +1,4 @@
-library################## An R-script to read YAML DTS project files, visualize and statistically evaluate data
+################## An R-script to read YAML DTS project files, visualize and statistically evaluate data
 
 library(ggplot2)
 library(tidyr)
@@ -30,7 +30,7 @@ project.file <- file.choose()
 project.path = dirname(project.file)
 project.data<-yaml.load_file(project.file)
 
-#make sure the data are written in a subfolder of the data folder
+#make sure the evaluations are written in a subfolder of the data folder
 evaluation.path = paste(project.path,"evaluations", sep = "/")
 dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)

@@ -54,7 +54,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
           keeps = c("a_pos","torque")
           period.data[[i]] <- temp[keeps] #list only position and torque data by period
           
-          if(sequence$type[i]=="fs"||"inv_fs"||"optomotor"||"class_patt"||"class_cola")
+          if(sequence$type[i]!="optomotor")
           {
             ## plot the torque and position time traces
             filename = paste(flyname,"timetraces",i,".png", sep="_")
@@ -72,7 +72,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
             ggtitle(paste(flyname, "Period", i))
           
           #position
-          if(sequence$type[i]=="fs"||"inv_fs"||"optomotor"||"class_patt"||"class_cola")
+          if(sequence$type[i]!="optomotor")
           {
           poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
             geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
@@ -86,7 +86,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
           if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))}
           
           #for position
-          if(sequence$type[i]=="fs"||"class_patt"||"class_cola")
+          if(sequence$type[i]!="optomotor")
           {
             t1 = sum(abs(temp$a_pos) >= 512 & abs(temp$a_pos) <= 1538)
             t2 = nrow(temp)-t1
@@ -185,7 +185,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       ggtitle(paste("Period", i))
     
     #position
-    if(sequence$type[i]=="fs"||"inv_fs"||"optomotor"||"class_patt"||"class_cola")
+    if(sequence$type[i]!="optomotor")
     {
       poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
         geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
