@@ -17,8 +17,8 @@ grouped.data <- list()
 
 ############# read file list and plot graphs for each file #############################
 xml_list <- choose.files()
-if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group have the identical experimental design
-{
+if(MultiFlyDataVerification(xml_list)==TRUE) { # make sure all flies in a group have the identical experimental design
+  print("identical")
   for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
@@ -51,9 +51,16 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
           
           #only look at period data
           temp  <- rawdata[rawdata$period == i, ]
-          keeps = c("a_pos","torque")
-          period.data[[i]] <- temp[keeps] #list only position and torque data by period
           
+          if (sequence$type[i] == "OptomotoL") or (sequence$type[i] == "OptomotoR") {
+            keeps = c("a_pos","fly")
+            period.data[[i]] <- temp[keeps] #list only position and torque data by period
+            } 
+          else{
+            keeps = c("a_pos","torque")
+            period.data[[i]] <- temp[keeps] #list only position and torque data by period
+            }
+
           if(sequence$type[i]!="optomotor")
           {
             ## plot the torque and position time traces
