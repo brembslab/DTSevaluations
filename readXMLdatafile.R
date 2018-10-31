@@ -13,6 +13,7 @@ flyDataImport <- function(xml_name) {
   
     #parse the metadata
     URIs <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/URIs"))
+    
     experimenter <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experimenter"))
     fly <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/fly"))
     experiment <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experiment"))
@@ -40,8 +41,7 @@ MultiFlyDataVerification <- function(xml_list)
 for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
-    
-    ##### read the data with the corresponding function #######
+    ##### read the data with the corresponding function (readXMLdatafile.R) #######
     singleflydata <- flyDataImport(xml_name)
     
     ##extract meta-data
@@ -56,7 +56,9 @@ for (l in 1:length(xml_list))
                     as.vector(sequence$outcome),
                     as.vector(sequence$pattern),
                     as.vector(sequence$coup_coeff))
-    if(l==1){metadata<-data.frame(flymetadata)}else{metadata[,l]<-data.frame(flymetadata)}
+    if(l==1){
+      metadata<-data.frame(flymetadata)}else{
+      metadata[,l]<-data.frame(flymetadata)}
   }
   return(length(unique(as.list(metadata))) == 1)
 }
