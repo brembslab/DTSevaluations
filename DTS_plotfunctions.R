@@ -41,6 +41,21 @@ dytraces <- function(rawdata)
   return(traces)
 }
 
+dytraces_platform <- function(rawdata)
+{
+  traces <- dygraph(rawdata, main = paste("Time Traces", flyname)) %>%
+    dySeries("a_pos", label = "position", color = "darkred") %>%
+    dySeries("fly", axis = 'y2', color = "blue") %>%
+    dyAxis("x", drawGrid = FALSE) %>%
+    dyAxis("y", label = "Position [arb_units]") %>%
+    dyOptions(gridLineColor = "lightgrey") %>%
+    dyAxis("y2", label = "Torque [arb_units]", independentTicks = TRUE, drawGrid = FALSE) %>%
+    dyOptions(includeZero = TRUE) %>%
+    dyRangeSelector()
+  
+  return(traces)
+}
+
 ############ Function to plot several plots into a single plot #########
 
 multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) 
