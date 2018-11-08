@@ -40,6 +40,9 @@ NofGroups=lengths(project.data["resources"])
 
 grouped.trqhistos <- list()   #Torque histograms for group in a list of length NofPeriods
 grouped.poshistos <- list()   #Position histograms for group in a list of length NofPeriods
+grouped.flyhistos <- list()
+grouped.flyhistosL <- list()   #Platform position histograms for group in a list of length NofPeriods
+grouped.flyhistosR <- list()   #Platform position histograms for group in a list of length NofPeriods
 grouped.PIprofiles <- list()  #PIProfile data frames in a list of length NofGroups
 grouped.periods <- list()     #Period designs in a list of length NofGroups
 grouped.spectra <- list()      #Power spectra in a list of length NofGroups
@@ -82,15 +85,24 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     #create/empty plot lists
     poshistos <- list()
     trqhistos <- list()
+    flyhistos <- list() #still needed?
+    flyhistosR <- list()
+    flyhistosL <- list()
+    #vectors for pooled platform periods
+    optomotoL_flydata <- c()
+    optomotoR_flydata <- c()
     
 #### call RMarkdown for single fly evaluations ################################################
-    rmarkdown::render('b:/GitHub/DTSevaluations/single_fly.Rmd', 
+    single_fly_path <- paste(start.wd, "single_fly.Rmd", sep = "/")
+    rmarkdown::render(single_fly_path, 
                       output_file = paste(flyname,"descr_anal.html", sep="_"), 
                       output_dir = evaluation.path)
 #### end RMarkdown for single fly evaluations ################################################
     
     ##move PIs to multi-experiment data.frame
-    if(l>1){PIprofile <- rbind2(PIprofile, as.vector(t(sequence$lambda)))}
+    if(l>1 & isTRUE(sequence$type[1]=="fs"||sequence$type[1]=="color")){
+      PIprofile <- rbind2(PIprofile, as.vector(t(sequence$lambda)))
+      }
     
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
@@ -117,50 +129,63 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     pooled.data[[i]] <- period.data
   } #for number of periods
   
-  ## plot pooled position and torque histograms by period ##
+  ## plot pooled position and torque or platform histograms by period ##
   
   for(i in 1:NofPeriods)
   {
     temp<-pooled.data[[i]]
-    
-    #torque
-    trqhistos[[i]] <- ggplot(data=temp, aes_string(temp$torque)) +
-      geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-      labs(x="torque [arb units]", y="frequency") +
-      xlim(-600,600) +
-      ggtitle(paste("Period", i))
-    
-    #position
-    if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotor")
-    {
+    if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotor") {
+      #torque
+      trqhistos[[i]] <- ggplot(data=temp, aes_string(temp$torque)) +
+        geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
+        labs(x="torque [arb units]", y="frequency") +
+        xlim(-600,600) +
+        ggtitle(paste("Period", i))
+      
+      #position
       poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
         geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
         labs(x="position [arb units]", y="frequency") +
         xlim(-2047,2048) +
         ggtitle(paste("Period", i))
+    } else if (sequence$type[i]=="OptomotoL"||sequence$type[i]=="OptomotoR") {
+      #platform
+      flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
+        geom_histogram(binwidth = 0.0175, fill = sequence$histocolor[i]) +
+        labs(x="fly [arb units]", y="frequency") +
+        xlim(-5,2) +
+        ggtitle(paste("Period", i))
     }
   }
   
-  ## pool all torque and position data into single data.frame
+  ## pool all torque/platform and position data into single data.frame
   
   all.data <- do.call(rbind, pooled.data)
   
   
   ## plot pooled histograms for all flies over all periods
-  
-  #torque
-  trqhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$torque)) + 
-    geom_histogram(binwidth=3) + 
-    labs(x="torque [arb units]", y="frequency") + 
-    xlim(-600,600) +
-    ggtitle("Pooled Torque Histogram")
-  
-  #position
-  poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
-    geom_histogram(binwidth=10) +
-    labs(x="position [arb units]", y="frequency") + 
-    xlim(-2047,2048) +
-    ggtitle("Pooled Position Histogram")
+  if(sequence$type[1]=="fs"||sequence$type[1]=="color"||sequence$type[1]=="optomotor") {
+    #torque
+    trqhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$torque)) + 
+      geom_histogram(binwidth=3) + 
+      labs(x="torque [arb units]", y="frequency") + 
+      xlim(-600,600) +
+      ggtitle("Pooled Torque Histogram")
+    
+    #position
+    poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
+      geom_histogram(binwidth=10) +
+      labs(x="position [arb units]", y="frequency") + 
+      xlim(-2047,2048) +
+      ggtitle("Pooled Position Histogram")
+  } else if (sequence$type[1]=="OptomotoL"||sequence$type[1]=="OptomotoR") {
+    #platform
+    flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) + 
+      geom_histogram(binwidth=0.0175) +
+      labs(x="fly [arb units]", y="frequency") + 
+      xlim(-5,2) +
+      ggtitle("Pooled Platform Position Histogram")
+  }
 
 } else {print("You have selected files with differing metadata")}
 
@@ -173,20 +198,30 @@ grouped.periods[[x]] = periods
 grouped.trqhistos[[x]] = trqhistos #add torque histograms to list of grouped histograms
 trqhistos <- list() #empty torque histograms
 
+#Platform Histograms
+grouped.flyhistos[[x]] = flyhistos   #add platform histograms to list of grouped p_position histograms
+flyhistos <- list() #empty list of p_position histograms
+grouped.flyhistosL[[x]] = flyhistosL #add platform histograms to list of grouped p_position histograms for left turning arena
+flyhistosL <- list() 
+grouped.flyhistosR[[x]] = flyhistosR #add platform histograms to list of grouped p_position histograms for right turning arena
+flyhistosR <- list()
+
 #Position Histograms
 grouped.poshistos[[x]] = poshistos #add torque histograms to list of grouped position histograms
 poshistos <- list() #empty list of position histograms
 
 #PI data
-colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods) #make colnames in PIprofile
-grouped.PIprofiles[[x]] = PIprofile #add PIprofile to list of grouped PIs
-PIprofile <- PIprofile[0,] #empty PIprofile
+if(sequence$type[1]=="fs"||sequence$type[1]=="color"||sequence$type[1]=="optomotor") {
+  colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods) #make colnames in PIprofile
+  grouped.PIprofiles[[x]] = PIprofile #add PIprofile to list of grouped PIs
+  PIprofile <- PIprofile[0,] #empty PIprofile
+}
 
 #Power spectra
 spectemp <- do.call(cbind, speclist) #combine all power spectra
 colnames(spectemp)[1]<-"freq" #label the first x-axis as frequency
 spectemp$freq <- spectemp$freq*1000 #convert kHz to Hz
-spectemp <- spectemp[, -grep("x", colnames(spectemp))] #drop all x-axes exept the one now labelled "freq"
+spectemp <- spectemp[-grep("x", colnames(spectemp))] #drop all x-axes exept the one now labelled "freq"
 spectemp[length(spectemp)+1] <- rowMeans(spectemp[, grep("y", colnames(spectemp))]) #calculate the mean power spectrum in the group
 spectemp[length(spectemp)+1] <- rowSds(spectemp[, grep("y", colnames(spectemp))])/sqrt(length(project.data[["resources"]][[x]][["data"]])) #calculate the standard deviation in the group
 spectemp[, grep("y", colnames(spectemp))] <- NULL #drop all raw data for summary data
@@ -204,7 +239,11 @@ grouped.spectra[[x]] = spectemp #save group mean/sd
 ###### Plots ######
 
 ###generate important variables for later plotting and annotation
-colorrange = project.data[["statistics"]][["color-range"]]
+
+#check if statistcs are included, if not generate color range manually
+if (!is.null(project.data[["statistics"]])) {
+  colorrange = project.data[["statistics"]][["color-range"]]
+} else {colorrange = c("khaki", "olivedrab3", "cornflowerblue", "goldenrod1", "indianred1", "plum3")}
 boxcolors = c(colorrange[1:NofGroups])
 boxes<-c(1:NofGroups)
 
@@ -214,10 +253,12 @@ if(NofGroups>2){}
 ###### continue for all projects with two groups
 
 #### call RMarkdown for project evaluations ################################################
-rmarkdown::render('b:/GitHub/DTSevaluations/project.Rmd', 
+project_path <- paste(start.wd, "project.Rmd", sep = "/")
+rmarkdown::render(project_path, 
                   output_file = paste(project.data$name,"html", sep = "."), 
                   output_dir = evaluation.path)
 #### end RMarkdown for project evaluations #################################################
 
 
 setwd(start.wd)
+
