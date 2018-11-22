@@ -44,9 +44,14 @@ grouped.PIprofiles <- list()  #PIProfile data frames in a list of length NofGrou
 grouped.periods <- list()     #Period designs in a list of length NofGroups
 grouped.spectra <- list()      #Power spectra in a list of length NofGroups
 
+#create empty list for individual fly names in each group for display in project evaluation
+exp_groups <- list()
+
 for(x in 1:NofGroups)
 {
-xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/")
+  grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
+  grp_description = project.data[["resources"]][[x]][["description"]] #collect description of the group
+  xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
 
 #create/empty lists for collecting all single fly data by period
 period.data <- list()     #data grouped by period
@@ -95,8 +100,11 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
     
+    xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
 
   } #for number of flies in xml_list
+
+  exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
 
   ########### plot graphs for all experiments #####################
   
