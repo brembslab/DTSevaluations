@@ -43,20 +43,33 @@ grouped.poshistos <- list()   #Position histograms for group in a list of length
 grouped.flyhistos <- list()
 grouped.flyhistosL <- list()   #Platform position histograms for group in a list of length NofPeriods
 grouped.flyhistosR <- list()   #Platform position histograms for group in a list of length NofPeriods
+grouped.flytraces <- list()   #Platform position traces in a list of length NofGroups
 grouped.PIprofiles <- list()  #PIProfile data frames in a list of length NofGroups
 grouped.periods <- list()     #Period designs in a list of length NofGroups
 grouped.spectra <- list()      #Power spectra in a list of length NofGroups
+#create empty list for individual fly names in each group for display in project evaluation
+exp_groups <- list() 
 
 for(x in 1:NofGroups)
 {
-xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/")
+grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group 
+grp_description = project.data[["resources"]][[x]][["description"]] #collect description of the group
+
+xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
 
 #create/empty lists for collecting all single fly data by period
 period.data <- list()     #data grouped by period
 grouped.data <- list()    #total data grouped
 grouped.data.periodsL <- list() #total data grouped by left or right turning arena for platform
 grouped.data.periodsR <- list()
+grouped.data.tracesL <- list() #mean trace of left or right Periods
+grouped.data.tracesR <- list()
+grouped.data.flyL <- list()
+grouped.data.flyR <- list()
 speclist <- list()
+#vectors for pooled  platform period traces
+flytracesL <- list()
+flytracesR <- list()
 
 #start evaluating
 if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group have the identical experimental design
@@ -87,15 +100,17 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     #create/empty plot lists
     poshistos <- list()
     trqhistos <- list()
-    flyhistos <- list() #still needed?
+    flyhistos <- list()
     flyhistosR <- list()
     flyhistosL <- list()
-    #vectors for pooled platform periods
-    optomotoL_flydata <- c()
-    optomotoR_flydata <- c()
-    flyhistosL.rawdata <- list()
-    flyhistosR.rawdata <- list()
-
+    flytraces <- list()
+    #vectors for pooled platform period histograms
+    optomotoL_flydata <- list() #unused?
+    optomotoR_flydata <- list() #unused?
+    periodL <- data.frame() #these empty data frames are needed if no Platform data is used
+    periodR <- data.frame()
+    flytracesL_data_frame <- data.frame()
+    flytracesR_data_frame <- data.frame()
 #### call RMarkdown for single fly evaluations ################################################
     single_fly_path <- paste(start.wd, "single_fly.Rmd", sep = "/")
     rmarkdown::render(single_fly_path, 
@@ -110,10 +125,14 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
-    grouped.data.periodsL[[l]] <- list(periodL)
+    grouped.data.periodsL[[l]] <- list(periodL) #special lists for left and right p_opomtor periods
     grouped.data.periodsR[[l]] <- list(periodR)
 
+    xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation 
+  
   } #for number of flies in xml_list
+
+  exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document 
 
   ########### plot graphs for all experiments #####################
   
@@ -164,11 +183,50 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
   }
   
   ## pool all torque/platform and position data into single data.frame
+  for (n in 1:length(grouped.data.periodsL)) {
+    grouped.data.flyL[[n]] <- grouped.data.periodsL[[n]][[1]]$fly
+    grouped.data.flyR[[n]] <- grouped.data.periodsR[[n]][[1]]$fly
+  }
   
-  all.data <- do.call(rbind, pooled.data)
-  all.data.periodsL <- data.frame(grouped.data.periodsL[[l]])
-  all.data.periodsR <- data.frame(grouped.data.periodsR[[l]])
+  ## make final data frames for plotting
   
+    #for histogram with all fly data
+  all.data <- do.call(rbind, pooled.data) 
+  
+  if (sequence$type[1]=="OptomotoL"||sequence$type[1]=="OptomotoR") {
+    #for histogram with all fly data sorted by left turning arena
+  all.data.periodsL <- data.frame(unlist(grouped.data.flyL))
+  names(all.data.periodsL) <- "fly"
+  
+    #for histogram with all fly data sorted by right turning arena
+  all.data.periodsR <- data.frame(unlist(grouped.data.flyR))
+  names(all.data.periodsR) <- "fly"
+  
+    #for multiple traces graph with mean trace of each period in left/right
+    #fit "flytraces" list for the "data.frame()" function
+  flytracesL <- lapply(flytracesL, function(x) {
+    length(x) <- min(lengths(flytracesL)); x}) 
+  flytracesR <- lapply(flytracesR, function(x) {
+    length(x) <- min(lengths(flytracesR)); x})
+    #create data frame for pooled traces plot
+    fly <- unlist(flytracesL)
+    period <- rep(c(1:length(flytracesL)), each=length(flytracesL[[1]]))
+    time <- rep(seq(0, (length(flytracesL[[1]])-1)*10, by=10), times=length(flytracesL))
+  all.data.periodL <- data.frame(fly, period, time)
+    #create data frame for pooled traces plot
+    fly <- unlist(flytracesR)
+    period <- rep(c(1:length(flytracesR)), each=length(flytracesR[[1]]))
+    time <- rep(seq(0, (length(flytracesR[[1]])-1)*10, by=10), times=length(flytracesR))
+  all.data.periodR <- data.frame(fly, period, time)
+  
+    #for mean traces graph of all left/right periods 
+  all.data.flytracesL <- rowMeans(data.frame(flytracesL))
+  all.data.flytracesL <- data.frame(all.data.flytracesL, seq(0, (length(all.data.flytracesL)-1)*10, by=10))
+  names(all.data.flytracesL) <- c("fly", "time")
+  all.data.flytracesR <- rowMeans(data.frame(flytracesR))
+  all.data.flytracesR <- data.frame(all.data.flytracesR, seq(0, (length(all.data.flytracesR)-1)*10, by=10))
+  names(all.data.flytracesR) <- c("fly", "time")
+  }
   
   ## plot pooled histograms for all flies over all periods
   if(sequence$type[1]=="fs"||sequence$type[1]=="color"||sequence$type[1]=="optomotor") {
@@ -193,17 +251,42 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       xlim(-5,2) +
       ggtitle("Pooled P_Pos Histogram")
     
-    flyhistos[[NofPeriods+2]] <- ggplot(data=all.data.periodsL, aes_string(all.data.periodsL$optomotoL_flydata)) + 
+    flyhistos[[NofPeriods+2]] <- ggplot(data=all.data.periodsL, aes_string(all.data.periodsL$fly)) + 
       geom_histogram(binwidth=0.0175) +
       labs(x="fly [arb units]", y="frequency") + 
       xlim(-5,2) +
       ggtitle("Pooled P_Pos Histogram\n(left turning arena)")
     
-    flyhistos[[NofPeriods+3]] <- ggplot(data=all.data.periodsR, aes_string(all.data.periodsR$optomotoR_flydata)) + 
+    flyhistos[[NofPeriods+3]] <- ggplot(data=all.data.periodsR, aes_string(all.data.periodsR$fly)) + 
       geom_histogram(binwidth=0.0175) +
       labs(x="fly [arb units]", y="frequency") + 
       xlim(-5,2) +
       ggtitle("Pooled P_Pos Histogram\n(right turning arena)")
+    
+    flytraces[[1]] <- ggplot(data=all.data.periodL, aes_string(y = all.data.periodL$fly, x = all.data.periodL$time, colour = all.data.periodL$period)) +
+      geom_line(aes_string(group = all.data.periodL$period)) + 
+      scale_color_gradientn(colours=rainbow(4)) +
+      geom_smooth() + 
+      labs(x="time (ms)", y="fly") + 
+      ggtitle("Multi Traces\n(left turning arena)")
+    
+    flytraces[[2]] <- ggplot(data=all.data.periodR, aes_string(y = all.data.periodR$fly, x = all.data.periodR$time, colour = all.data.periodR$period)) +
+      geom_line(aes_string(group = all.data.periodR$period)) + 
+      scale_color_gradientn(colours=rainbow(4)) +
+      geom_smooth() + 
+      labs(x="time (ms)", y="fly") + 
+      ggtitle("Multi Traces\n(right turning arena)")
+    
+    flytraces[[3]] <- ggplot(data=all.data.flytracesL, aes_string(x=all.data.flytracesL$time, y=all.data.flytracesL$fly)) +
+      geom_line() +
+      ggtitle("Pooled traces\n(left turning arena)") +
+      labs(x="time(ms)", y="fly")
+    
+    flytraces[[4]] <- ggplot(data=all.data.flytracesR, aes_string(x=all.data.flytracesR$time, y=all.data.flytracesR$fly)) +
+      geom_line() +
+      ggtitle("Pooled traces\n(right turning arena)") +
+      labs(x="time(ms)", y="fly")
+
   }
 
 } else {print("You have selected files with differing metadata")}
@@ -220,11 +303,8 @@ trqhistos <- list() #empty torque histograms
 #Platform Histograms
 grouped.flyhistos[[x]] = flyhistos   #add platform histograms to list of grouped p_position histograms
 flyhistos <- list() #empty list of p_position histograms
-# grouped.flyhistosL[[x]] = flyhistosL #add platform histograms to list of grouped p_position histograms for left turning arena
-# flyhistosL <- list() 
-# grouped.flyhistosR[[x]] = flyhistosR #add platform histograms to list of grouped p_position histograms for right turning arena
-# flyhistosR <- list()
-
+grouped.flytraces[[x]] <- flytraces #add platform traces to list of grouped p_position traces
+flytraces <- list() #empty list of p_position traces
 
 #Position Histograms
 grouped.poshistos[[x]] = poshistos #add torque histograms to list of grouped position histograms

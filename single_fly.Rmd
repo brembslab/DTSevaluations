@@ -49,7 +49,6 @@ source("DTS_plotfunctions.R")
     #check if number of periods in metadata is true
     if (ncol(periods) != NofPeriods) {
       NofPeriods = ncol(periods)
-      print("sequence$type metadata faulty, function will still be working correctly")
     }
     colnames(periods)<-sprintf("Period %s",1:NofPeriods)
     
@@ -88,7 +87,7 @@ source("DTS_plotfunctions.R")
       temp  <- rawdata[rawdata$period == i, ]
       
       if (sequence$type[i] == "OptomotoL" || sequence$type[i] == "OptomotoR") {
-        keeps = c("a_pos","fly")
+        keeps = c("arena","fly")
       } else {
         keeps = c("a_pos","torque")
       }      
@@ -109,7 +108,8 @@ source("DTS_plotfunctions.R")
           labs(x="fly [arb units]", y="frequency") +
           xlim(-3.2, 0) +
           ggtitle(paste(flyname, "Period", i, "OptomotoR"))
-        optomotoR_flydata <- c(optomotoR_flydata, period.data[[i]]["fly"], recursive = TRUE, use.names = FALSE)
+        #for later histograms of pooled periods
+        optomotoR_flydata[countR] <- c(period.data[[i]]["fly"])
         countR = countR+1
       } else if (sequence$type[i] == "OptomotoL") {
         flyhistosL[[countL]] <- ggplot(data=temp, aes_string(temp$fly)) +
@@ -117,7 +117,7 @@ source("DTS_plotfunctions.R")
           labs(x="fly [arb units]", y="frequency") +
           xlim(-3.2, 0) +
           ggtitle(paste(flyname, "Period", i, "OptomotoL"))
-        optomotoL_flydata <- c(optomotoL_flydata, period.data[[i]]["fly"], recursive = TRUE, use.names = FALSE)
+        optomotoL_flydata[countL] <- c(period.data[[i]]["fly"])
         countL = countL+1
       }
 
@@ -158,27 +158,80 @@ source("DTS_plotfunctions.R")
     
 ```
 
-### 5. Torque or Platform Histograms
+### 5. Torque or Platform Histograms/Traces
 
 ```{r Torque/PlatformHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 16}    
     
     ## plot position and torque histograms ##
 
     #platform
-    periodL <- data.frame(optomotoL_flydata)
-    periodR <- data.frame(optomotoR_flydata)
+    if (sequence$type[1]=="OptomotoL"||sequence$type[1]=="OptomotoR") {
+      #restructuring of the data
+    # optomotoR_flydata[[12]] <- optomotoL_flydata[[1]][1:2000] #temporary
+    # optomotoL_flydata[[1]] <- optomotoL_flydata[[1]][2000:length(optomotoL_flydata[[1]])]#temporary
+ 
+    #fit "optomotoL_flydata" list for the "data.frame()" function
+    optomotoL_flydata <- lapply(optomotoL_flydata, function(x) { length(x) <- min(lengths(optomotoL_flydata)); x })
+    flytracesL[[l]] <- rowMeans(data.frame(optomotoL_flydata))
+    flytracesL_data_frame <- data.frame(flytracesL[[l]], seq(0, (length(flytracesL[[l]])-1)*10, by=10))
+    names(flytracesL_data_frame) <- c("fly", "time")
+      #create data frame for pooled traces plot
+    fly <- unlist(optomotoL_flydata)
+    period <- rep(c(1:length(optomotoL_flydata)), each=length(optomotoL_flydata[[1]]))
+    time <- rep(seq(0, (length(optomotoL_flydata[[1]])-1)*10, by=10), times=length(optomotoL_flydata))
+    periodL <- data.frame(fly, period, time)
     
-    flyhistosR[[length(flyhistosR)+1]] <- ggplot(data=periodR, aes(periodR$optomotoR_flydata)) +
+    #fit "optomotoR_flydata" list for the "data.frame()" function
+    optomotoR_flydata <- lapply(optomotoR_flydata, function(x) {length(x) <- min(lengths(optomotoR_flydata)); x}) 
+    flytracesR[[l]] <- rowMeans(data.frame(optomotoR_flydata))     
+    flytracesR_data_frame <- data.frame(flytracesR[[l]], seq(0, (length(flytracesR[[l]])-1)*10, by=10))
+    names(flytracesR_data_frame) <- c("fly", "time") #final data frame for single trace
+      #create data frame for pooled traces plot
+    fly <- unlist(optomotoR_flydata)
+    period <- rep(c(1:length(optomotoR_flydata)), each=length(optomotoR_flydata[[1]]))
+    time <- rep(seq(0, (length(optomotoR_flydata[[1]])-1)*10, by=10), times=length(optomotoR_flydata))
+    periodR <- data.frame(fly, period, time)#final data frame for multi traces
+    }
+    
+    
+      #pooled histograms
+    flyhistosL[[length(flyhistosL)+1]] <- ggplot(data=periodL, aes(periodL$fly)) +
       geom_histogram(binwidth=0.0175) + 
-      labs(x="fly [arb units]", y="frequency") + 
-      xlim(-3.2, 0) +
-      ggtitle(paste(flyname, "total of right periods"))
-    flyhistosL[[length(flyhistosL)+1]] <- ggplot(data=periodL, aes(periodL$optomotoL_flydata)) +
-      geom_histogram(binwidth=0.0175) + 
+      scale_color_gradientn(colours=rainbow(4)) +
       labs(x="fly [arb units]", y="frequency") + 
       xlim(-3.2, 0) +
       ggtitle(paste(flyname, "total of left periods"))
+    flyhistosR[[length(flyhistosR)+1]] <- ggplot(data=periodR, aes(periodR$fly, colour = periodR$period)) +
+      geom_histogram(binwidth=0.0175) + 
+      scale_color_gradientn(colours=rainbow(4)) +
+      labs(x="fly [arb units]", y="frequency") + 
+      xlim(-3.2, 0) +
+      ggtitle(paste(flyname, "total of right periods"))
+    
+      #pooled traces
+    flytraces[[1]] <- ggplot(data=periodL, aes(y = periodL$fly, x = periodL$time, colour = periodL$period)) +
+       geom_line(aes_string(group = periodL$period)) + 
+       scale_color_gradientn(colours=rainbow(4)) +
+       geom_smooth() + 
+       labs(x="time (ms)", y="fly") + 
+       ggtitle(paste(flyname, "pooled traces for left periods"))
+    flytraces[[2]] <- ggplot(data=flytracesL_data_frame, aes_string(x=flytracesL_data_frame$time, y=flytracesL_data_frame$fly)) +
+      geom_line() +
+      ggtitle("Pooled traces\n(left turning arena)") +
+      labs(x="time(ms)", y="fly")
 
+    flytraces[[3]] <- ggplot(data=periodR, aes(y = periodR$fly, x = periodR$time, colour = periodR$period)) +
+       geom_line(aes_string(group = periodR$period)) + 
+       scale_color_gradientn(colours=rainbow(4)) +
+       geom_smooth() + 
+       labs(x="time (ms)", y="fly") + 
+       ggtitle(paste(flyname, "pooled traces for right periods"))
+    flytraces[[4]] <- ggplot(data=flytracesR_data_frame, aes_string(x=flytracesR_data_frame$time, y=flytracesR_data_frame$fly)) +
+      geom_line() +
+      ggtitle("Pooled traces\n(right turning arena)") +
+      labs(x="time(ms)", y="fly")
+    
+        
     #torque
     trqhistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$torque)) + 
       geom_histogram(binwidth=3) + 
@@ -201,6 +254,7 @@ source("DTS_plotfunctions.R")
     } else if (sequence$type[1]=="OptomotoL" | sequence$type[1]=="OptomotoR") {
       multiplot(plotlist = flyhistosR, cols = 4)
       multiplot(plotlist = flyhistosL, cols = 4)
+      multiplot(plotlist = flytraces, cols = 2)
     }
 ```
 
@@ -226,7 +280,7 @@ type <- isFALSE(sequence$type[1] == "OptomotoL" | sequence$type[1] == "OptomotoR
     } else if (sequence$type[1]=="OptomotoL"||sequence$type[1]=="OptomotoR") {
       meanspec(rawdata$fly, f = samplerate, wl = 600) #plot mean power spectrum for each fly
       title(paste("Fly-Powerspectrum", flyname))
-      spectro(rawdata$fly, f = samplerate, wl=600) #plot spectrogram for each fly
+      spectro(rawdata$fly, f = samplerate, wl=600, osc = TRUE) #plot spectrogram for each fly
       title(paste("Fly-Spectrogram", flyname))
       speclist[[l]] = as.data.frame(meanspec(rawdata$fly, f = samplerate, wl = 600, plot = FALSE)) #collect each spectrum for later averaging
     }

@@ -41,6 +41,21 @@ dytraces <- function(rawdata)
   return(traces)
 }
 
+dytraces_platform <- function(rawdata)
+{
+  traces <- dygraph(rawdata, main = paste("Time Traces", flyname)) %>%
+    dySeries("arena", label = "position", color = "darkred") %>%
+    dySeries("fly", axis = 'y2', color = "blue") %>%
+    dyAxis("x", drawGrid = FALSE) %>%
+    dyAxis("y", label = "Arena Position [arb_units]") %>%
+    dyOptions(gridLineColor = "lightgrey") %>%
+    dyAxis("y2", label = "Fly [arb_units]", independentTicks = TRUE, drawGrid = FALSE) %>%
+    dyOptions(includeZero = TRUE) %>%
+    dyRangeSelector()
+  
+  return(traces)
+}
+
 ############ Function to plot several plots into a single plot #########
 
 multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) 
@@ -71,6 +86,7 @@ multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL)
     }
   }
 }
+#source: http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
 
 ############ Function to annotate plots after stats #########
 
