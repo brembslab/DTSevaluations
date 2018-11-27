@@ -87,7 +87,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     #create/empty plot lists
     poshistos <- list()
     trqhistos <- list()
-    flyhistos <- list()
+    flyhistos <- list() #still needed?
     flyhistosR <- list()
     flyhistosL <- list()
     #vectors for pooled platform periods
@@ -95,6 +95,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     optomotoR_flydata <- c()
     flyhistosL.rawdata <- list()
     flyhistosR.rawdata <- list()
+
 #### call RMarkdown for single fly evaluations ################################################
     single_fly_path <- paste(start.wd, "single_fly.Rmd", sep = "/")
     rmarkdown::render(single_fly_path, 
@@ -223,6 +224,7 @@ flyhistos <- list() #empty list of p_position histograms
 # flyhistosL <- list() 
 # grouped.flyhistosR[[x]] = flyhistosR #add platform histograms to list of grouped p_position histograms for right turning arena
 # flyhistosR <- list()
+
 
 #Position Histograms
 grouped.poshistos[[x]] = poshistos #add torque histograms to list of grouped position histograms
