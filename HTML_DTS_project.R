@@ -54,6 +54,8 @@ xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep =
 #create/empty lists for collecting all single fly data by period
 period.data <- list()     #data grouped by period
 grouped.data <- list()    #total data grouped
+grouped.data.periodsL <- list() #total data grouped by left or right turning arena for platform
+grouped.data.periodsR <- list()
 speclist <- list()
 
 #start evaluating
@@ -91,7 +93,9 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     #vectors for pooled platform periods
     optomotoL_flydata <- c()
     optomotoR_flydata <- c()
-    
+    flyhistosL.rawdata <- list()
+    flyhistosR.rawdata <- list()
+
 #### call RMarkdown for single fly evaluations ################################################
     single_fly_path <- paste(start.wd, "single_fly.Rmd", sep = "/")
     rmarkdown::render(single_fly_path, 
@@ -106,7 +110,8 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
-    
+    grouped.data.periodsL[[l]] <- list(periodL)
+    grouped.data.periodsR[[l]] <- list(periodR)
 
   } #for number of flies in xml_list
 
@@ -161,6 +166,8 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
   ## pool all torque/platform and position data into single data.frame
   
   all.data <- do.call(rbind, pooled.data)
+  all.data.periodsL <- data.frame(grouped.data.periodsL[[l]])
+  all.data.periodsR <- data.frame(grouped.data.periodsR[[l]])
   
   
   ## plot pooled histograms for all flies over all periods
@@ -184,7 +191,19 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       geom_histogram(binwidth=0.0175) +
       labs(x="fly [arb units]", y="frequency") + 
       xlim(-5,2) +
-      ggtitle("Pooled Platform Position Histogram")
+      ggtitle("Pooled P_Pos Histogram")
+    
+    flyhistos[[NofPeriods+2]] <- ggplot(data=all.data.periodsL, aes_string(all.data.periodsL$optomotoL_flydata)) + 
+      geom_histogram(binwidth=0.0175) +
+      labs(x="fly [arb units]", y="frequency") + 
+      xlim(-5,2) +
+      ggtitle("Pooled P_Pos Histogram\n(left turning arena)")
+    
+    flyhistos[[NofPeriods+3]] <- ggplot(data=all.data.periodsR, aes_string(all.data.periodsR$optomotoR_flydata)) + 
+      geom_histogram(binwidth=0.0175) +
+      labs(x="fly [arb units]", y="frequency") + 
+      xlim(-5,2) +
+      ggtitle("Pooled P_Pos Histogram\n(right turning arena)")
   }
 
 } else {print("You have selected files with differing metadata")}
@@ -201,10 +220,11 @@ trqhistos <- list() #empty torque histograms
 #Platform Histograms
 grouped.flyhistos[[x]] = flyhistos   #add platform histograms to list of grouped p_position histograms
 flyhistos <- list() #empty list of p_position histograms
-grouped.flyhistosL[[x]] = flyhistosL #add platform histograms to list of grouped p_position histograms for left turning arena
-flyhistosL <- list() 
-grouped.flyhistosR[[x]] = flyhistosR #add platform histograms to list of grouped p_position histograms for right turning arena
-flyhistosR <- list()
+# grouped.flyhistosL[[x]] = flyhistosL #add platform histograms to list of grouped p_position histograms for left turning arena
+# flyhistosL <- list() 
+# grouped.flyhistosR[[x]] = flyhistosR #add platform histograms to list of grouped p_position histograms for right turning arena
+# flyhistosR <- list()
+
 
 #Position Histograms
 grouped.poshistos[[x]] = poshistos #add torque histograms to list of grouped position histograms

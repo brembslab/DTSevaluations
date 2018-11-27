@@ -42,18 +42,20 @@ source("DTS_plotfunctions.R")
 **Fly description:** `r paste(fly$description)`; **FlyBase ID:** [`r paste(fly$flybase)`](http://flybase.org/reports/`r paste(fly$flybase)`)
 
 ### 2. Experimental Design:
-```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 3, fig.width = 9}
+```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 9}
     #plot table of period sequence
     periods=t(sequence)
 
-    # check if number of periods in metadata is true
+    #check if number of periods in metadata is true
     if (ncol(periods) != NofPeriods) {
       NofPeriods = ncol(periods)
       print("sequence$type metadata faulty, function will still be working correctly")
     }
     colnames(periods)<-sprintf("Period %s",1:NofPeriods)
     
-    grid.table(periods)
+    #transpose the table so that it doesn't go out of the boudaries
+    transposed_periods <- t(periods)
+    grid.table(transposed_periods)
 ```
 
 ### 3. Interactive Time Traces:
@@ -72,6 +74,10 @@ source("DTS_plotfunctions.R")
 
 ```{r PeriodTraces, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10}
 
+    #variables needed for platform function
+    countL = 1
+    countR = 1
+      
     for(i in 1:NofPeriods){
       
       #save colors for later plotting
@@ -98,19 +104,21 @@ source("DTS_plotfunctions.R")
       
       #platform (distinguish between OptomotoR and OptomotoL)
       if (sequence$type[i] == "OptomotoR") {
-        flyhistosR[[length(flyhistosR)+1]] <- ggplot(data=temp, aes_string(temp$fly)) +
+        flyhistosR[[countR]] <- ggplot(data=temp, aes_string(temp$fly)) +
           geom_histogram(binwidth = 0.0175, fill = sequence$histocolor[i]) +
           labs(x="fly [arb units]", y="frequency") +
           xlim(-3.2, 0) +
           ggtitle(paste(flyname, "Period", i, "OptomotoR"))
         optomotoR_flydata <- c(optomotoR_flydata, period.data[[i]]["fly"], recursive = TRUE, use.names = FALSE)
+        countR = countR+1
       } else if (sequence$type[i] == "OptomotoL") {
-        flyhistosL[[length(flyhistosL)+1]] <- ggplot(data=temp, aes_string(temp$fly)) +
+        flyhistosL[[countL]] <- ggplot(data=temp, aes_string(temp$fly)) +
           geom_histogram(binwidth = 0.0175, fill = sequence$histocolor[i]) +
           labs(x="fly [arb units]", y="frequency") +
           xlim(-3.2, 0) +
           ggtitle(paste(flyname, "Period", i, "OptomotoL"))
         optomotoL_flydata <- c(optomotoL_flydata, period.data[[i]]["fly"], recursive = TRUE, use.names = FALSE)
+        countL = countL+1
       }
 
       #torque
