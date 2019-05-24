@@ -1,4 +1,6 @@
-################## An R-script to read YAML DTS project files, visualize and statistically evaluate data
+#####################################################################################################################################
+################## R-script to read YAML DTS project files, visualize and statistically evaluate data. Reports in HTML ##############
+#####################################################################################################################################
 
 library(ggplot2)
 library(tidyr)
@@ -6,6 +8,7 @@ library(dygraphs)
 library(grid)
 library(reshape2)
 library(dplyr)
+library(plyr)
 library(gridExtra)
 library(yaml)
 library(ggsignif)
@@ -72,6 +75,8 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     NofPeriods = singleflydata[[5]]
     sequence <- singleflydata[[6]]
     samplerate = as.numeric(as.character(singleflydata[[4]]$sample_rate))
+    real_sample_rate = as.numeric(as.character(singleflydata[[11]]))
+    down_sample_rate = as.numeric(as.character(singleflydata[[12]]))
     
     ##extract fly meta-data
     fly <- singleflydata[[3]]
@@ -83,13 +88,16 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
 
     ##extract the rawdata
     rawdata <- singleflydata[[9]]
+    torquerange = singleflydata[[10]]
+    #calculate max torque values for axes when plotting 
+    maxtorque = c(-round_any(max(abs(torquerange)), 100, f=ceiling),round_any(max(abs(torquerange)), 100, f=ceiling))
     
     #create/empty plot lists
     poshistos <- list()
     trqhistos <- list()
     
 #### call RMarkdown for single fly evaluations ################################################
-    rmarkdown::render('b:/GitHub/DTSevaluations/single_fly.Rmd', 
+    rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""), 
                       output_file = paste(flyname,"descr_anal.html", sep="_"), 
                       output_dir = evaluation.path)
 #### end RMarkdown for single fly evaluations ################################################
@@ -108,20 +116,17 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
 
   ########### plot graphs for all experiments #####################
   
-  ##pool all data except "optomotor" by period
+  ##pool all data by period
   
   pooled.data<-list()
   
   for(i in 1:NofPeriods)
   {
     period.data<-data.frame()
-    if(sequence$type[i]!="optomotor")
-    {  
-      for (l in 1:length(xml_list)) 
+    for (l in 1:length(xml_list)) 
       {
         period.data <- rbind(period.data, grouped.data[[l]][[i]])
       }
-    }
     pooled.data[[i]] <- period.data
   } #for number of periods
   
@@ -135,7 +140,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     trqhistos[[i]] <- ggplot(data=temp, aes_string(temp$torque)) +
       geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
       labs(x="torque [arb units]", y="frequency") +
-      xlim(-600,600) +
+      xlim(maxtorque) +
       ggtitle(paste("Period", i))
     
     #position
@@ -144,7 +149,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
         geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
         labs(x="position [arb units]", y="frequency") +
-        xlim(-2047,2048) +
+        xlim(-1800,1800) +
         ggtitle(paste("Period", i))
     }
   }
@@ -160,14 +165,14 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
   trqhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$torque)) + 
     geom_histogram(binwidth=3) + 
     labs(x="torque [arb units]", y="frequency") + 
-    xlim(-600,600) +
+    xlim(maxtorque) +
     ggtitle("Pooled Torque Histogram")
   
   #position
   poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
     geom_histogram(binwidth=10) +
     labs(x="position [arb units]", y="frequency") + 
-    xlim(-2047,2048) +
+    xlim(-1800,1800) +
     ggtitle("Pooled Position Histogram")
 
 } else {print("You have selected files with differing metadata")}
@@ -222,7 +227,7 @@ if(NofGroups>2){}
 ###### continue for all projects with two groups
 
 #### call RMarkdown for project evaluations ################################################
-rmarkdown::render('b:/GitHub/DTSevaluations/project.Rmd', 
+rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""), 
                   output_file = paste(project.data$name,"html", sep = "."), 
                   output_dir = evaluation.path)
 #### end RMarkdown for project evaluations #################################################

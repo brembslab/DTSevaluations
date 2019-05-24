@@ -8,17 +8,17 @@ trq_pos_traces <- function(temp)
   pos <- temp$a_pos
   for(p in 2:nrow(temp))
   {
-    if (abs(as.numeric(pos[p]))>1950 && sign(as.numeric(pos[p]))!=sign(as.numeric(pos[p-1]))) {pos[p-1]="NA"}
+    if (abs(as.numeric(pos[p]))>1770 && sign(as.numeric(pos[p]))!=sign(as.numeric(pos[p-1]))) {pos[p-1]="NA"}
   }
   par(mar=c(5, 4, 4, 4) + 0.1)
-  traces <- plot(x = temp$time, y = temp$a_pos, type = "n", axes=FALSE, xaxs = "i", yaxs = "i", ylim=c(-2047,2048), ylab = "",xlab="")
+  traces <- plot(x = temp$time, y = temp$a_pos, type = "n", axes=FALSE, xaxs = "i", yaxs = "i", ylim=c(-1800,1800), ylab = "",xlab="")
   #shade quadrants
-  rect(temp$time[1],-1538,temp$time[nrow(temp)],-512, col = "grey95")
-  rect(temp$time[1],512,temp$time[nrow(temp)],1538, col = "grey95")
+  rect(temp$time[1],-1350,temp$time[nrow(temp)],-450, col = "grey95")
+  rect(temp$time[1],450,temp$time[nrow(temp)],1350, col = "grey95")
     par(new=TRUE)
-  plot(x = temp$time, y = pos, type = "l", col="red3", xaxs = "i", yaxs = "i", ylim=c(-2047,2048), ylab = "position[arb.units]",xlab="time [ms]")
+  plot(x = temp$time, y = pos, type = "l", col="red3", xaxs = "i", yaxs = "i", ylim=c(-1800,1800), ylab = "position[arb.units]",xlab="time [ms]")
     par(new=TRUE)
-  plot(x = temp$time, temp$torque, type = "l", col="blue", xaxs = "i", ylim=c(-500,500), main = paste("Fly Traces", flyname, "Period", i), axes=F, xlab=NA, ylab="")
+  plot(x = temp$time, temp$torque, type = "l", col="blue", xaxs = "i", ylim=maxtorque, main = paste("Fly Traces", flyname, "Period", i), axes=F, xlab=NA, ylab="")
   lines(c(temp$time[1],temp$time[nrow(temp)]),c(0,0),type="l",lty=1,lwd=1, col="black")
   axis(4)
   mtext("torque [arb_units]", side = 4, line = 3)
@@ -32,9 +32,9 @@ dytraces <- function(rawdata)
     dySeries("a_pos", label = "position", color = "darkred") %>%
     dySeries("torque", axis = 'y2', color = "blue") %>%
     dyAxis("x", drawGrid = FALSE) %>%
-    dyAxis("y", label = "Position [arb_units]", valueRange = c(-2048,2048)) %>%
+    dyAxis("y", label = "Position [arb_units]", valueRange = c(-1800,1800)) %>%
     dyOptions(gridLineColor = "lightgrey") %>%
-    dyAxis("y2", label = "Torque [arb_units]", independentTicks = TRUE, valueRange = c(-700,700), drawGrid = FALSE) %>%
+    dyAxis("y2", label = "Torque [arb_units]", independentTicks = TRUE, valueRange = maxtorque, drawGrid = FALSE) %>%
     dyOptions(includeZero = TRUE) %>%
     dyRangeSelector()
 

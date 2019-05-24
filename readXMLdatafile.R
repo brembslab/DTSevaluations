@@ -4,38 +4,68 @@ require("XML")
 
 ####################### Functions for importing data ##########################
 
-## Importing DTS data from an XML file
+#### Importing DTS data from an XML file####
 flyDataImport <- function(xml_name) {
   
-  ## Import the data from the .xml file.
+### Import the data from the .xml file.
   flyData <- xmlParse(xml_name)
   flyDataXMLtop = xmlRoot(flyData)
   
-    #parse the metadata
+   ##parse the metadata
     URIs <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/URIs"))
     
     experimenter <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experimenter"))
     fly <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/fly"))
     experiment <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experiment"))
-    #parse sequence data
+  ##parse sequence data
     NofPeriods = as.integer(xmlGetAttr(flyDataXMLtop[['sequence']], "periods"))
     sequence <- xmlToDataFrame(nodes=getNodeSet(flyData,"//sequence/period"))    
-    #parse time series meta-data
+  ##parse time series meta-data
     CSV_descriptor <- xmlToDataFrame(nodes=getNodeSet(flyData,"//timeseries/CSV_descriptor"))
     variables <- xmlToDataFrame(nodes=getNodeSet(flyData,"//timeseries/variables/variable"))
-    #parse the time series raw data
+  ##parse the time series raw data
     rawdata <- read.table(text=xmlSApply(flyDataXMLtop[['timeseries']][['csv_data']], xmlValue), col.names=variables$type)
+  ##reset position data to +/-180° [-1800..1796]
+    if (experiment$arena_type=="lightguides"){rawdata$a_pos = rawdata$a_pos-1800}
+    if (experiment$arena_type=="motor"){rawdata$a_pos = round(rawdata$a_pos*0.87890625)}
+  ##reset periods to start from 1 of they start from 0
+    if (rawdata$period[1]==0){rawdata$period=rawdata$period+1}
+  ##calculate actual sampling rate and downsample if necessary
+    real_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
+    if (round(real_sample_rate) > 20) {
+      binsize = as.integer(real_sample_rate/20)
+      rawdata <- downsamplebin(rawdata,binsize)
+      down_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
+    } else {
+      real_sample_rate = experiment$sample_rate
+      down_sample_rate = experiment$sample_rate
+    }
+    
+  ##find range of torque values  
+    torquerange = range(rawdata$torque)
+    
     
     options(digits.secs = 3)
-    rawdata$date<-as.POSIXct(rawdata$time/1000, origin="1970-01-01", tz="UTC")
+    rawdata$date<-as.POSIXct(rawdata$time/1000, origin=date(experiment$dateTime), tz="UTC") #required for some function...???
     
     ##list all data
-    singleflydata <- list(URIs, experimenter, fly, experiment, NofPeriods, sequence, CSV_descriptor, variables, rawdata)
+    singleflydata <- list(URIs, 
+                          experimenter,
+                          fly,
+                          experiment,
+                          NofPeriods,
+                          sequence,
+                          CSV_descriptor,
+                          variables,
+                          rawdata,
+                          torquerange,
+                          real_sample_rate,
+                          down_sample_rate)
   
   return(singleflydata)
 }
 
-## make sure all flies in a group have the identical experimental design
+#### make sure all flies in a group have the identical experimental design ####
 MultiFlyDataVerification <- function(xml_list)
 {
 for (l in 1:length(xml_list)) 
@@ -81,3 +111,62 @@ collect.metadata <-function(singleflydata)
   mdata = c(exp.name, exp.orcid, exp.date, exp.duration, exp.description, exp.setup, fly)
   return(mdata)
 }
+
+##downsample the rawdata using a fixed bin width
+downsamplebin <- function(rawdata, binsize) {
+  
+  # create the vectors in which to save the downsampled data
+  timeDownsampled <- vector(mode = "numeric", length = ceiling(length(rawdata$time)/binsize))
+  a_posDownsampled <- vector(mode = "numeric", length = ceiling(length(rawdata$a_pos)/binsize))
+  torqueDownsampled <- vector(mode = "numeric", length = ceiling(length(rawdata$torque)/binsize))
+  periodDownsampled <- vector(mode = "numeric", length = ceiling(length(rawdata$period)/binsize))
+
+  # downsampling time
+  for (index in seq(1,length(rawdata$time),binsize)) {
+    if(index < (length(rawdata$time)-binsize)) { # check whether we reached the end of the data; if not:
+      timeDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$time[index:(index+binsize-1)])/binsize)  # average all data in the bin and save it in the right slot of the downsampled vector
+    } else {  # in case we reached the end
+      timeDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$time[index:length(rawdata$time)])/length(rawdata$time[index:length(rawdata$time)])) # average over the remaining values and save the result
+      timeDownsampled <- timeDownsampled-timeDownsampled[1] #set time to start from 0
+    }
+  }
+  # downsampling position
+  for (index in seq(1,length(rawdata$a_pos),binsize)) {
+    if(index < (length(rawdata$a_pos)-binsize)) { # check whether we reached the end of the data; if not:
+      a_posDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$a_pos[index:(index+binsize-1)])/binsize)  # average all data in the bin and save it in the right slot of the downsampled vector
+    } else {  # in case we reached the end
+      a_posDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$a_pos[index:length(rawdata$a_pos)])/length(rawdata$a_pos[index:length(rawdata$a_pos)])) # average over the remaining values and save the result
+    }
+  }
+  # downsampling torque
+  for (index in seq(1,length(rawdata$torque),binsize)) {
+    if(index < (length(rawdata$torque)-binsize)) { # check whether we reached the end of the data; if not:
+      torqueDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$torque[index:(index+binsize-1)])/binsize)  # average all data in the bin and save it in the right slot of the downsampled vector
+    } else {  # in case we reached the end
+      torqueDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$torque[index:length(rawdata$torque)])/length(rawdata$torque[index:length(rawdata$torque)])) # average over the remaining values and save the result
+    }
+  }
+  # downsampling period
+  for (index in seq(1,length(rawdata$period),binsize)) {
+    if(index < (length(rawdata$period)-binsize)) { # check whether we reached the end of the data; if not:
+        if (abs(max(rawdata$period[index:(index+binsize-1)]) - min(rawdata$period[index:(index+binsize-1)])) == 0){ #check if there is a period switch in the bin, if there is:
+          periodDownsampled[((index-1)/binsize)+1] <- rawdata$period[index]
+        } else if (table(rawdata$period[index:(index+binsize-1)])[1]>table(rawdata$period[index:(index+binsize-1)])[2]) #if the majority of values indicates old period
+          {
+            periodDownsampled[((index-1)/binsize)+1] <- rawdata$period[index] #make the period vale that of the old period
+          } else {
+            periodDownsampled[((index-1)/binsize)+1] <- rawdata$period[index+binsize-1] #if the majority of values indicates new period, set the value to the new period
+          }
+    } else { # in case we reached the end
+      periodDownsampled[((index-1)/binsize)+1] <- rawdata$period[length(rawdata$period)]
+    }
+  }
+
+  
+  # bind the downsampled vectors into one dataframe
+  rawdataDown <- data.frame("time" = timeDownsampled, "a_pos" = a_posDownsampled, "torque" = torqueDownsampled, "period" = periodDownsampled)
+  
+  # return the downsampled vector
+  return(rawdataDown)
+}
+

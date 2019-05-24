@@ -24,8 +24,7 @@ dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)
 
 #start evaluating
-if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group have the identical experimental design
-{
+
   for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
@@ -48,7 +47,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     poshistos <- list()
     trqhistos <- list()
 
-    #start writing to PDF
+    #start writing to single-fly PDF
     filename = paste(flyname,"descr_anal.pdf", sep="_")
     pdf(file=filename, paper="a4r", pointsize=14, width = 0, height = 0)
     
@@ -66,11 +65,14 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     grid.table(periods)
     ##### analyze data from each period separately #######
     
+    #add columns for PIs to sequence data
+    sequence$lambda <- NA
+    
     for(i in 1:NofPeriods){
       
       #save colors for later plotting
-      if(sequence$outcome[i]==0){sequence$color[i]="lightyellow"} else {sequence$color[i]="orange"}
-      if(sequence$outcome[i]==0){sequence$histocolor[i]="darkgreen"} else {sequence$histocolor[i]="orange"}
+      if(sequence$outcome[i]==1){sequence$color[i]="orange"} else {sequence$color[i]="lightyellow"}
+      if(sequence$outcome[i]==1){sequence$histocolor[i]="orange"} else {sequence$histocolor[i]="darkgreen"}
       
       #only look at period data
       temp  <- rawdata[rawdata$period == i, ]
@@ -98,18 +100,22 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
         poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
           geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
           labs(x="position [arb units]", y="frequency") +
-          xlim(-2047,2048) +
+          xlim(0,3600) +
           ggtitle(paste(flyname, "Period", i))
       }
       
       ##calculate PIs
+      
+      #find out from which periods we need PIs
+      #NofPIperiods = sum(sequence$contingency != "")
+      
       ##create data.frame for adding PIs if it doesn't eist, yet
       if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))}
       
       #for position
       if(sequence$type[i]=="fs"||sequence$type[i]=="color")
       {
-        t1 = sum(abs(temp$a_pos) >= 512 & abs(temp$a_pos) <= 1538)
+        t1 = sum((abs(temp$a_pos) >= 450 & abs(temp$a_pos) <= 1350))
         t2 = nrow(temp)-t1
         sequence$lambda[i] = (t1-t2)/(t1+t2)
         if (sequence$contingency[i] == '2_4_Q'){sequence$lambda[i]=-sequence$lambda[i]}
@@ -135,7 +141,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
       geom_histogram(binwidth=10) +
       labs(x="position [arb units]", y="frequency") + 
-      xlim(-2047,2048) +
+      xlim(0,3600) +
       ggtitle(paste(flyname, "total"))
     
     ##write histograms to file
@@ -295,4 +301,3 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
 
     dev.off()
     }
-} else {print("You have selected files with differing metadata")}

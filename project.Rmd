@@ -1,7 +1,20 @@
+---
+title: "*Drosophila* Time Series - Project Evaluation Sheet"
+output: 
+  html_document:
+    number_sections: true
+    toc: true
+    toc_float: true
+---
 <style type="text/css">
   body .main-container {
     max-width: 1800px !important;
   }
+  h1.title {
+  font-size: 38px;
+  color: DarkRed;
+  text-align: center;
+}
 </style>
 
 ```{r setup, include=FALSE}
@@ -30,17 +43,17 @@ source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
 ```
 
-<center><h1><i>Drosophila</i> Time Series - Project Evaluation Sheet</h1></center>
 <center><h2>for time series data set: "<b>`r paste(project.data$title)`</b>"</h2></center>
+<center>Rendered on `r format(Sys.time(), '%d %B %Y')`</center>
 
-### 1. Metadata:
+# Metadata
 
 **Description:** `r paste(project.data$description)`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
 
-### 2. Experimental Design:
-```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 3, fig.width = 9}
+# Experimental Design
+```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 3, fig.width = (NofPeriods+1)}
 #Write table of period design
 periods <- periods[-6,]
 periods[3,periods["outcome",]==0]="test"
@@ -48,21 +61,22 @@ periods[3,periods["outcome",]==1]="training"
 grid.table(periods)
 ```
 
-### 3. Experimental groups and single fly evaluations:
+# Experimental groups and single fly evaluations
 
 **Number of experimental groups:** `r paste(NofGroups)`
 ```{r singleflydata, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
 exp_groups <- as.data.frame(t(plyr::ldply(exp_groups, rbind))) #make dataframe from list
-colnames(exp_groups) <- as.character(unlist(exp_groups[1,])) # make group names to column names
+colnames(exp_groups) = exp_groups[1, ] # make group names to column names
 #tidy the dataframe up a little
-exp_groups = exp_groups[-1,]
-rownames(exp_groups) <- NULL
+exp_groups = exp_groups[-1, ,drop=F] #remove the first row which is now column names, without converting to a vector in case of single column
+rownames(exp_groups) <- NULL #remove the numbers
 kable(exp_groups) #plot table with links to individual fly evaluations
 ```
 
 
 
-### 4. Torque Histograms:
+# Histograms
+## Torque Histograms
 
 ```{r TorqueHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
@@ -70,11 +84,11 @@ for(x in 1:NofGroups)
   {
     cat("<center><h4>",project.data[["resources"]][[x]][["title"]],"</h4></center>")
     trqhistos <- grouped.trqhistos[[x]]
-    multiplot(plotlist = trqhistos, cols=2) #torquehistos
+    multiplot(plotlist = trqhistos, cols=round(NofPeriods/5)) #torquehistos
 }  
 ```
 
-### 5. Position Histograms:
+## Position Histograms:
 
 ```{r PositionHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
@@ -82,11 +96,11 @@ for(x in 1:NofGroups)
   {
     cat("<center><h4>",project.data[["resources"]][[x]][["title"]],"</h4></center>")
     poshistos <- grouped.poshistos[[x]]
-    multiplot(plotlist = poshistos, cols=2) #positionhistos
+    multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5)) #positionhistos
 }
 ```
 
-### 6. Fourier Spectrum Analysis
+# Fourier Spectrum Analysis
 
 ```{r spectra, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8}
 spectemp <- do.call("rbind", grouped.spectra) #create single data.frame with grouping variable from list of groups
@@ -113,14 +127,15 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
         theme(axis.text.y = element_text(size=12))+ ylab("mean rel. Power") + xlab("Frequency [Hz]"))
 ```
 
-
-### 7. Performance Index bar plot with SEM:
+# Performance Indices
+## Performance Index bar plot with SEM:
 
 ```{r PIbar, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8}
 PIplots <- list()
 for(x in 1:NofGroups)
   {
     PIprofile <- grouped.PIprofiles[[x]]
+    PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
       # compute summary statistics
       error <- data.frame(period=integer(ncol(PIprofile)), mean=numeric(ncol(PIprofile)), sem=numeric(ncol(PIprofile)))
       for(e in 1:ncol(PIprofile))
@@ -132,7 +147,7 @@ for(x in 1:NofGroups)
       # plot graph
      PIplots[[x]] <- ggplot(error, aes(x=period, y=mean)) + 
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_bar(fill = sequence$color, position=position_dodge(), stat="identity", colour="black") +
+              geom_bar(fill = as.vector(na.omit(sequence$color)), position=position_dodge(), stat="identity", colour="black") +
               geom_errorbar(aes(ymin=mean-sem, ymax=mean+sem),
                             width=0,
                             size=1.5,
@@ -141,20 +156,21 @@ for(x in 1:NofGroups)
               scale_x_continuous(breaks = seq(1, NofPeriods, 1)) +
               scale_y_continuous(breaks = seq(-1, 1, .2)) +
               theme_light(base_size = 16) + theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=16))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods)
+              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods)
   }
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
-### 8. Performance Index box&dotplot with notches:
+## Performance Index box&dotplot with notches:
 
 ```{r BoxWithNotch, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8}
 for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
+  PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
     PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_boxplot(fill = sequence$color, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+              geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
               geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
@@ -164,15 +180,16 @@ for(x in 1:NofGroups)
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
-### 9. Performance Index box&dotplot without notches:
+## Performance Index box&dotplot without notches:
 
 ```{r BoxNoNotch, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8}
 for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
+  PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
     PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_boxplot(fill = sequence$color, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
+              geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
               geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
@@ -182,17 +199,18 @@ for(x in 1:NofGroups)
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
-### 10. Performance Index Violin Plot:
+## Performance Index Violin Plot:
 
 ```{r Violin, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8}
 
 for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
+  PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
     PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_violin(width = 1.1) +
-              geom_boxplot(fill = sequence$color, width = 0.1, outlier.color="darkred") +
+              geom_boxplot(fill = as.vector(na.omit(sequence$color)), width = 0.1, outlier.color="darkred") +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -228,19 +246,24 @@ wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1 ###determine
 ```
 
 ```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
-cat("### 11. Statistical Tests of single groups against zero:")
+cat("# Statistics\n## Statistical Tests of single groups against zero")
 
   wilcoxon<-numeric()  
   for(x in 1:NofGroups){wilcoxon[x] = signif(wilcox.test(PIstat[[x]])$p.value, 3)} #test all groups against zero
-  #compute Bayes Factor for each group
-  results.bayes<-list()
-  for(x in 1:NofGroups){results.bayes[[x]]=extractBF(ttestBF(na.omit(PIstat[[x]])))} #extract BayesFactors for all groups
-  results.bayes<-do.call("rbind", results.bayes) #fuse all Bayes results into one dataframe
-  results.bayes <- results.bayes[-c(3,4)]# drop the date and code columns
-  results.bayes <- as.data.frame(sapply(results.bayes , signif, 3)) # reduce results to 3 significant digits
-  #add group names as row names
-  row.names(results.bayes) <- groupnames
-
+  #compute Bayes Factor for single group 
+  if(NofGroups==1){
+    results.bayes=extractBF(ttestBF(na.omit(PIstat[[1]])))
+    results.bayes <- results.bayes[-c(3,4)] # drop the date and code columns
+    row.names(results.bayes) <- groupnames #group name as row name
+    results.bayes <- signif(results.bayes, digits=3) # reduce results to 3 significant digits
+    } else { #compute Bayes Factors for several groups
+          results.bayes<-list()
+          for(x in 1:NofGroups){results.bayes[[x]]=extractBF(ttestBF(na.omit(PIstat[[x]])))} #extract BayesFactors for all groups
+          results.bayes<-do.call("rbind", results.bayes) #fuse all Bayes results into one dataframe
+          results.bayes <- results.bayes[-c(3,4)]# drop the date and code columns
+          row.names(results.bayes) <- groupnames #group name as row name
+          results.bayes <- signif(results.bayes, digits=3) # reduce results to 3 significant digits
+    }
 # plot PI box plot test against zero
   plots.singles<-list(ggplot(melt(PIstat), aes(variable, value)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
@@ -264,7 +287,7 @@ two <- project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2
 ```
       
 ```{r Utest, eval=two, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
-cat("### 12. Statistical Tests between two groups:")
+cat("## Statistical Tests between two groups")
 
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
     w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)

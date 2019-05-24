@@ -1,7 +1,20 @@
+---
+title: "Single Fly Descriptive Data Evaluation Sheet"
+output: 
+  html_document:
+    number_sections: true
+    toc: true
+    toc_float: true
+---
 <style type="text/css">
   body .main-container {
     max-width: 1800px !important;
   }
+  h1.title {
+  font-size: 38px;
+  color: DarkRed;
+  text-align: center;
+}
 </style>
 
 ```{r setup, include=FALSE}
@@ -29,27 +42,36 @@ source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
 ```
 
-<center><h1>Single Fly Descriptive Data Evaluation Sheet</h1></center>
 <center><h2>for time series experiment `r paste(flyname)`</h2></center>
+<center>Rendered on `r format(Sys.time(), '%d %B %Y')`</center>
 
-### 1. Metadata:
+# Metadata
 
 **Date and time of the experiment:** `r paste(experiment$dateTime)`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment description:** `r paste(experiment$description)`  
 **Experiment duration:** `r paste(experiment$duration)`s  
-**Sampling rate:** `r paste(experiment$sample_rate)`Hz; **Arena type:** `r paste(experiment$arena_type)`; **Torquemeter type:** `r paste(experiment$meter_type)`  
+**Arena type:** `r paste(experiment$arena_type)`; **Torquemeter type:** `r paste(experiment$meter_type)`  
 **Fly description:** `r paste(fly$description)`; **FlyBase ID:** [`r paste(fly$flybase)`](http://flybase.org/reports/`r paste(fly$flybase)`)
+**Sampling rate:** `r paste(experiment$sample_rate)`Hz
+```{r sr_condition, echo=FALSE}
+sampleratecondition <- round(real_sample_rate)>20
+```
 
-### 2. Experimental Design:
-```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 3, fig.width = 9}
+```{r samplerate, eval=sampleratecondition, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, comment=NA, results = 'asis'}
+cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>Downsampled sampling rate (target 20 Hz):</b> ", paste(round(down_sample_rate,4)), " Hz")
+```
+
+# Experimental Design
+```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 3, fig.width = (NofPeriods+1)}
     #plot table of period sequence
     periods=t(sequence)
     colnames(periods)<-sprintf("Period %s",1:NofPeriods)
     grid.table(periods)
 ```
 
-### 3. Interactive Time Traces:
+# Time Traces
+## Interactive Time Traces
 
 ```{r dytraces, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12}    
     
@@ -58,22 +80,34 @@ source("DTS_plotfunctions.R")
 
 ```
 
-### 4. Time Traces by Period:
+## Time Traces by Period
 
 ```{r PeriodTraces, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10}
+
+#add columns for PIs to sequence data
+    sequence$lambda <- NA
 
     for(i in 1:NofPeriods){
       
       #save colors for later plotting
-      if(sequence$outcome[i]==0){sequence$color[i]="lightyellow"} else {sequence$color[i]="orange"}
-      if(sequence$outcome[i]==0){sequence$histocolor[i]="darkgreen"} else {sequence$histocolor[i]="orange"}
+      if(sequence$outcome[i]==0){
+        sequence$color[i]="lightyellow"
+        sequence$histocolor[i]="darkgreen"
+      } else {
+        sequence$color[i]="orange"
+        sequence$histocolor[i]="orange"
+        }
+     if(sequence$contingency[i]==""){
+        sequence$color[i]=NA
+        sequence$histocolor[i]="red"
+        }
       
       #only look at period data
       temp  <- rawdata[rawdata$period == i, ]
       keeps = c("a_pos","torque")
       period.data[[i]] <- temp[keeps] #list only position and torque data by period
       
-      if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotor")
+      if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotorR"||sequence$type[i]=="optomotorL")
       {
         ## plot the torque and position time traces
         trq_pos_traces(temp)
@@ -84,16 +118,16 @@ source("DTS_plotfunctions.R")
       trqhistos[[i]] <- ggplot(data=temp, aes_string(temp$torque)) +
         geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
         labs(x="torque [arb units]", y="frequency") +
-        xlim(-600,600) +
+        xlim(maxtorque) +
         ggtitle(paste(flyname, "Period", i))
       
       #position
-      if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotor")
+      if(sequence$type[i]=="fs"||sequence$type[i]=="color")
       {
         poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
           geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
-          labs(x="position [arb units]", y="frequency") +
-          xlim(-2047,2048) +
+          labs(x="position [degrees*10]", y="frequency") +
+          xlim(-1800,1800) +
           ggtitle(paste(flyname, "Period", i))
       }
       
@@ -104,20 +138,25 @@ source("DTS_plotfunctions.R")
       #for position
       if(sequence$type[i]=="fs"||sequence$type[i]=="color")
       {
-        t1 = sum(abs(temp$a_pos) >= 512 & abs(temp$a_pos) <= 1538)
+        t1 = sum(abs(temp$a_pos) >= 450 & abs(temp$a_pos) <= 1350)
         t2 = nrow(temp)-t1
         sequence$lambda[i] = (t1-t2)/(t1+t2)
         if (sequence$contingency[i] == '2_4_Q'){sequence$lambda[i]=-sequence$lambda[i]}
         if(l==1){PIprofile[1,i]=sequence$lambda[i]}
+      } else if (sequence$type[i]=="yt" || sequence$type[i]=="sw_blue" || sequence$type[i]=="sw_green") #calculate torque PIs
+      {
+        t1 = sum(temp$torque >= 0)
+        t2 = nrow(temp)-t1
+        sequence$lambda[i] = (t1-t2)/(t1+t2)
+        if (sequence$contingency[i] == 'positive_torque'){sequence$lambda[i]=-sequence$lambda[i]}
+        if(l==1){PIprofile[1,i]=sequence$lambda[i]}
       }
-      #for torque
-      #if(sequence$type[i]=="yt"||"sw_blue"||"sw_green")
-      #{}
     } #for Number of Periods
     
 ```
 
-### 5. Torque Histograms
+# Histograms
+## Torque Histograms
 
 ```{r TorqueHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
     
@@ -126,44 +165,44 @@ source("DTS_plotfunctions.R")
     trqhistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$torque)) + 
       geom_histogram(binwidth=3) + 
       labs(x="torque [arb units]", y="frequency") + 
-      xlim(-600,600) +
+      xlim(-maxtorque) +
       ggtitle(paste(flyname, "total"))
     
     #position
     poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
       geom_histogram(binwidth=10) +
-      labs(x="position [arb units]", y="frequency") + 
-      xlim(-2047,2048) +
+      labs(x="position [degrees*10]", y="frequency") + 
+      xlim(-1800,1800) +
       ggtitle(paste(flyname, "total"))
     
     ##write histograms
     #torque
-    multiplot(plotlist = trqhistos, cols=2)
+    multiplot(plotlist = trqhistos, cols=round(NofPeriods/5))
 ```
 
-### 6. Position Histograms
+## Position Histograms
     
 ```{r PositionHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
-    multiplot(plotlist = poshistos, cols=2)
+    multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5))
 ```
 
-### 7. Power spectrum and spectrogram:
+# Power spectrum and spectrogram
 
 ```{r spectra, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8}
-    meanspec(rawdata$torque, f = samplerate, wl = 600) #plot mean power spectrum for each fly
+    meanspec(rawdata$torque, f = down_sample_rate, wl = 600) #plot mean power spectrum for each fly
     title(paste("Torque-Powerspectrum", flyname))
-    spectro(rawdata$torque, f = samplerate, wl=600) #plot spectrogram for each fly
+    spectro(rawdata$torque, f = down_sample_rate, wl=600) #plot spectrogram for each fly
     title(paste("Torque-Spectrogram", flyname))
-    speclist[[l]] = as.data.frame(meanspec(rawdata$torque, f = samplerate, wl = 600, plot = FALSE)) #collect each spectrum for later averaging
+    speclist[[l]] = as.data.frame(meanspec(rawdata$torque, f = down_sample_rate, wl = 600, plot = FALSE)) #collect each spectrum for later averaging
 ```
 
-### 8. Learning and avoidance scores:
+# Learning and avoidance scores
 
 ```{r PIs, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8}
-    barplot(sequence$lambda, main = paste("Performance Indices", flyname),
+    barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
             xlab="Time [periods]",
             ylab="PI [rel. units]",
             space=0,
-            col = sequence$color)
+            col = as.vector(na.omit(sequence$color)))
 ```
 
