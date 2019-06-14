@@ -66,29 +66,27 @@ grid.table(periods)
 **Number of experimental groups:** `r paste(NofGroups)`
 ```{r singleflydata, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
 exp_groups <- as.data.frame(t(plyr::ldply(exp_groups, rbind))) #make dataframe from list
-colnames(exp_groups) = exp_groups[1, ] # make group names to column names
+colnames(exp_groups) = as.character(unlist(exp_groups[1, ])) # make group names to column names
 #tidy the dataframe up a little
 exp_groups = exp_groups[-1, ,drop=F] #remove the first row which is now column names, without converting to a vector in case of single column
 rownames(exp_groups) <- NULL #remove the numbers
 kable(exp_groups) #plot table with links to individual fly evaluations
 ```
 
-
-
 # Histograms
 ## Torque Histograms
 
-```{r TorqueHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
 for(x in 1:NofGroups)
   {
     cat("<center><h4>",project.data[["resources"]][[x]][["title"]],"</h4></center>")
-    trqhistos <- grouped.trqhistos[[x]]
-    multiplot(plotlist = trqhistos, cols=round(NofPeriods/5)) #torquehistos
+    flyhistos <- grouped.flyhistos[[x]]
+    multiplot(plotlist = flyhistos, cols=round(NofPeriods/5)) #flyhistos
 }  
 ```
 
-## Position Histograms:
+## Arena Position Histograms
 
 ```{r PositionHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
@@ -99,6 +97,51 @@ for(x in 1:NofGroups)
     multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5)) #positionhistos
 }
 ```
+
+<!-- Computing optomotor data if they are present -->
+
+```{r om, echo=FALSE}
+om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are optomotor periods
+```
+
+`r if (om) '# Optomotor Analysis'`
+
+```{r Optomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}
+ plotOM <- as.data.frame(do.call(cbind, lapply(grouped.OMdata, "[", , "time"))) #create dataframe from which to plot average optomotor traces for group
+ names(plotOM)[1] = "time" #label the first column as time
+ 
+ #extract means, sd and group columns from list by groups
+  plotOM$means <- do.call(cbind, lapply(grouped.OMdata, "[", , "means"))
+  plotOM$sd <- do.call(cbind, lapply(grouped.OMdata, "[", , "sd"))
+  plotOM$group <- do.call(cbind, lapply(grouped.OMdata, "[", , "group"))
+
+  print(ggplot(plotOM, aes(x=time, y=means, group = group)) + 
+        geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
+        scale_fill_manual(values = boxcolors) +
+        geom_line(aes(colour = group), size = 2) + 
+        scale_color_manual(values = boxcolors) +
+        ggtitle("Optomotor Traces") +
+        guides(colour = guide_legend(override.aes = list(size=3))) +
+        theme_light(base_size = 16) + 
+          theme(legend.justification=c(1,0),
+            legend.position=c(0.94,0.60), 
+            legend.title=element_blank(), 
+            legend.key.size = unit(2, 'lines'),
+            legend.key = element_rect(size = 6),
+            legend.box.background = element_rect(fill="white"),
+            legend.box.margin = margin(4, 4, 4, 4),
+            legend.text=element_text(size=14), 
+            panel.grid.major.y = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+          theme(axis.text.y = element_text(size=12))+
+          ylab("Optomotor Response [rel. units]") + 
+          xlab("Time [ms]"))
+
+
+
+```
+
 
 # Fourier Spectrum Analysis
 
@@ -155,8 +198,11 @@ for(x in 1:NofGroups)
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_x_continuous(breaks = seq(1, NofPeriods, 1)) +
               scale_y_continuous(breaks = seq(-1, 1, .2)) +
-              theme_light(base_size = 16) + theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]") + theme(aspect.ratio=4/NofPeriods)
+              theme_light(base_size = 16) + 
+              theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.y = element_text(size=18))+ 
+              ylab("PI [rel. units]") + 
+              theme(aspect.ratio=4/NofPeriods)
   }
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
@@ -174,8 +220,12 @@ for(x in 1:NofGroups)
               geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
-              theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Experiment Sequence") + theme(aspect.ratio=4/NofPeriods)
+              theme_light(base_size = 16) + 
+              theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.y = element_text(size=18))+ 
+              ylab("PI [rel. units]")+ 
+              xlab("Experiment Sequence") + 
+              theme(aspect.ratio=4/NofPeriods)
   }  
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
@@ -193,8 +243,11 @@ for(x in 1:NofGroups)
               geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
-              theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Experiment Sequence") + theme(aspect.ratio=4/NofPeriods)
+              theme_light(base_size = 16) + 
+              theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.y = element_text(size=18))+ 
+              ylab("PI [rel. units]")+ xlab("Experiment Sequence") + 
+              theme(aspect.ratio=4/NofPeriods)
   }      
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
@@ -213,8 +266,12 @@ for(x in 1:NofGroups)
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), width = 0.1, outlier.color="darkred") +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
-              theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab("PI [rel. units]")+ xlab("Experiment Sequence") + theme(aspect.ratio=4/NofPeriods)
+              theme_light(base_size = 16) + 
+              theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.y = element_text(size=18))+ 
+              ylab("PI [rel. units]")+ 
+              xlab("Experiment Sequence") + 
+              theme(aspect.ratio=4/NofPeriods)
   }
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```

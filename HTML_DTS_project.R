@@ -39,16 +39,21 @@ dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)
 
 #how many experimental groups will need to be evaluated
-NofGroups=lengths(project.data["resources"])
+NofGroups = lengths(project.data["resources"])
 
-grouped.trqhistos <- list()   #Torque histograms for group in a list of length NofPeriods
-grouped.poshistos <- list()   #Position histograms for group in a list of length NofPeriods
+#what kind of experiment are we dealing with? Default is torquemeter
+if (exists('type', where=project.data)){ExpType = project.data["type"]} else ExpType = "torquemeter"
+if (ExpType=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
+
+### Initialize empty lists where data are collected
+grouped.poshistos <- list()   #Arena position histograms for group in a list of length NofPeriods
 grouped.PIprofiles <- list()  #PIProfile data frames in a list of length NofGroups
 grouped.periods <- list()     #Period designs in a list of length NofGroups
-grouped.spectra <- list()      #Power spectra in a list of length NofGroups
+grouped.spectra <- list()     #Power spectra in a list of length NofGroups
+grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of length NofPeriods
 
-#create empty list for individual fly names in each group for display in project evaluation
-exp_groups <- list()
+exp_groups <- list()    #Individual fly names in each group for display in project evaluation
+grouped.OMdata <-list() #Averaged optomotor data for each group
 
 for(x in 1:NofGroups)
 {
@@ -88,13 +93,13 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
 
     ##extract the rawdata
     rawdata <- singleflydata[[9]]
-    torquerange = singleflydata[[10]]
-    #calculate max torque values for axes when plotting 
-    maxtorque = c(-round_any(max(abs(torquerange)), 100, f=ceiling),round_any(max(abs(torquerange)), 100, f=ceiling))
+    flyrange = singleflydata[[10]]
+    #calculate max fly values for axes when plotting 
+    maxfly = c(-round_any(max(abs(flyrange)), 100, f=ceiling),round_any(max(abs(flyrange)), 100, f=ceiling))
     
     #create/empty plot lists
     poshistos <- list()
-    trqhistos <- list()
+    flyhistos <- list()
     
 #### call RMarkdown for single fly evaluations ################################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""), 
@@ -103,16 +108,28 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
 #### end RMarkdown for single fly evaluations ################################################
     
     ##move PIs to multi-experiment data.frame
-    if(l>1){PIprofile <- rbind2(PIprofile, as.vector(t(sequence$lambda)))}
+    if(l>1){
+      PIprofile <- rbind2(PIprofile, as.vector(t(sequence$lambda)))
+    }
     
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
-    
+
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
 
   } #for number of flies in xml_list
 
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
+  
+  # derive means and SDs for optomotor data in the group
+if(any(grepl("optomotor", sequence$type)==TRUE)){
+  OMdata$means=rowMeans(OMdata[-1])
+  OMdata$sd=rowSds(OMdata[-1])
+  OMdata$group=project.data[["resources"]][[x]][["name"]]
+  grouped.OMdata[[x]] <- OMdata #save optomotor data to groupwise list
+  rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group 
+}
+  
 
   ########### plot graphs for all experiments #####################
   
@@ -130,42 +147,42 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     pooled.data[[i]] <- period.data
   } #for number of periods
   
-  ## plot pooled position and torque histograms by period ##
+  ## plot pooled position and fly histograms by period ##
   
   for(i in 1:NofPeriods)
   {
     temp<-pooled.data[[i]]
     
-    #torque
-    trqhistos[[i]] <- ggplot(data=temp, aes_string(temp$torque)) +
+    #fly
+    flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
       geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
       labs(x="torque [arb units]", y="frequency") +
-      xlim(maxtorque) +
+      xlim(maxfly) +
       ggtitle(paste("Period", i))
     
     #position
-    if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotor")
+    if(sequence$type[i]=="fs" || sequence$type[i]=="color")
     {
       poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
         geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
-        labs(x="position [arb units]", y="frequency") +
+        labs(x="arena position [arb units]", y="frequency") +
         xlim(-1800,1800) +
         ggtitle(paste("Period", i))
     }
   }
   
-  ## pool all torque and position data into single data.frame
+  ## pool all fly and position data into single data.frame
   
   all.data <- do.call(rbind, pooled.data)
   
   
   ## plot pooled histograms for all flies over all periods
   
-  #torque
-  trqhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$torque)) + 
+  #fly behavior
+  flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) + 
     geom_histogram(binwidth=3) + 
     labs(x="torque [arb units]", y="frequency") + 
-    xlim(maxtorque) +
+    xlim(maxfly) +
     ggtitle("Pooled Torque Histogram")
   
   #position
@@ -182,12 +199,12 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
 #Period sequence design meta-data
 grouped.periods[[x]] = periods
 
-#Torque Histograms
-grouped.trqhistos[[x]] = trqhistos #add torque histograms to list of grouped histograms
-trqhistos <- list() #empty torque histograms
+#fly Histograms
+grouped.flyhistos[[x]] = flyhistos #add fly histograms to list of grouped histograms
+flyhistos <- list() #empty fly histograms
 
 #Position Histograms
-grouped.poshistos[[x]] = poshistos #add torque histograms to list of grouped position histograms
+grouped.poshistos[[x]] = poshistos #add position histograms to list of grouped position histograms
 poshistos <- list() #empty list of position histograms
 
 #PI data

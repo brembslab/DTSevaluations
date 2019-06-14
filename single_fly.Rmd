@@ -34,7 +34,7 @@ library(ggsignif)
 library(effsize)
 library(pwr)
 library(BayesFactor)
-library(genefilter)
+library(genefilter)  # if not available for newest version: setRepositories(addURLs = c(CRANxtras = "http://www.stats.ox.ac.uk/pub/RWin"))
 library(seewave)
 
 ## source the script with the functions needed for analysis
@@ -51,7 +51,7 @@ source("DTS_plotfunctions.R")
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment description:** `r paste(experiment$description)`  
 **Experiment duration:** `r paste(experiment$duration)`s  
-**Arena type:** `r paste(experiment$arena_type)`; **Torquemeter type:** `r paste(experiment$meter_type)`  
+**Arena type:** `r paste(experiment$arena_type)`; **Measurement device:** `r paste(experiment$meter_type)`  
 **Fly description:** `r paste(fly$description)`; **FlyBase ID:** [`r paste(fly$flybase)`](http://flybase.org/reports/`r paste(fly$flybase)`)
 **Sampling rate:** `r paste(experiment$sample_rate)`Hz
 ```{r sr_condition, echo=FALSE}
@@ -102,41 +102,41 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
         sequence$histocolor[i]="red"
         }
       
-      #only look at period data
+      ##only look at period data
       temp  <- rawdata[rawdata$period == i, ]
-      keeps = c("a_pos","torque")
-      period.data[[i]] <- temp[keeps] #list only position and torque data by period
+      keeps = c("a_pos","fly")
+      period.data[[i]] <- temp[keeps] #list only arena position and fly behavior data by period
       
       if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotorR"||sequence$type[i]=="optomotorL")
       {
-        ## plot the torque and position time traces
-        trq_pos_traces(temp)
+        ## plot the fly behavior and arena position time traces
+        fly_pos_traces(temp)
       }
 
-      #Calculate period histograms
-      #torque
-      trqhistos[[i]] <- ggplot(data=temp, aes_string(temp$torque)) +
+      ##Calculate period histograms
+      #fly behavior
+      flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
         geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-        labs(x="torque [arb units]", y="frequency") +
-        xlim(maxtorque) +
+        labs(x="Torque [arb units]", y="frequency") +
+        xlim(maxfly) +
         ggtitle(paste(flyname, "Period", i))
       
-      #position
+      #arena position
       if(sequence$type[i]=="fs"||sequence$type[i]=="color")
       {
         poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
           geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
-          labs(x="position [degrees*10]", y="frequency") +
+          labs(x="Arena Position [degrees*10]", y="frequency") +
           xlim(-1800,1800) +
           ggtitle(paste(flyname, "Period", i))
       }
+      
       
       ##calculate PIs
       ##create data.frame for adding PIs if it doesn't eist, yet
       if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))}
       
-      #for position
-      if(sequence$type[i]=="fs"||sequence$type[i]=="color")
+      if(sequence$type[i]=="fs"||sequence$type[i]=="color") #for arena position
       {
         t1 = sum(abs(temp$a_pos) >= 450 & abs(temp$a_pos) <= 1350)
         t2 = nrow(temp)-t1
@@ -145,10 +145,11 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
         if(l==1){PIprofile[1,i]=sequence$lambda[i]}
       } else if (sequence$type[i]=="yt" || sequence$type[i]=="sw_blue" || sequence$type[i]=="sw_green") #calculate torque PIs
       {
-        t1 = sum(temp$torque >= 0)
+        table1 <- table(sign(temp$fly)) 
+        t1 = table1[2]
         t2 = nrow(temp)-t1
         sequence$lambda[i] = (t1-t2)/(t1+t2)
-        if (sequence$contingency[i] == 'positive_torque'){sequence$lambda[i]=-sequence$lambda[i]}
+        if (sequence$contingency[i] == 'right_torque'){sequence$lambda[i]=-sequence$lambda[i]}
         if(l==1){PIprofile[1,i]=sequence$lambda[i]}
       }
     } #for Number of Periods
@@ -156,16 +157,16 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
 ```
 
 # Histograms
-## Torque Histograms
+## Fly Behavior Histograms
 
-```{r TorqueHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
+```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
     
-    ## plot position and torque histograms ##
-    #torque
-    trqhistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$torque)) + 
+    ## plot position and fly histograms ##
+    #fly behavior
+    flyhistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$fly)) + 
       geom_histogram(binwidth=3) + 
       labs(x="torque [arb units]", y="frequency") + 
-      xlim(-maxtorque) +
+      xlim(-maxfly) +
       ggtitle(paste(flyname, "total"))
     
     #position
@@ -176,24 +177,87 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
       ggtitle(paste(flyname, "total"))
     
     ##write histograms
-    #torque
-    multiplot(plotlist = trqhistos, cols=round(NofPeriods/5))
+    #fly behavior
+    multiplot(plotlist = flyhistos, cols=round(NofPeriods/5))
 ```
 
-## Position Histograms
+## Arena Position Histograms
     
 ```{r PositionHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
     multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5))
 ```
 
+<!-- Computing optomotor data if they are present -->
+
+```{r om, echo=FALSE}
+om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are optomotor periods
+```
+
+`r if (om) '# Optomotor evaluations'`
+`r if (om) '## Optomotor traces (right/left)'`
+
+```{r OptomotorTraces, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+
+### extract optomotor traces and generate dataframe for right (clockwise) turning arena
+rightOMperiods=which(grepl("optomotorR", sequence$type)) #collect the right turning OM periods
+rightOMdata<-filter(rawdata, rawdata$period %in% rightOMperiods) #extract only right turning arena periods
+rightOMdata <- rightOMdata %>% select(-c(a_pos,date)) #drop unnecessary columns
+rightOMdata$time=ave(rightOMdata$period, rightOMdata$period, FUN=seq_along) #match the time values to start at each period start
+rightOMdata$time=(rightOMdata$time-1)*50 #make 20Hz data into ms time scale
+rightOMdata$period=as.factor(rightOMdata$period)
+ggplot(data = rightOMdata, aes(x=time, y=fly)) + 
+  geom_line(aes(group=period, colour=period), size=1) + 
+  geom_smooth(method="loess", span = 0.1) +
+  ylab("Optomotor Resoponse [rel. units]")+ 
+  xlab("Time [ms]") + 
+  ggtitle(paste("Right (clockwise) arena rotations -", flyname))
+
+### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
+leftOMperiods=which(grepl("optomotorL", sequence$type)) #collect the left turning OM periods
+leftOMdata<-filter(rawdata, rawdata$period %in% leftOMperiods)  #extract only left turning arena periods
+leftOMdata <- leftOMdata %>% select(-c(a_pos,date))  #drop unnecessary columns
+leftOMdata$time=ave(leftOMdata$period, leftOMdata$period, FUN=seq_along) #match the time values to start at each period start
+leftOMdata$time=((leftOMdata$time)*50)+max(rightOMdata$time) #make 20Hz data into ms time scale, starting after right turning data
+leftOMdata$period=as.factor(leftOMdata$period)
+ggplot(data = leftOMdata, aes(x=time, y=fly)) + 
+  geom_line(aes(group=period, colour=period), size=1) + 
+  geom_smooth(method="loess", span = 0.1) +
+  ylab("Optomotor Resoponse [rel. units]")+ 
+  xlab("Time [ms]") +
+  ggtitle(paste("Left (counter-clockwise) arena rotations -", flyname))
+
+### generate averaged optomotor responses ovr both rotation directions
+tempOMdata=rbind(rightOMdata,leftOMdata) #combine left and right OMdata in one dataframe
+tempOMdata=aggregate(tempOMdata$fly,FUN=mean,by=list(tempOMdata$time)) #average across periods
+colnames(tempOMdata) <- c("time", as.character(flyname)) #set dataframe names
+
+if(!exists("OMdata"))
+{
+  OMdata=tempOMdata
+} else {
+  OMdata[[as.character(flyname)]]=tempOMdata[[as.character(flyname)]]
+}
+```
+
+`r if (om) '## Averaged optomotor response'`
+
+```{r OptomotorAverage, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+
+ggplot(data=OMdata, aes(x=OMdata$time, y=OMdata[[as.character(flyname)]])) + 
+  geom_line() +
+  ylab("Optomotor Resoponse [rel. units]")+ 
+  xlab("Time [ms]")
+
+```
+
 # Power spectrum and spectrogram
 
 ```{r spectra, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8}
-    meanspec(rawdata$torque, f = down_sample_rate, wl = 600) #plot mean power spectrum for each fly
+    meanspec(rawdata$fly, f = down_sample_rate, wl = 600) #plot mean power spectrum for each fly
     title(paste("Torque-Powerspectrum", flyname))
-    spectro(rawdata$torque, f = down_sample_rate, wl=600) #plot spectrogram for each fly
+    spectro(rawdata$fly, f = down_sample_rate, wl=600) #plot spectrogram for each fly
     title(paste("Torque-Spectrogram", flyname))
-    speclist[[l]] = as.data.frame(meanspec(rawdata$torque, f = down_sample_rate, wl = 600, plot = FALSE)) #collect each spectrum for later averaging
+    speclist[[l]] = as.data.frame(meanspec(rawdata$fly, f = down_sample_rate, wl = 600, plot = FALSE)) #collect each spectrum for later averaging
 ```
 
 # Learning and avoidance scores

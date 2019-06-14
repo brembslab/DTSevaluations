@@ -1,14 +1,14 @@
 ################### Plotting functions for DTS data ######################
 
-######## Plot torque and position data for each period ########
+######## Plot fl behavior and position data for each period ########
 
-trq_pos_traces <- function(temp)
+fly_pos_traces <- function(temp)
 {
   ##modify a_Pos to introduce gaps between -180° and 180°
   pos <- temp$a_pos
   for(p in 2:nrow(temp))
   {
-    if (abs(as.numeric(pos[p]))>1770 && sign(as.numeric(pos[p]))!=sign(as.numeric(pos[p-1]))) {pos[p-1]="NA"}
+    if (abs(as.numeric(pos[p]))>1750 && sign(as.numeric(pos[p]))!=sign(as.numeric(pos[p-1]))) {pos[p-1]="NA"}
   }
   par(mar=c(5, 4, 4, 4) + 0.1)
   traces <- plot(x = temp$time, y = temp$a_pos, type = "n", axes=FALSE, xaxs = "i", yaxs = "i", ylim=c(-1800,1800), ylab = "",xlab="")
@@ -18,7 +18,7 @@ trq_pos_traces <- function(temp)
     par(new=TRUE)
   plot(x = temp$time, y = pos, type = "l", col="red3", xaxs = "i", yaxs = "i", ylim=c(-1800,1800), ylab = "position[arb.units]",xlab="time [ms]")
     par(new=TRUE)
-  plot(x = temp$time, temp$torque, type = "l", col="blue", xaxs = "i", ylim=maxtorque, main = paste("Fly Traces", flyname, "Period", i), axes=F, xlab=NA, ylab="")
+  plot(x = temp$time, temp$fly, type = "l", col="blue", xaxs = "i", ylim=maxfly, main = paste("Fly Traces", flyname, "Period", i), axes=F, xlab=NA, ylab="")
   lines(c(temp$time[1],temp$time[nrow(temp)]),c(0,0),type="l",lty=1,lwd=1, col="black")
   axis(4)
   mtext("torque [arb_units]", side = 4, line = 3)
@@ -30,11 +30,11 @@ dytraces <- function(rawdata)
 {
   traces <- dygraph(rawdata, main = paste("Time Traces", flyname)) %>%
     dySeries("a_pos", label = "position", color = "darkred") %>%
-    dySeries("torque", axis = 'y2', color = "blue") %>%
+    dySeries("fly", axis = 'y2', color = "blue") %>%
     dyAxis("x", drawGrid = FALSE) %>%
     dyAxis("y", label = "Position [arb_units]", valueRange = c(-1800,1800)) %>%
     dyOptions(gridLineColor = "lightgrey") %>%
-    dyAxis("y2", label = "Torque [arb_units]", independentTicks = TRUE, valueRange = maxtorque, drawGrid = FALSE) %>%
+    dyAxis("y2", label = "Torque [arb_units]", independentTicks = TRUE, valueRange = maxfly, drawGrid = FALSE) %>%
     dyOptions(includeZero = TRUE) %>%
     dyRangeSelector()
 
@@ -71,6 +71,7 @@ multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL)
     }
   }
 }
+#source: http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
 
 ############ Function to annotate plots after stats #########
 
