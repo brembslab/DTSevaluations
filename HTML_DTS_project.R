@@ -192,7 +192,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     xlim(-1800,1800) +
     ggtitle("Pooled Position Histogram")
 
-} else {print("You have selected files with differing metadata")}
+} else stop("You have selected files with differing metadata. Please check your DTS files for consistency!")
 
 ###Collect the data from each group in their respective lists and empty the variables
 

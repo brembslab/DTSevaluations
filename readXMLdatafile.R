@@ -120,14 +120,13 @@ for (l in 1:length(xml_list))
     ##extract meta-data
     experiment <- singleflymetadata[[4]]
     sequence <- singleflymetadata[[6]]
-    flymetadata <- c(as.vector(experiment$duration),
-                    as.vector(experiment$sample_rate),
+    flymetadata <- c(as.vector(as.numeric(as.character(experiment$duration))),
+                    as.vector(as.numeric(as.character(experiment$sample_rate))),
                     as.vector(experiment$arena_type),
                     as.vector(experiment$meter_type),
                     as.vector(sequence$type),
                     as.vector(as.numeric(as.character(sequence$duration))),
                     as.vector(sequence$outcome),
-                    as.vector(sequence$pattern),
                     as.vector(sequence$coup_coeff))
     if(l==1){
       metadata<-data.frame(flymetadata)}else{
