@@ -187,7 +187,7 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
     multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5))
 ```
 
-<!-- Computing optomotor data if they are present -->
+<!-- Evaluate optomotor data if they are present -->
 
 ```{r om, echo=FALSE}
 om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are optomotor periods
@@ -247,6 +247,50 @@ ggplot(data=OMdata, aes(x=OMdata$time, y=OMdata[[as.character(flyname)]])) +
   geom_line() +
   ylab("Optomotor Resoponse [rel. units]")+ 
   xlab("Time [ms]")
+
+```
+
+`r if (om) '## Further optomotor evaluations'`
+
+```{r moreOptomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+
+###generate traces to fit nonlinear model
+# Find the midpoint in left and right turning in averaged traces (plotOM)
+OMmidpoint = plotOM$time[nrow(plotOM)]/2
+
+#right turning traces
+x=plotOM$time[plotOM$time<=OMmidpoint]                       #time
+y=plotOM$means[plotOM$time<=OMmidpoint]+abs(plotOM$means[1]) #mean right OM response normalized to start from zero
+m<-nls(y~a*x/(b+x))                                          #use Michaelis-Menten to fit the data
+right=coef(m)                                                #put the right turning coefficients in a vector
+
+#left turning traces
+x=plotOM$time[plotOM$time>OMmidpoint]                        #time
+x=x-x[1]                                                     #set time to start from zero
+y=-plotOM$means[plotOM$time>OMmidpoint]                      #mean left OM response
+y=y+abs(y[1])                                                #normalized to start from zero
+m<-nls(y~a*x/(b+x))                                          #use Michaelis-Menten to fit the data
+left=coef(m)                                                 #put the left turning coefficients in a vector
+
+#calculate averages and asymmetries
+aveOMcoeff=(right+left)/2                                    #mean asymptote and halfmaximal time
+aveOMcoeff[2]=aveOMcoeff[2]/1000                             #halfmaximal time in seconds
+OMasym=(right-left)/(right+left)                             #asymmetry index
+
+#collect coefficients for plotting and export
+tempOMparams <- as.data.frame(rbind(as.numeric(aveOMcoeff))) #gather asymptote and halfmaximal time
+tempOMparams$v3 = OMasym[1]                                  #add asymptote asymmetry index
+names(tempOMparams) = c("asymptote", "halfmax_time","AI")    #column names
+rownames(tempOMparams)[1]=as.character(flyname)              #row names
+kable(tempOMparams)                                          #plot table with data
+
+#export coefficients in dataframwe
+if(!exists("OMparams"))
+{
+  OMparams=tempOMparams
+} else {
+  OMparams[as.character(flyname),]=tempOMparams
+}
 
 ```
 
