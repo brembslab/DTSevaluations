@@ -5,6 +5,7 @@ output:
     number_sections: true
     toc: true
     toc_float: true
+    keep_md: FALSE
 ---
 <style type="text/css">
   body .main-container {
@@ -151,13 +152,28 @@ two <- project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2
 
 plotOMparams=ldply(grouped.OMparams, data.frame)    #move the dataframes from each group into a single dataframe
 samplesizes = as.numeric(table(plotOMparams$group)) #determine sample sizes in each group
+OMvariables = head(names(plotOMparams),-1)
+OMtitles = c("Optomotor Magnitude", "Halfmaximal Rise Time", "Asymmetry Index")
 
-if(two) #for two groups
+#for one group without statistics
+if(NofGroups==1)
   {
-    OMvariables = head(names(plotOMparams),-1)
-    OMtitles = c("Optomotor Magnitude", "Halfmaximal Rise Time", "Asymmetry Index")
         for (v in 1:3) {
-           cat(paste("## ", OMtitles[v], sep = ""))
+           cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
+           print(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
+              geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
+              geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+              theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+              samplesizes.annotate(boxes, samplesizes))
+        }
+}
+
+#for two groups with statistics
+if(two)
+  {
+        for (v in 1:3) {
+           cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
             utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$p.value, 3) #compare the two groups with a U-test and collect p-value
             w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$statistic, 3)
             #compute effect size Cohen's D
