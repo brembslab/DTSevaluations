@@ -53,7 +53,8 @@ grouped.spectra <- list()     #Power spectra in a list of length NofGroups
 grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of length NofPeriods
 
 exp_groups <- list()    #Individual fly names in each group for display in project evaluation
-grouped.OMdata <-list() #Averaged optomotor data for each group
+grouped.OMdata <-list() #Averaged optomotor data traces for each group
+grouped.OMparams <-list() #Extracted optomotor parameters for each group
 
 for(x in 1:NofGroups)
 {
@@ -101,10 +102,10 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     poshistos <- list()
     flyhistos <- list()
     
-#### call RMarkdown for single fly evaluations ################################################
-    rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""), 
-                      output_file = paste(flyname,"descr_anal.html", sep="_"), 
-                      output_dir = evaluation.path)
+#### call RMarkdown for single fly evaluations ###############################################
+    rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
+                      output_file = paste(flyname,"descr_anal.html", sep="_"),            ######
+                      output_dir = evaluation.path)                                      ######
 #### end RMarkdown for single fly evaluations ################################################
     
     ##move PIs to multi-experiment data.frame
@@ -121,17 +122,20 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
 
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
   
-  # derive means and SDs for optomotor data in the group
+  # derive means and SDs for optomotor data in the group and collect extracted OM parameters
 if(any(grepl("optomotor", sequence$type)==TRUE)){
   OMdata$means=rowMeans(OMdata[-1])
   OMdata$sd=rowSds(OMdata[-1])
   OMdata$group=project.data[["resources"]][[x]][["name"]]
   grouped.OMdata[[x]] <- OMdata #save optomotor data to groupwise list
-  rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group 
+  rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group
+  OMparams$group=project.data[["resources"]][[x]][["name"]]
+  grouped.OMparams[[x]] <- OMparams #save extracted optomotor parameters to groupwise list
+  rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
 }
   
 
-  ########### plot graphs for all experiments #####################
+  ########### plot rawdata graphs for all experiments #####################
   
   ##pool all data by period
   
