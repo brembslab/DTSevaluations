@@ -187,7 +187,7 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
     multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5))
 ```
 
-<!-- Computing optomotor data if they are present -->
+<!-- Evaluate optomotor data if they are present -->
 
 ```{r om, echo=FALSE}
 om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are optomotor periods
@@ -247,6 +247,54 @@ ggplot(data=OMdata, aes(x=OMdata$time, y=OMdata[[as.character(flyname)]])) +
   geom_line() +
   ylab("Optomotor Resoponse [rel. units]")+ 
   xlab("Time [ms]")
+
+```
+
+`r if (om) '## Further optomotor evaluations'`
+
+```{r moreOptomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+
+###generate traces to fit nonlinear model
+# Find the midpoint in left and right turning in averaged traces (OMdata)
+OMmidpoint = OMdata$time[nrow(OMdata)]/2
+
+#right turning traces
+x1=OMdata$time[OMdata$time<=OMmidpoint]                                   #time
+rOMlow=abs(min(OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint])) #find lowest value in the right turning trace
+y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]+rOMlow         #mean right OM response normalized to positive values
+m<-nls(y~a*x1/(b+x1))                                                     #use Michaelis-Menten to fit the data
+right=coef(m)                                                             #put the right turning coefficients in a vector
+
+#left turning traces
+x1=OMdata$time[OMdata$time>OMmidpoint]                                    #time
+x1=x1-x1[1]                                                               #set time to start from zero
+lOMlow=abs(min(OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]))  #find lowest value in the left turning trace
+y=-OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]+lOMlow         #mean left OM response normalized to positive values
+m<-nls(y~a*x1/(b+x1))                                                     #use Michaelis-Menten to fit the data
+left=coef(m)                                                              #put the left turning coefficients in a vector
+
+###calculate averages and asymmetries to three significant digits
+  #bring left and right asymptotes back to actual values
+right[1]=right[1]-rOMlow
+left[1]=left[1]-lOMlow
+aveOMcoeff=signif((right+left)/2, 3)       #mean asymptote and halfmaximal time
+aveOMcoeff[2]=signif(aveOMcoeff[2]/1000, 3)                  #halfmaximal time in seconds
+OMasym=signif((right-left)/(right+left), 3)                  #asymmetry index
+
+###collect coefficients for plotting and export
+tempOMparams <- as.data.frame(rbind(as.numeric(aveOMcoeff))) #gather asymptote and halfmaximal time
+tempOMparams$v3 = OMasym[1]                                  #add asymptote asymmetry index
+names(tempOMparams) = c("asymptote", "halfmax_time","AI")    #set column names
+rownames(tempOMparams)[1]=as.character(flyname)              #set row names to flynames
+kable(tempOMparams)                                          #plot table with data
+
+###collect all coefficients in dataframe for the group
+if(!exists("OMparams"))
+{
+  OMparams=tempOMparams
+} else {
+  OMparams[as.character(flyname),]=tempOMparams
+}
 
 ```
 
