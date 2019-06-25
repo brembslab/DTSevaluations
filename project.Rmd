@@ -38,6 +38,7 @@ library(BayesFactor)
 library(genefilter)
 library(seewave)
 library(lubridate)
+library(dabestr)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -375,8 +376,6 @@ stat <- !is.null(project.data[["statistics"]]) ###determine if stats are request
 
 ```{r StatPrep, eval=stat, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
 learningscore=project.data[["statistics"]][["learning-score"]][["data"]] #get the PI that is going to be tested
-if(!om){samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))}
-
 #create new dataframe with only the chosen PI values
 PIstat <- list()
 for(x in 1:NofGroups){PIstat[[x]] <- grouped.PIprofiles[[x]][[learningscore]]}
@@ -384,6 +383,8 @@ PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind))) #convert PI list to data.
 colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name')) #add group names as column names to PIstat
 #compute standard deviations
 SDs<-as.numeric(apply(PIstat, 2, function(x) sd(na.omit(x))))
+if(!om){samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))}
+
 ```
 
 ```{r WilcoxonSetup, echo=FALSE}
@@ -490,3 +491,12 @@ cat("## Statistical tests between two groups")
 
 ```
 
+```{r estimationstats, eval=two, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("## Estimation statistics")
+
+PIest=na.omit(melt(PIstat)) #create a dataframe that fits estimation stat requirements and remove missing PIs
+unpaired_median_diff <- dabest(PIest, variable, value, idx = groupnames, paired = FALSE, func = median) #create estimation results list
+print(plot(unpaired_median_diff)) #plot results
+
+
+```
