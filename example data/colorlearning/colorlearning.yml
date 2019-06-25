@@ -13,27 +13,6 @@ author:
 - lastName: Brembs
 - id: 0000-0001-7824-7650
 resources:
-- name: rut
-  title: rutabaga mutant
-  description: experimental
-  data:
-  - rut_color_01.xml
-  - rut_color_02.xml
-  - rut_color_03.xml
-  - rut_color_04.xml
-  - rut_color_05.xml
-  - rut_color_06.xml
-  - rut_color_07.xml #didn't fly well
-  - rut_color_08.xml
-  - rut_color_09.xml
-  - rut_color_10.xml
-  - rut_color_11.xml
-  - rut_color_12.xml
-  - rut_color_13.xml
-  - rut_color_14.xml
-  - rut_color_15.xml
-  - rut_color_16.xml
-  #-rut_color_17.xml #data corrupted
 - name: WTB
   title: wild type Berlin
   description: control
@@ -64,6 +43,27 @@ resources:
   - wtb_color_24.xml
   - wtb_color_25.xml
   - wtb_color_26.xml
+- name: rut
+  title: rutabaga mutant
+  description: experimental
+  data:
+  - rut_color_01.xml
+  - rut_color_02.xml
+  - rut_color_03.xml
+  - rut_color_04.xml
+  - rut_color_05.xml
+  - rut_color_06.xml
+  - rut_color_07.xml #didn't fly well
+  - rut_color_08.xml
+  - rut_color_09.xml
+  - rut_color_10.xml
+  - rut_color_11.xml
+  - rut_color_12.xml
+  - rut_color_13.xml
+  - rut_color_14.xml
+  - rut_color_15.xml
+  - rut_color_16.xml
+  #-rut_color_17.xml #data corrupted  
 statistics:
   significance-levels:
     - 0.005
