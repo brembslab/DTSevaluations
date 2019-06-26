@@ -48,11 +48,12 @@ source("DTS_plotfunctions.R")
 # Metadata
 
 **Date and time of the experiment:** `r paste(experiment$dateTime)`  
+**Raw data file (XML):** `r paste('<a href="../', basename(xml_name), '">', flyname, '</a>', sep = "")`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment description:** `r paste(experiment$description)`  
 **Experiment duration:** `r paste(experiment$duration)`s  
 **Arena type:** `r paste(experiment$arena_type)`; **Measurement device:** `r paste(experiment$meter_type)`  
-**Fly description:** `r paste(fly$description)`; **FlyBase ID:** [`r paste(fly$flybase)`](http://flybase.org/reports/`r paste(fly$flybase)`)
+**Fly description:** `r paste(fly$description)`; **FlyBase ID:** [`r paste(fly$flybase)`](http://flybase.org/reports/`r paste(fly$flybase)`)  
 **Sampling rate:** `r paste(experiment$sample_rate)`Hz
 ```{r sr_condition, echo=FALSE}
 sampleratecondition <- round(real_sample_rate)>20
