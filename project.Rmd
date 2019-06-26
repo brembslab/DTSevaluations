@@ -50,6 +50,7 @@ source("DTS_plotfunctions.R")
 
 # Metadata
 
+**Project file (YAML):** `r paste('<a href="../', basename(project.file), '">', project.data$title, '</a>', sep = "")`  
 **Description:** `r paste(project.data$description)`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
