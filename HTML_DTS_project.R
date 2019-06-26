@@ -21,6 +21,7 @@ library(lubridate)
 library(rmarkdown)
 library(markdown)
 library(knitr)
+library(dabestr)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
