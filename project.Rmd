@@ -279,6 +279,7 @@ len = as.integer(8)
 ## Performance Index bar plot with SEM:
 
 ```{r PIbar, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8}
+
 PIplots <- list()
 for(x in 1:NofGroups)
   {
@@ -307,7 +308,7 @@ for(x in 1:NofGroups)
               theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]") + 
-              theme(aspect.ratio=4/NofPeriods)
+              theme(strip.text = element_text(hjust = -0.05), strip.background = element_blank(), aspect.ratio=4/NofPeriods)
   }
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
@@ -319,7 +320,7 @@ for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
   PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
-    PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
+    PIplots[[x]] <- ggplot(melt(PIprofile), aes(,, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
               geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
