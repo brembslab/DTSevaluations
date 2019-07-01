@@ -1,7 +1,6 @@
 #####################################################################################################################################
 ################## R-script to read YAML DTS project files, visualize and statistically evaluate data. Reports in HTML ##############
 #####################################################################################################################################
-
 library(ggplot2)
 library(tidyr)
 library(dygraphs)
@@ -22,7 +21,8 @@ library(rmarkdown)
 library(markdown)
 library(knitr)
 library(dabestr)
-
+library(cowplot)
+library(ggpubr)
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
@@ -249,7 +249,7 @@ if(NofGroups>2){}
 ###### continue for all projects with two groups
 
 #### call RMarkdown for project evaluations ################################################
-rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""), 
+rmarkdown::render(paste(start.wd,"/project - Kopie.Rmd", sep=""), 
                   output_file = paste(project.data$name,"html", sep = "."), 
                   output_dir = evaluation.path)
 #### end RMarkdown for project evaluations #################################################

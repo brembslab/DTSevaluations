@@ -264,10 +264,21 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
         theme(axis.text.y = element_text(size=12))+ ylab("mean rel. Power") + xlab("Frequency [Hz]"))
 ```
 
+
+# Get graph dimension
+
+```{r Grapghdim, eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 6}
+if(lengths(project.data["resources"]) == 1){
+len = as.integer(5)
+} else {
+len = as.integer(8)
+}
+```
+
 # Performance Indices
 ## Performance Index bar plot with SEM:
 
-```{r PIbar, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8}
+```{r PIbar, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8}
 PIplots <- list()
 for(x in 1:NofGroups)
   {
@@ -303,7 +314,7 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 
 ## Performance Index box&dotplot with notches:
 
-```{r BoxWithNotch, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8}
+```{r BoxWithNotch, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 6}
 for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
@@ -326,7 +337,7 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 
 ## Performance Index box&dotplot without notches:
 
-```{r BoxNoNotch, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8}
+```{r BoxNoNotch, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.height = len, fig.width = 6, fig.align = "center"}
 for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
@@ -342,13 +353,13 @@ for(x in 1:NofGroups)
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ xlab("Experiment Sequence") + 
               theme(aspect.ratio=4/NofPeriods)
-  }      
+}      
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 ## Performance Index Violin Plot:
 
-```{r Violin, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8}
+```{r Violin, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8}
 
 for(x in 1:NofGroups)
   {
@@ -390,6 +401,11 @@ if(!om){samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x)))
 
 ```{r WilcoxonSetup, echo=FALSE}
 wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1 ###determine if we need to do single tests
+if(NofGroups == 1){
+stat = as.logical("FALSE")
+} else {
+stat = as.logical("TRUE")
+}
 ```
 
 ```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
