@@ -316,11 +316,12 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ## Performance Index box&dotplot with notches:
 
 ```{r BoxWithNotch, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 6}
+
 for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
   PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
-    PIplots[[x]] <- ggplot(melt(PIprofile), aes(,, value)) +
+    PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
               geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
