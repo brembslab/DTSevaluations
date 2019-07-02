@@ -115,7 +115,7 @@ om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are opt
 
  #plot averaged OM traces
 
-  print(ggplot(plotOM, aes(x=time, y=means, group = group)) + 
+  print(ggplot(plotOM, aes(x=time/1000, y=means, group = group)) + 
         geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
         scale_fill_manual(values = boxcolors) +
         geom_line(aes(colour = group), size = 1) + 
@@ -136,7 +136,9 @@ om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are opt
             panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
           theme(axis.text.y = element_text(size=12))+
           ylab("Optomotor Response [rel. units]") + 
-          xlab("Time [ms]"))
+          xlab("Time [s]")+
+          annotate("text", -Inf, Inf, label = "Rigth turning", hjust = -0.1, vjust = 1.5)+
+          annotate("text", -Inf, -Inf, label = "Left turning", hjust =-0.1, vjust = -0.9))
 
 ```
 

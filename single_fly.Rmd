@@ -206,12 +206,16 @@ rightOMdata <- rightOMdata %>% select(-c(a_pos,date)) #drop unnecessary columns
 rightOMdata$time=ave(rightOMdata$period, rightOMdata$period, FUN=seq_along) #match the time values to start at each period start
 rightOMdata$time=(rightOMdata$time-1)*50 #make 20Hz data into ms time scale
 rightOMdata$period=as.factor(rightOMdata$period)
-ggplot(data = rightOMdata, aes(x=time, y=fly)) + 
+ggplot(data = rightOMdata, aes(x=time/1000, y=fly)) + 
   geom_line(aes(group=period, colour=period), size=1) + 
   geom_smooth(method="loess", span = 0.1) +
   ylab("Optomotor Resoponse [rel. units]")+ 
-  xlab("Time [ms]") + 
-  ggtitle(paste("Right (clockwise) arena rotations -", flyname))
+  xlab("Time [s]") + 
+  ggtitle(paste("Right (clockwise) arena rotations -", flyname)) +
+  geom_hline(yintercept = 0) +
+  theme_classic() + 
+  annotate("text", -Inf, Inf, label = "Right turning", hjust = -0.1, vjust = 1.5)+
+  annotate("text", -Inf, -Inf, label = "Left turning", hjust =-0.1, vjust = -0.9)
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
 leftOMperiods=which(grepl("optomotorL", sequence$type)) #collect the left turning OM periods
@@ -220,12 +224,16 @@ leftOMdata <- leftOMdata %>% select(-c(a_pos,date))  #drop unnecessary columns
 leftOMdata$time=ave(leftOMdata$period, leftOMdata$period, FUN=seq_along) #match the time values to start at each period start
 leftOMdata$time=((leftOMdata$time)*50)+max(rightOMdata$time) #make 20Hz data into ms time scale, starting after right turning data
 leftOMdata$period=as.factor(leftOMdata$period)
-ggplot(data = leftOMdata, aes(x=time, y=fly)) + 
+ggplot(data = leftOMdata, aes(x=time/1000, y=fly)) + 
   geom_line(aes(group=period, colour=period), size=1) + 
   geom_smooth(method="loess", span = 0.1) +
   ylab("Optomotor Resoponse [rel. units]")+ 
-  xlab("Time [ms]") +
-  ggtitle(paste("Left (counter-clockwise) arena rotations -", flyname))
+  xlab("Time [s]") +
+  ggtitle(paste("Left (counter-clockwise) arena rotations -", flyname)) +
+  geom_hline(yintercept = 0) +
+  theme_classic() + 
+  annotate("text", -Inf, Inf, label = "Right turning", hjust = -0.1, vjust = 1.5)+
+  annotate("text", -Inf, -Inf, label = "Left turning", hjust =-0.1, vjust = -0.9)
 
 ### generate averaged optomotor responses ovr both rotation directions
 tempOMdata=rbind(rightOMdata,leftOMdata) #combine left and right OMdata in one dataframe
@@ -244,10 +252,14 @@ if(!exists("OMdata"))
 
 ```{r OptomotorAverage, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
-ggplot(data=OMdata, aes(x=OMdata$time, y=OMdata[[as.character(flyname)]])) + 
+ggplot(data=OMdata, aes(x=OMdata$time/1000, y=OMdata[[as.character(flyname)]])) + 
   geom_line() +
   ylab("Optomotor Resoponse [rel. units]")+ 
-  xlab("Time [ms]")
+  xlab("Time [s]") +
+  geom_hline(yintercept = 0) +
+  theme_classic() + 
+  annotate("text", -Inf, Inf, label = "Right turning", hjust = -0.1, vjust = 1.5)+
+  annotate("text", -Inf, -Inf, label = "Left turning", hjust =-0.1, vjust = -0.9)
 
 ```
 
