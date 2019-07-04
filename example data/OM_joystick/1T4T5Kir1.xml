@@ -16,17 +16,37 @@
 		<description>Stripes 1</description>
 		<flybase />
 	</fly>
-	<experiment type="Optomotor">
+	<experiment type="optomotorR">
 		<dateTime>2019-05-21T14:29:58.348000</dateTime>
-		<duration>10</duration>
+		<duration>600</duration>
 		<description>"Optmototorics on platform (open loop)"</description>
 		<sample_rate>100</sample_rate>
 		<arena_type>motor</arena_type>
-		<meter_type />
+		<meter_type>Joystick</meter_type>
 	</experiment>
 </metadata>
-<sequence periods="7">
-<period number="1"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="2"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="3"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="4"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="5"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="6"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="7"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="8"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="9"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="10"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="11"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="12"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="13"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="14"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="15"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="16"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="17"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="18"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="19"><type>OptomotoL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period><period number="20"><type>OptomotoR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern></period></sequence>
+<sequence periods="20">
+<period number="1"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="2"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="3"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="4"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="5"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="6"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="7"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="8"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="9"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="10"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="11"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="12"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="13"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="14"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="15"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="16"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="17"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="18"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="19"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+<period number="20"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>4</pattern><contingency></contingency></period>
+</sequence>
 <timeseries>
 	<CSV_descriptor>
 		<delimiter>tab</delimiter>
@@ -35,12 +55,12 @@
 	</CSV_descriptor>
 	<variables>
 		<variable number="1">
-		    <type>fly</type>		
+		    <type>j_pos</type>		
 			<var_type>float32</var_type>
 			<unit>arb_unit</unit>
 		</variable>	
 		<variable number="2">
-		    <type>arena</type>		
+		    <type>a_pos</type>		
 			<var_type>float32</var_type>
 			<unit>arb_unit</unit>
 		</variable>
@@ -60005,6 +60025,58 @@
 -1.350098 -0.222168 599470 20
 -1.357422 -0.222168 599480 20
 -1.352539 -0.222168 599490 20
--1.347656 -0.222168 599500 20</csv_data>
+-1.347656 -0.222168 599500 20
+-0.935059 0.065918 599510 20
+-0.959473 -0.297852 599520 20
+-0.961914 -0.270996 599530 20
+-0.959473 -0.244141 599540 20
+-0.959473 -0.214844 599550 20
+-0.944824 -0.168457 599560 20
+-0.937500 -0.114746 599570 20
+-0.930176 -0.061035 599580 20
+-0.922852 -0.007324 599590 20
+-0.908203 0.021973 599600 20
+-0.935059 0.065918 599610 20
+-0.952148 -0.595703 599620 20
+-0.957031 -0.593262 599630 20
+-0.952148 -0.593262 599640 20
+-0.954590 -0.593262 599650 20
+-0.954590 -0.593262 599660 20
+-0.954590 -0.590820 599670 20
+-0.947266 -0.593262 599680 20
+-0.957031 -0.593262 599690 20
+-0.952148 -0.590820 599700 20
+-0.942383 -0.590820 599710 20
+-0.954590 -0.590820 599720 20
+-0.957031 -0.593262 599730 20
+-0.947266 -0.593262 599740 20
+-0.942383 -0.593262 599750 20
+-0.944824 -0.595703 599760 20
+-0.942383 -0.590820 599770 20
+-0.935059 -0.593262 599780 20
+-0.932617 -0.593262 599790 20
+-0.932617 -0.593262 599800 20
+-0.930176 -0.590820 599810 20
+-0.927734 -0.593262 599820 20
+-0.932617 -0.593262 599830 20
+-0.937500 -0.593262 599840 20
+-0.937500 -0.590820 599850 20
+-0.942383 -0.590820 599860 20
+-0.947266 -0.593262 599870 20
+-0.942383 -0.593262 599880 20
+-0.944824 -0.593262 599890 20
+-0.944824 -0.593262 599900 20
+-0.942383 -0.588379 599910 20
+-0.939941 -0.593262 599920 20
+-0.937500 -0.593262 599930 20
+-0.935059 -0.593262 599940 20
+-0.935059 -0.595703 599950 20
+-0.937500 -0.595703 599960 20
+-0.944824 -0.590820 599970 20
+-0.947266 -0.593262 599980 20
+-0.944824 -0.590820 599990 20
+-0.949707 -0.590820 600000 20
+-0.954590 -0.593262 600010 20
+</csv_data>
 </timeseries>
 </DTS_xml>

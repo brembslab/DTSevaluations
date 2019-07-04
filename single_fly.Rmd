@@ -163,19 +163,21 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
 ```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
     
     ## plot position and fly histograms ##
-    #fly behavior
+    # add fly behavior pooled histogram
     flyhistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$fly)) + 
       geom_histogram(binwidth=3) + 
       labs(x="torque [arb units]", y="frequency") + 
       xlim(-maxfly) +
       ggtitle(paste(flyname, "total"))
     
-    #position
-    poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
+    # add pooled position histogram - if there are any fs periods
+    if ('fs' %in% sequence$type) {
+      poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
       geom_histogram(binwidth=10) +
       labs(x="position [degrees*10]", y="frequency") + 
       xlim(-1800,1800) +
       ggtitle(paste(flyname, "total"))
+    }
     
     ##write histograms
     #fly behavior
@@ -185,7 +187,7 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
 ## Arena Position Histograms
     
 ```{r PositionHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
-    multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5))
+    if (!(!'NULL' %in% poshistos)) {multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5))} #only print position histograms if there are any
 ```
 
 <!-- Evaluate optomotor data if they are present -->
@@ -312,10 +314,12 @@ if(!exists("OMparams"))
 # Learning and avoidance scores
 
 ```{r PIs, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8}
-    barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
+    if (!all(is.na(sequence$lambda))) {
+      barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
             xlab="Time [periods]",
             ylab="PI [rel. units]",
             space=0,
             col = as.vector(na.omit(sequence$color)))
+    }
 ```
 

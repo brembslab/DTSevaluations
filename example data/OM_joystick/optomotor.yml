@@ -1,0 +1,66 @@
+---
+experiment:
+    type: Joystick
+    id: none
+    name: optomotorRT4T5test
+    title: optomotorR test of T4/T5 neurons
+    description: optomotorR test of flies with optic lobe neurons T4/T5 silenced by expressing Kir
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: max-vdl
+    description: Max von der Linde
+    firstName: Max
+    lastName: von der Linde
+    id: none
+resources:
+- name: T4/T5 silenced
+  title: T4/T5 neurons silenced
+  description: experimental
+  data:
+  - 1t4t5Kir1.xml
+  - 2t4t5Kir2.xml
+  - 3t4t5Kir1.xml
+  - 4t4t5Kir1.xml
+- name: genetic controls
+  title: heterozygous control flies
+  description: control
+  data:
+  - 1Kirwtb1.xml
+  - 2Kirwtb1.xml
+  - 3Kirwtb1.xml
+  - 4Kirwtb1.xml
+  - 1T4T5wtb1.xml
+  - 2T4T5WTB1.xml
+  - 3T4T5WTB1.xml
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianred1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 12
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #yes
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: two.sided #less, greater, two.sided
+    data: 1 #yes
+mediatype: text/csv/xml
+epid: 245

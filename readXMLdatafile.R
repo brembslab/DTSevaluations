@@ -25,16 +25,22 @@ flyDataImport <- function(xml_name) {
     variables <- xmlToDataFrame(nodes=getNodeSet(flyData,"//timeseries/variables/variable"))
   ##parse the time series raw data
     rawdata <- read.table(text=xmlSApply(flyDataXMLtop[['timeseries']][['csv_data']], xmlValue), col.names=variables$type)
-  ##reset position data to +/-180° [-1800..1796]
-    if (experiment$arena_type=="lightguides"){rawdata$a_pos = rawdata$a_pos-1800}
-    if (experiment$arena_type=="motor"){rawdata$a_pos = round(rawdata$a_pos*0.87890625)}
   ##reset periods to start from 1 of they start from 0
     if (rawdata$period[1]==0){rawdata$period=rawdata$period+1}
-
-  ##change j_pos data from float to integer
-    if(exists("j_pos", rawdata)){
-      rawdata$j_pos = round(rawdata$j_pos*1000)
+  ##reset position data to +/-180° [-1800..1796] for torquemeter experiments
+    if (project.data$experiment$type=="Torquemeter"){
+    if (experiment$arena_type=="lightguides"){rawdata$a_pos = rawdata$a_pos-1800}
+    if (experiment$arena_type=="motor"){rawdata$a_pos = round(rawdata$a_pos*0.87890625)}
     }
+    
+  ##change j_pos data from float to integer and shift to make approx. zero symmetric (needs work!)
+    if(exists("j_pos", rawdata)){
+      rawdata$j_pos = round(rawdata$j_pos*1000)+1100
+    }
+  ##change a_pos data from float to integer in Joystick experiments
+    if(experiment$meter_type=="Joystick"){
+      rawdata$a_pos = round(rawdata$a_pos*1000)
+    }    
   ##replace column name for fly behavior (torque, j_pos) with "fly"
     colnames(rawdata) = gsub("torque", "fly", colnames(rawdata))
     colnames(rawdata) = gsub("j_pos", "fly", colnames(rawdata))
@@ -154,7 +160,7 @@ collect.metadata <-function(singleflydata)
   return(mdata)
 }
 
-##downsample the rawdata using a fixed bin width
+##downsample the rawdata using a fixed bin width (deprecated)
 downsamplebin <- function(rawdata, binsize) {
   
   # create the vectors in which to save the downsampled data
@@ -250,8 +256,9 @@ weightedDownsample20Hz <- function(rawdata, sequence, experiment, NofPeriods) {
             negative_periods=rownames(difference)[difference$deviation==-1] #find the periods with missing values
             rawdataDown$last = with(rawdataDown, ave(last, match(rawdataDown$period, negative_periods), FUN = function(x) ifelse(seq_along(x) == length(x), 2, x))) # "2" marking the last data püoint in an offending period
             copy = as.vector(rawdataDown[is.element(rawdataDown$last, 2),])
-            for (z in length(negative_periods)) {
-              temp.pos=as.numeric(rownames(copy[z,])) #find the rioght position to insert
+            copy$last=NA
+            for (z in 1:length(negative_periods)) {
+              temp.pos=as.numeric(rownames(copy[z,])) #find the right position to insert
               next.pos=temp.pos+1                     #for some reason, R also wants to have the next position as a variable
               rawdataDown <- rbind(rawdataDown[1:temp.pos,], copy[z,], rawdataDown[next.pos:nrow(rawdataDown),]) # duplicate the last data point in the offending periods
               } 
