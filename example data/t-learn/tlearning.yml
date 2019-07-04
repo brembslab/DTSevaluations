@@ -1,17 +1,19 @@
 ---
-name: wtb-t-learning
-type: torquemeter
-title: Wild Type Berlin T-Pattern Learning
-description: Standard T-Pattern learning for the Drosophila Neurogenetics course
+experiment:
+    type: Torquemeter
+    id: SCR_017276
+    name: wtb-t-learning
+    title: Wild Type Berlin T-Pattern Learning
+    description: Standard T-Pattern learning for the Drosophila Neurogenetics course
 licenses:
-- name: ODC-PDDL-1.0
-- uri: http://opendatacommons.org/licenses/pddl
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
 author:
-- name: bjoern-brembs
-- description: Björn Brembs
-- firstName: Björn
-- lastName: Brembs
-- id: 0000-0001-7824-7650
+    name: bjoern-brembs
+    description: Björn Brembs
+    firstName: Björn
+    lastName: Brembs
+    id: 0000-0001-7824-7650
 resources:
 - name: WTB
   title: wild type Berlin

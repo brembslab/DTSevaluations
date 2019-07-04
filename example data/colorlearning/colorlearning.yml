@@ -1,17 +1,19 @@
 ---
-name: wtb-rut-colorlearning
-type: torquemeter
-title: rutabaga vs. wtb in closed-loop color learning
-description: Comparison of rutabaga mutants and wild type 'Berlin' flies in closed-loop blue-green color learning, requiring angle-integration
+experiment:
+    type: Torquemeter
+    id: SCR_017276
+    name: wtb-rut-colorlearning
+    title: rutabaga vs. wtb in closed-loop color learning
+    description: Comparison of rutabaga mutants and wild type 'Berlin' flies in closed-loop blue-green color learning, requiring angle-integration
 licenses:
-- name: ODC-PDDL-1.0
-- uri: http://opendatacommons.org/licenses/pddl
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
 author:
-- name: bjoern-brembs
-- description: Björn Brembs
-- firstName: Björn
-- lastName: Brembs
-- id: 0000-0001-7824-7650
+    name: bjoern-brembs
+    description: Björn Brembs
+    firstName: Björn
+    lastName: Brembs
+    id: 0000-0001-7824-7650
 resources:
 - name: WTB
   title: wild type Berlin

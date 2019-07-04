@@ -1,17 +1,19 @@
 ---
-name: wtb-t-learning-fgroups
-type: torquemeter
-title: Wild Type Berlin T-Pattern Learning
-description: Standard T-Pattern learning for the Drosophila Neurogenetics course
+experiment:
+    type: Torquemeter
+    id: SCR_017276
+    name: wtb-t-learning-fgroups
+    title: Wild Type Berlin T-Pattern Learning
+    description: Standard T-Pattern learning for the Drosophila Neurogenetics course
 licenses:
-- name: ODC-PDDL-1.0
-- uri: http://opendatacommons.org/licenses/pddl
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
 author:
-- name: bjoern-brembs
-- description: Björn Brembs
-- firstName: Björn
-- lastName: Brembs
-- id: 0000-0001-7824-7650
+    name: bjoern-brembs
+    description: Björn Brembs
+    firstName: Björn
+    lastName: Brembs
+    id: 0000-0001-7824-7650
 resources:
 - name: WTB1
   title: wild type Berlin
@@ -55,7 +57,7 @@ statistics:
   two.groups:
     title: several two-sided tests
     description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
-    power: two.sided #first group is tested for being lower than second group (alternatives: greater, two.sided)
-    data: 0 #yes
+    power: two.sided #less, greater, two.sided
+    data: 1 #yes
 mediatype: text/csv/xml
 epid: 245
