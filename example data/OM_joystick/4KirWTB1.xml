@@ -7,9 +7,9 @@
 		<datamodel />
 	</URIs>
 	<experimenter>
-		<firstname>X</firstname>
-		<lastname>X</lastname>
-		<orcid>https://orcid.org/0000-0002-4016-4240</orcid>
+		<firstname>Maximilian</firstname>
+		<lastname>von der Linde</lastname>
+		<orcid>0000-0002-4016-4240</orcid>
 	</experimenter>	
 	<fly type="control">
 		<name>4KirWTB1</name>

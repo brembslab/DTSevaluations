@@ -190,12 +190,14 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     xlim(maxfly) +
     ggtitle("Pooled Torque Histogram")
   
-  #position
+  #position (if there are fs periods)
+  if ('fs' %in% sequence$type) {
   poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
     geom_histogram(binwidth=10) +
     labs(x="position [arb units]", y="frequency") + 
     xlim(-1800,1800) +
     ggtitle("Pooled Position Histogram")
+  }
 
 } else stop("You have selected files with differing metadata. Please check your DTS files for consistency!")
 

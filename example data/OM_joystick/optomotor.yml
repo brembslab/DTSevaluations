@@ -2,9 +2,9 @@
 experiment:
     type: Joystick
     id: none
-    name: optomotorRT4T5test
-    title: optomotorR test of T4/T5 neurons
-    description: optomotorR test of flies with optic lobe neurons T4/T5 silenced by expressing Kir
+    name: optomotorT4T5test
+    title: Optomotor test of T4/T5 neurons
+    description: Platform optomotor test of flies with optic lobe neurons T4/T5 silenced by expressing Kir
 licenses:
     name: ODC-PDDL-1.0
     uri: http://opendatacommons.org/licenses/pddl
@@ -50,17 +50,17 @@ statistics:
     - indianred1
     - plum3
   learning-score:
-    title: PI8
-    description: First test after last training
-    data: 12
+    title:
+    description:
+    data:
   single.groups:
     title: several single group tests against zero
     description: one sided Wilcoxon-Tests and Bayes Factors
-    data: 1 #yes
+    data: 0 #yes
   two.groups:
     title: several two-sided tests
     description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
     power: two.sided #less, greater, two.sided
-    data: 1 #yes
+    data: 0 #yes
 mediatype: text/csv/xml
 epid: 245
