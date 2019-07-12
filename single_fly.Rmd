@@ -36,6 +36,7 @@ library(pwr)
 library(BayesFactor)
 library(genefilter)  # if not available for newest version: setRepositories(addURLs = c(CRANxtras = "http://www.stats.ox.ac.uk/pub/RWin"))
 library(seewave)
+library(zoo)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -228,7 +229,7 @@ ggplot(data = leftOMdata, aes(x=time, y=fly)) +
   xlab("Time [ms]") +
   ggtitle(paste("Left (counter-clockwise) arena rotations -", flyname))
 
-### generate averaged optomotor responses ovr both rotation directions
+### generate averaged optomotor responses over both rotation directions
 tempOMdata=rbind(rightOMdata,leftOMdata) #combine left and right OMdata in one dataframe
 tempOMdata=aggregate(tempOMdata$fly,FUN=mean,by=list(tempOMdata$time)) #average across periods
 colnames(tempOMdata) <- c("time", as.character(flyname)) #set dataframe names
@@ -256,18 +257,28 @@ ggplot(data=OMdata, aes(x=OMdata$time, y=OMdata[[as.character(flyname)]])) +
 
 ```{r moreOptomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
-###generate traces to fit nonlinear model
+###generate traces to fit nonlinear model for parameter estimation
 # Find the midpoint in left and right turning in averaged traces (OMdata)
 OMmidpoint = OMdata$time[nrow(OMdata)]/2
 
 #right turning traces
 x1=OMdata$time[OMdata$time<=OMmidpoint]                     #time
-y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]  #mean right OM response normalized to positive values
+y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]  #mean right OM response
+y=rollapply(y, 20,mean, fill="extend")                      #apply rolling average of 20 data points (1s)
 xy <-sortedXyData(x1,y)                                     #create sortedXYdata object
+
+LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata right turning
+
+#plot(xy)
+#abline(LinMod)
+#LinMod$coefficients[2]
+
+if(abs(LinMod$coefficients[2])<0.0001){                     #if the linear model shows hardly any slope, set asymptote as mean of all values
+  right=c(b0=0, b1=mean(y), lrc=-1000)
+  } else {
 right<-tryCatch(                                            #extract the right turning coefficients into a vector. Set vector to zero for errors
     expr = {
                     right<-NLSstAsymptotic(xy)
-                    return(right)
                      },
     error = function(e){
                       right=c(b0=0, b1=0, lrc=-1000)        #set logarithmic rate constant to -1000 so exp(lrc)=0
@@ -278,17 +289,27 @@ right<-tryCatch(                                            #extract the right t
                    return(right)
                      },
     finally = {}
-)
+)}
 
 #left turning traces
 x1=OMdata$time[OMdata$time>OMmidpoint]                      #time
 x1=x1-x1[1]                                                 #set time to start from zero
-y=OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]   #mean left OM response normalized to positive values
+y=OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]   #mean left OM response
+y=rollapply(y, 20,mean, fill="extend")                      #apply rolling average of 20 data points (1s)
 xy <-sortedXyData(x1,y)                                     #create sortedXYdata object
+
+LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata left turning
+
+#plot(xy)
+#abline(LinMod)
+#LinMod$coefficients[2]
+
+if(abs(LinMod$coefficients[2])<0.0001){                     #if the linear model shows hardly any slope, set asymptote as mean of all values
+  left=c(b0=0, b1=mean(y), lrc=-1000)
+  } else {
 left<-tryCatch(                                             #extract the left turning coefficients into a vector. Set vector to zero for errors
     expr = {
                     left<-NLSstAsymptotic(xy)
-                    return(left)
                      },
     error = function(e){
                       left=c(b0=0, b1=0, lrc=-1000)         #set logarithmic rate constant to -1000 so exp(lrc)=0
@@ -299,7 +320,7 @@ left<-tryCatch(                                             #extract the left tu
                    return(left)
                      },
     finally = {}
-)
+)}
 
 
 ###calculate averages and asymmetries to three significant digits and put them into a vector
@@ -343,7 +364,7 @@ if(!exists("OMparams"))
 ```
 
 
-```{r PIs, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8}
+```{r PIs, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Learning and avoidance scores\n")
 
       barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),

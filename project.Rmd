@@ -142,7 +142,7 @@ om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are opt
 
 `r if (om) '# Optomotor Parameter Analysis'`
 
-```{r statSetup, echo=FALSE}
+```{r statvariables, echo=FALSE}
 two <- NofGroups==2     #determine if we need to do between groups tests
     signif = project.data[["statistics"]][["significance-levels"]]                   #get significance levels
     groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
