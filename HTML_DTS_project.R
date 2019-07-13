@@ -43,8 +43,8 @@ setwd(evaluation.path)
 NofGroups = lengths(project.data["resources"])
 
 #what kind of experiment are we dealing with? Default is torquemeter
-if (exists('type', where=project.data)){ExpType = project.data["type"]} else ExpType = "torquemeter"
-if (ExpType=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
+if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
+if (ExpType=="Torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
 
 ### Initialize empty lists where data are collected
 grouped.poshistos <- list()   #Arena position histograms for group in a list of length NofPeriods
@@ -190,12 +190,14 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     xlim(maxfly) +
     ggtitle("Pooled Torque Histogram")
   
-  #position
+  #position (if there are fs periods)
+  if ('fs' %in% sequence$type) {
   poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
     geom_histogram(binwidth=10) +
     labs(x="position [arb units]", y="frequency") + 
     xlim(-1800,1800) +
     ggtitle("Pooled Position Histogram")
+  }
 
 } else stop("You have selected files with differing metadata. Please check your DTS files for consistency!")
 
@@ -250,7 +252,7 @@ if(NofGroups>2){}
 
 #### call RMarkdown for project evaluations ################################################
 rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""), 
-                  output_file = paste(project.data$name,"html", sep = "."), 
+                  output_file = paste(project.data$experiment$name,"html", sep = "."), 
                   output_dir = evaluation.path)
 #### end RMarkdown for project evaluations #################################################
 

@@ -36,6 +36,7 @@ library(pwr)
 library(BayesFactor)
 library(genefilter)  # if not available for newest version: setRepositories(addURLs = c(CRANxtras = "http://www.stats.ox.ac.uk/pub/RWin"))
 library(seewave)
+library(zoo)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -163,29 +164,30 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
 ```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
     
     ## plot position and fly histograms ##
-    #fly behavior
+    # add fly behavior pooled histogram
     flyhistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$fly)) + 
       geom_histogram(binwidth=3) + 
       labs(x="torque [arb units]", y="frequency") + 
       xlim(-maxfly) +
       ggtitle(paste(flyname, "total"))
     
-    #position
-    poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
+    # add pooled position histogram - if there are any fs periods
+    if ('fs' %in% sequence$type) {
+      poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
       geom_histogram(binwidth=10) +
       labs(x="position [degrees*10]", y="frequency") + 
       xlim(-1800,1800) +
       ggtitle(paste(flyname, "total"))
+    }
     
     ##write histograms
     #fly behavior
     multiplot(plotlist = flyhistos, cols=round(NofPeriods/5))
 ```
 
-## Arena Position Histograms
-    
-```{r PositionHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
-    multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5))
+```{r PositionHistogram, eval=('fs' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
+      cat("\n## Arena Position Histograms\n")
+      multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5)) #only print position histograms if there are any
 ```
 
 <!-- Evaluate optomotor data if they are present -->
@@ -227,7 +229,7 @@ ggplot(data = leftOMdata, aes(x=time, y=fly)) +
   xlab("Time [ms]") +
   ggtitle(paste("Left (counter-clockwise) arena rotations -", flyname))
 
-### generate averaged optomotor responses ovr both rotation directions
+### generate averaged optomotor responses over both rotation directions
 tempOMdata=rbind(rightOMdata,leftOMdata) #combine left and right OMdata in one dataframe
 tempOMdata=aggregate(tempOMdata$fly,FUN=mean,by=list(tempOMdata$time)) #average across periods
 colnames(tempOMdata) <- c("time", as.character(flyname)) #set dataframe names
@@ -255,37 +257,89 @@ ggplot(data=OMdata, aes(x=OMdata$time, y=OMdata[[as.character(flyname)]])) +
 
 ```{r moreOptomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
-###generate traces to fit nonlinear model
+###generate traces to fit nonlinear model for parameter estimation
 # Find the midpoint in left and right turning in averaged traces (OMdata)
 OMmidpoint = OMdata$time[nrow(OMdata)]/2
 
 #right turning traces
-x1=OMdata$time[OMdata$time<=OMmidpoint]                                   #time
-rOMlow=abs(min(OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint])) #find lowest value in the right turning trace
-y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]+rOMlow         #mean right OM response normalized to positive values
-m<-nls(y~a*x1/(b+x1))                                                     #use Michaelis-Menten to fit the data
-right=coef(m)                                                             #put the right turning coefficients in a vector
+x1=OMdata$time[OMdata$time<=OMmidpoint]                     #time
+y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]  #mean right OM response
+y=rollapply(y, 20,mean, fill="extend")                      #apply rolling average of 20 data points (1s)
+xy <-sortedXyData(x1,y)                                     #create sortedXYdata object
+
+LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata right turning
+
+#plot(xy)
+#abline(LinMod)
+#LinMod$coefficients[2]
+
+if(abs(LinMod$coefficients[2])<0.0001){                     #if the linear model shows hardly any slope, set asymptote as mean of all values
+  right=c(b0=0, b1=mean(y), lrc=-1000)
+  } else {
+right<-tryCatch(                                            #extract the right turning coefficients into a vector. Set vector to zero for errors
+    expr = {
+                    right<-NLSstAsymptotic(xy)
+                     },
+    error = function(e){
+                      right=c(b0=0, b1=0, lrc=-1000)        #set logarithmic rate constant to -1000 so exp(lrc)=0
+                   return(right)
+                     },
+    warning = function(w){
+                      right=c(b0=0, b1=0, lrc=-1000)        #set logarithmic rate constant to -1000 so exp(lrc)=0
+                   return(right)
+                     },
+    finally = {}
+)}
 
 #left turning traces
-x1=OMdata$time[OMdata$time>OMmidpoint]                                    #time
-x1=x1-x1[1]                                                               #set time to start from zero
-lOMlow=abs(min(OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]))  #find lowest value in the left turning trace
-y=-OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]+lOMlow         #mean left OM response normalized to positive values
-m<-nls(y~a*x1/(b+x1))                                                     #use Michaelis-Menten to fit the data
-left=coef(m)                                                              #put the left turning coefficients in a vector
+x1=OMdata$time[OMdata$time>OMmidpoint]                      #time
+x1=x1-x1[1]                                                 #set time to start from zero
+y=OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]   #mean left OM response
+y=rollapply(y, 20,mean, fill="extend")                      #apply rolling average of 20 data points (1s)
+xy <-sortedXyData(x1,y)                                     #create sortedXYdata object
 
-###calculate averages and asymmetries to three significant digits
-  #bring left and right asymptotes back to actual values
-right[1]=right[1]-rOMlow
-left[1]=left[1]-lOMlow
-aveOMcoeff=signif((right+left)/2, 3)       #mean asymptote and halfmaximal time
-aveOMcoeff[2]=signif(aveOMcoeff[2]/1000, 3)                  #halfmaximal time in seconds
-OMasym=signif((right-left)/(right+left), 3)                  #asymmetry index
+LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata left turning
 
-###collect coefficients for plotting and export
-tempOMparams <- as.data.frame(rbind(as.numeric(aveOMcoeff))) #gather asymptote and halfmaximal time
-tempOMparams$v3 = OMasym[1]                                  #add asymptote asymmetry index
-names(tempOMparams) = c("asymptote", "halfmax_time","AI")    #set column names
+#plot(xy)
+#abline(LinMod)
+#LinMod$coefficients[2]
+
+if(abs(LinMod$coefficients[2])<0.0001){                     #if the linear model shows hardly any slope, set asymptote as mean of all values
+  left=c(b0=0, b1=mean(y), lrc=-1000)
+  } else {
+left<-tryCatch(                                             #extract the left turning coefficients into a vector. Set vector to zero for errors
+    expr = {
+                    left<-NLSstAsymptotic(xy)
+                     },
+    error = function(e){
+                      left=c(b0=0, b1=0, lrc=-1000)         #set logarithmic rate constant to -1000 so exp(lrc)=0
+                   return(left)
+                     },
+    warning = function(w){
+                      left=c(b0=0, b1=0, lrc=-1000)         #set logarithmic rate constant to -1000 so exp(lrc)=0
+                   return(left)
+                     },
+    finally = {}
+)}
+
+
+###calculate averages and asymmetries to three significant digits and put them into a vector
+rightasymp = right[1]+right[2]
+leftasymp = left[1]+left[2]
+#sanity checks
+if(leftasymp < maxfly[1]){leftasymp=0}
+if(rightasymp > maxfly[2]){rightasymp=0}
+
+if (leftasymp==0 & rightasymp==0){aveOMcoeff=c(0,0,0)
+} else {
+      aveOMcoeff=c(signif((abs(rightasymp)+abs(leftasymp))/2, 3),                                #mean asymptote
+                   signif(((exp(right[3])+exp(left[3]))/2)*1000, 3),                             #mean rate constant [s]
+                   signif((abs(rightasymp)-abs(leftasymp))/(abs(rightasymp)+abs(leftasymp)), 3)) #asymmetry index
+}
+
+###make vector into a dataframe for easy exporting and plotting
+tempOMparams <- as.data.frame(rbind(as.numeric(aveOMcoeff))) #convert to dataframe
+names(tempOMparams) = c("asymptote", "rate constant","AI")        #set column names
 rownames(tempOMparams)[1]=as.character(flyname)              #set row names to flynames
 kable(tempOMparams)                                          #plot table with data
 
@@ -303,16 +357,17 @@ if(!exists("OMparams"))
 
 ```{r spectra, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8}
     meanspec(rawdata$fly, f = down_sample_rate, wl = 600) #plot mean power spectrum for each fly
-    title(paste("Torque-Powerspectrum", flyname))
+    title(paste(FlyBehavior, "Powerspectrum", flyname))
     spectro(rawdata$fly, f = down_sample_rate, wl=600) #plot spectrogram for each fly
-    title(paste("Torque-Spectrogram", flyname))
+    title(paste(FlyBehavior, "Spectrogram", flyname))
     speclist[[l]] = as.data.frame(meanspec(rawdata$fly, f = down_sample_rate, wl = 600, plot = FALSE)) #collect each spectrum for later averaging
 ```
 
-# Learning and avoidance scores
 
-```{r PIs, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8}
-    barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
+```{r PIs, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n# Learning and avoidance scores\n")
+
+      barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
             xlab="Time [periods]",
             ylab="PI [rel. units]",
             space=0,
