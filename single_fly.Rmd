@@ -213,7 +213,6 @@ ggplot(data = rightOMdata, aes(x=time/1000, y=fly)) +
   ylab("Optomotor Resoponse [rel. units]")+ 
   xlab("Time [s]") + 
   ggtitle(paste("Right (clockwise) arena rotations -", flyname)) +
-  
   theme_classic()+
   scale_x_discrete(expand = expand_scale(add = 0))
 
@@ -231,7 +230,6 @@ ggplot(data = leftOMdata, aes(x=time/1000, y=fly)) +
   ylab("Optomotor Resoponse [rel. units]")+ 
   xlab("Time [s]") +
   ggtitle(paste("Left (counter-clockwise) arena rotations -", flyname)) +
-  
   theme_classic() +
   scale_x_discrete(expand = expand_scale(add = 0))
 
