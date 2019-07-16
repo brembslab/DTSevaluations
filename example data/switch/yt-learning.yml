@@ -1,17 +1,19 @@
 ---
-name: wtb-yt-learning
-type: torquemeter
-title: Wild Type Berlin yaw torque learning
-description: Standard yaw torque learning by Anders
+experiment:
+    type: torquemeter
+    id: SCR_017276
+    name: wtb-yt-learning
+    title: Wild Type Berlin yaw torque learning
+    description: Standard yaw torque learning by Anders
 licenses:
-- name: ODC-PDDL-1.0
-- uri: http://opendatacommons.org/licenses/pddl
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
 author:
-- name: anders-eriksson
-- description: Anders Eriksson
-- firstName: Anders
-- lastName: Eriksson
-- id: 0000-0000-0000-0000
+    name: anders-eriksson
+    description: Anders Eriksson
+    firstName: Anders
+    lastName: Eriksson
+    id: 0000-0000-0000-0000
 resources:
 - name: WTB
   title: wild type Berlin
