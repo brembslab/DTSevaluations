@@ -22,6 +22,7 @@ library(rmarkdown)
 library(markdown)
 library(knitr)
 library(dabestr)
+library(zoo)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
