@@ -119,7 +119,7 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
       #fly behavior
       flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
         geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-        labs(x="Torque [arb units]", y="frequency") +
+        labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
         xlim(maxfly) +
         ggtitle(paste(flyname, "Period", i))
       
@@ -167,7 +167,7 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
     # add fly behavior pooled histogram
     flyhistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$fly)) + 
       geom_histogram(binwidth=3) + 
-      labs(x="torque [arb units]", y="frequency") + 
+      labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") + 
       xlim(-maxfly) +
       ggtitle(paste(flyname, "total"))
     
