@@ -162,7 +162,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     #fly
     flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
       geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-      labs(x="torque [arb units]", y="frequency") +
+      labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
       xlim(maxfly) +
       ggtitle(paste("Period", i))
     
@@ -187,9 +187,9 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
   #fly behavior
   flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) + 
     geom_histogram(binwidth=3) + 
-    labs(x="torque [arb units]", y="frequency") + 
+    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") + 
     xlim(maxfly) +
-    ggtitle("Pooled Torque Histogram")
+    ggtitle("Pooled Behavior Histogram")
   
   #position (if there are fs periods)
   if ('fs' %in% sequence$type) {
