@@ -117,7 +117,7 @@ om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are opt
 
   print(ggplot(plotOM, aes(x=time/1000, y=means, group = group)) +
         theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
-        geom_rect(aes(xmin = 30,xmax = 60,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
+        geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
         geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
         geom_hline(yintercept = 0, color="black") +
         scale_fill_manual(values = boxcolors) +

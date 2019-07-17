@@ -253,7 +253,7 @@ if(!exists("OMdata"))
 ```{r OptomotorAverage, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
 ggplot(data=OMdata, aes(x=OMdata$time/1000, y=OMdata[[as.character(flyname)]])) + 
-  geom_rect(aes(xmin = 30,xmax = 60,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
+  geom_rect(aes(xmin = mean(OMdata$time/1000),xmax = Inf,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
   geom_hline(yintercept = 0) +
   geom_line() +
   ylab("Optomotor Resoponse [rel. units]")+ 
