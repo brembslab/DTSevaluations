@@ -512,5 +512,12 @@ PIest=na.omit(melt(PIstat)) #create a dataframe that fits estimation stat requir
 unpaired_median_diff <- dabest(PIest, variable, value, idx = groupnames, paired = FALSE, func = median) #create estimation results list
 print(plot(unpaired_median_diff)) #plot results
 
+```
+
+```{r splitviolins, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Split Violin Plot\n")
+
+PIest$learningscore=project.data$statistics$`learning-score`$title #reuse estimation stat dataframe and add x-axis value for split violin plots
+print(ggplot(PIest, aes(learningscore, value, fill = variable)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
