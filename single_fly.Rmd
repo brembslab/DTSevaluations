@@ -61,7 +61,7 @@ sampleratecondition <- round(real_sample_rate)>20
 ```
 
 ```{r samplerate, eval=sampleratecondition, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, comment=NA, results = 'asis'}
-cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>Downsampled sampling rate (target 20 Hz):</b> ", paste(round(down_sample_rate,4)), " Hz")
+cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>Downsampled sampling rate (target 20 Hz):</b> ", paste(signif(down_sample_rate,4)), " Hz")
 ```
 
 # Experimental Design
@@ -109,7 +109,7 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
       keeps = c("a_pos","fly")
       period.data[[i]] <- temp[keeps] #list only arena position and fly behavior data by period
       
-      if(sequence$type[i]=="fs"||sequence$type[i]=="color"||sequence$type[i]=="optomotorR"||sequence$type[i]=="optomotorL")
+      if(sequence$type[i]=="fs"||sequence$type[i]=="yt"||sequence$type[i]=="color"||sequence$type[i]=="optomotorR"||sequence$type[i]=="optomotorL")
       {
         ## plot the fly behavior and arena position time traces
         fly_pos_traces(temp)

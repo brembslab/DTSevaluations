@@ -45,7 +45,7 @@ NofGroups = lengths(project.data["resources"])
 
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
-if (ExpType=="Torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
+if (ExpType=="Torquemeter" || ExpType=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
 
 ### Initialize empty lists where data are collected
 grouped.poshistos <- list()   #Arena position histograms for group in a list of length NofPeriods
