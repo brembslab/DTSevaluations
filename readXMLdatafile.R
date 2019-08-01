@@ -51,9 +51,12 @@ flyDataImport <- function(xml_name) {
     
   ##calculate actual sampling rate and downsample if necessary
     real_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
-    if (round(real_sample_rate) > 20) {
+    if (round(real_sample_rate) > 65) {
       rawdata <- weightedDownsample20Hz(rawdata, sequence, experiment, NofPeriods)
       down_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
+    } else if (round(real_sample_rate) > 20){
+    rawdata <- downsampleapprox(rawdata, sequence, experiment, NofPeriods)
+    down_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
     } else {
       real_sample_rate = experiment$sample_rate
       down_sample_rate = experiment$sample_rate
@@ -160,54 +163,37 @@ collect.metadata <-function(singleflydata)
   return(mdata)
 }
 
-##downsample the rawdata using a fixed bin width (deprecated)
-downsamplebin <- function(rawdata, binsize) {
+##downsample the rawdata using approx function (for data with period/time jitter)
+downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
+
+  NofDatapoints = as.numeric(as.character(experiment$duration))*20 #find the number of data points we should be having at 20Hz
   
   # create the vectors in which to save the downsampled data
-  timeDownsampled <- vector(mode = "numeric", length = ceiling(length(rawdata$time)/binsize))
-  a_posDownsampled <- vector(mode = "numeric", length = ceiling(length(rawdata$a_pos)/binsize))
-  flyDownsampled <- vector(mode = "numeric", length = ceiling(length(rawdata$fly)/binsize))
-  periodDownsampled <- vector(mode = "numeric", length = ceiling(length(rawdata$period)/binsize))
+  a_posDownsampled <- vector(mode = "numeric")
+  flyDownsampled <- vector(mode = "numeric")
+  periodDownsampled <- vector(mode = "numeric", length = NofDatapoints)
+  
+  # create new time and period values
+  timeDownsampled = seq(0, (as.numeric(as.character(experiment$duration))*1000)-50, 50)
+  p=1
+  t=0
+  for (index in 1:NofDatapoints){
+    periodDownsampled[index]=p
+    if (index == t+20*as.numeric(as.character(sequence$duration[p])))
+    {
+      t=t+20*as.numeric(as.character(sequence$duration[p]))
+      p=p+1
+    }
+  }
 
-  # downsampling time
-  for (index in seq(1,length(rawdata$time),binsize)) {
-    if(index < (length(rawdata$time)-binsize)) { # check whether we reached the end of the data; if not:
-      timeDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$time[index:(index+binsize-1)])/binsize)  # average all data in the bin and save it in the right slot of the downsampled vector
-    } else {  # in case we reached the end
-      timeDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$time[index:length(rawdata$time)])/length(rawdata$time[index:length(rawdata$time)])) # average over the remaining values and save the result
-      timeDownsampled <- timeDownsampled-timeDownsampled[1] #set time to start from 0
-    }
-  }
-  # downsampling position (problem with values at +/-180°!!)
-  for (index in seq(1,length(rawdata$a_pos),binsize)) {
-    if(index < (length(rawdata$a_pos)-binsize)) { # check whether we reached the end of the data; if not:
-      a_posDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$a_pos[index:(index+binsize-1)])/binsize)  # average all data in the bin and save it in the right slot of the downsampled vector
-    } else {  # in case we reached the end
-      a_posDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$a_pos[index:length(rawdata$a_pos)])/length(rawdata$a_pos[index:length(rawdata$a_pos)])) # average over the remaining values and save the result
-    }
-  }
-  # downsampling fly behavior
-  for (index in seq(1,length(rawdata$fly),binsize)) {
-    if(index < (length(rawdata$fly)-binsize)) { # check whether we reached the end of the data; if not:
-      flyDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$fly[index:(index+binsize-1)])/binsize)  # average all data in the bin and save it in the right slot of the downsampled vector
-    } else {  # in case we reached the end
-      flyDownsampled[((index-1)/binsize)+1] <- round(sum(rawdata$fly[index:length(rawdata$fly)])/length(rawdata$fly[index:length(rawdata$fly)])) # average over the remaining values and save the result
-    }
-  }
-  # downsampling period
-  for (index in seq(1,length(rawdata$period),binsize)) {
-    if(index < (length(rawdata$period)-binsize)) { # check whether we reached the end of the data; if not:
-        if (abs(max(rawdata$period[index:(index+binsize-1)]) - min(rawdata$period[index:(index+binsize-1)])) == 0){ #check if there is a period switch in the bin, if there is:
-          periodDownsampled[((index-1)/binsize)+1] <- rawdata$period[index]
-        } else if (table(rawdata$period[index:(index+binsize-1)])[1]>table(rawdata$period[index:(index+binsize-1)])[2]) #if the majority of values indicates old period
-          {
-            periodDownsampled[((index-1)/binsize)+1] <- rawdata$period[index] #make the period vale that of the old period
-          } else {
-            periodDownsampled[((index-1)/binsize)+1] <- rawdata$period[index+binsize-1] #if the majority of values indicates new period, set the value to the new period
-          }
-    } else { # in case we reached the end
-      periodDownsampled[((index-1)/binsize)+1] <- rawdata$period[length(rawdata$period)]
-    }
+  
+  # downsample fly behavior and a_pos (a_pos still needs work because it's circular!!)
+  for (index in 1:NofPeriods){
+    f=approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])
+    flyDownsampled=c(flyDownsampled, round(f[[2]]))
+    p=approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])
+    a_posDownsampled=c(a_posDownsampled, round(f[[2]]))
+    
   }
   
   # bind the downsampled vectors into one dataframe
@@ -217,7 +203,7 @@ downsamplebin <- function(rawdata, binsize) {
   return(rawdataDown)
 }
 
-### Downsampling to 20Hz by weighting according to the measured time within the 50ms bin
+### Downsampling to 20Hz by weighting according to the measured time within the 50ms bin (for accurate data traces)
 
 weightedDownsample20Hz <- function(rawdata, sequence, experiment, NofPeriods) {
   
