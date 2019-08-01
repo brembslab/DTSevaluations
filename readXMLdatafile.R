@@ -192,7 +192,7 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
     f=approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])
     flyDownsampled=c(flyDownsampled, round(f[[2]]))
     p=approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])
-    a_posDownsampled=c(a_posDownsampled, round(f[[2]]))
+    a_posDownsampled=c(a_posDownsampled, round(p[[2]]))
     
   }
   
