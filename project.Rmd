@@ -91,7 +91,7 @@ for(x in 1:NofGroups)
 ```
 
 
-```{r PositionHistogram, eval=('fs' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r PositionHistogram, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 cat("\n## Arena Position Histograms\n")
 for(x in 1:NofGroups)
   {
@@ -99,6 +99,7 @@ for(x in 1:NofGroups)
     poshistos <- grouped.poshistos[[x]]
     multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5)) #positionhistos
 }
+
 ```
 
 <!-- Computing optomotor data if they are present -->

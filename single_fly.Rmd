@@ -171,8 +171,8 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
       xlim(-maxfly) +
       ggtitle(paste(flyname, "total"))
     
-    # add pooled position histogram - if there are any fs periods
-    if ('fs' %in% sequence$type) {
+    # add pooled position histogram - if there are any periods with meaningful position data
+    if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
       poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
       geom_histogram(binwidth=10) +
       labs(x="position [degrees*10]", y="frequency") + 
@@ -185,9 +185,10 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
     multiplot(plotlist = flyhistos, cols=round(NofPeriods/5))
 ```
 
-```{r PositionHistogram, eval=('fs' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
+```{r PositionHistogram, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
       cat("\n## Arena Position Histograms\n")
       multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5)) #only print position histograms if there are any
+
 ```
 
 <!-- Evaluate optomotor data if they are present -->
