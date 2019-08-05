@@ -189,11 +189,10 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
   
   # downsample fly behavior and a_pos (a_pos still needs work because it's circular!!)
   for (index in 1:NofPeriods){
-    f=approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])
-    flyDownsampled=c(flyDownsampled, round(f[[2]]))
-    p=approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])
-    a_posDownsampled=c(a_posDownsampled, round(p[[2]]))
-    
+    f=approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])$y
+    flyDownsampled=c(flyDownsampled, round(f))
+    p=approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])$y
+    a_posDownsampled=c(a_posDownsampled, round(p))
   }
   
   # bind the downsampled vectors into one dataframe
