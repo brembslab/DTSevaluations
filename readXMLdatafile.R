@@ -19,6 +19,7 @@ flyDataImport <- function(xml_name) {
     experiment <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experiment"))
   ##parse sequence data
     NofPeriods = as.integer(xmlGetAttr(flyDataXMLtop[['sequence']], "periods"))
+    ExperimentType = xmlGetAttr(flyDataXMLtop[['metadata']][['experiment']], "type")
     sequence <- xmlToDataFrame(nodes=getNodeSet(flyData,"//sequence/period"))    
   ##parse time series meta-data
     CSV_descriptor <- xmlToDataFrame(nodes=getNodeSet(flyData,"//timeseries/CSV_descriptor"))
@@ -28,7 +29,7 @@ flyDataImport <- function(xml_name) {
   ##reset periods to start from 1 of they start from 0
     if (rawdata$period[1]==0){rawdata$period=rawdata$period+1}
   ##reset position data to +/-180° [-1800..1796] for torquemeter experiments
-    if (project.data$experiment$type=="Torquemeter"){
+    if (tolower(ExperimentType)=="torquemeter"){
     if (experiment$arena_type=="lightguides"){rawdata$a_pos = rawdata$a_pos-1800}
     if (experiment$arena_type=="motor"){rawdata$a_pos = round(rawdata$a_pos*0.87890625)}
     }
@@ -51,6 +52,7 @@ flyDataImport <- function(xml_name) {
     
   ##calculate actual sampling rate and downsample if necessary
     real_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
+    traces <- rawdata
     if (round(real_sample_rate) > 65) {
       rawdata <- weightedDownsample20Hz(rawdata, sequence, experiment, NofPeriods)
       down_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
@@ -63,7 +65,9 @@ flyDataImport <- function(xml_name) {
     }
   
     options(digits.secs = 3)
-    rawdata$date<-as.POSIXct(rawdata$time/1000, origin=date(experiment$dateTime), tz="UTC") #required for some function...???
+    rawdata$date<-as.POSIXct(rawdata$time/1000, origin=date(experiment$dateTime), tz="UTC") #required for dygraphs
+    traces$date<-as.POSIXct(traces$time/1000, origin=date(experiment$dateTime), tz="UTC") #required for dygraphs
+    
     
     ##list all data
     singleflydata <- list(URIs, 
@@ -77,12 +81,15 @@ flyDataImport <- function(xml_name) {
                           rawdata,
                           flyrange,
                           real_sample_rate,
-                          down_sample_rate)
+                          down_sample_rate,
+                          traces)
   
   return(singleflydata)
 }
 
-#### Importing only the meta-data from an XML file####
+
+
+#### Importing only the meta-data from an XML file ####
 flyMetaDataImport <- function(xml_name) {
   
   ### Import the data from the .xml file.
@@ -163,7 +170,7 @@ collect.metadata <-function(singleflydata)
   return(mdata)
 }
 
-##downsample the rawdata using approx function (for data with period/time jitter)
+### Downsample the rawdata using approx function (for data with period/time jitter)
 downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
 
   NofDatapoints = as.numeric(as.character(experiment$duration))*20 #find the number of data points we should be having at 20Hz
