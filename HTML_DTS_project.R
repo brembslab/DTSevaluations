@@ -97,6 +97,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     ##extract the rawdata
     rawdata <- singleflydata[[9]]
     flyrange = singleflydata[[10]]
+    traces <- singleflydata[[13]]
     #calculate max fly values for axes when plotting 
     maxfly = c(-round_any(max(abs(flyrange)), 100, f=ceiling),round_any(max(abs(flyrange)), 100, f=ceiling))
     

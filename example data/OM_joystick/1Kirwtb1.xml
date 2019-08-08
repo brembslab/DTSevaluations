@@ -16,7 +16,7 @@
 		<description>Stripe pattern 1</description>
 		<j_posbase />
 	</fly>
-	<experiment type="optomotorRR">
+	<experiment type="joystick">
 		<dateTime>2019-05-21T13:48:25.814000</dateTime>
 		<duration>600</duration>
 		<description>"Optmototorics on platform (open loop)"</description>

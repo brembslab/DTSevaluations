@@ -165,7 +165,7 @@
 	<variables>
 		<variable number="1">
 		    <type>time</type>		
-			<var_type>uint16int16</var_type>
+			<var_type>uint16</var_type>
 			<unit>ms</unit>
 		</variable>	
 		<variable number="2">

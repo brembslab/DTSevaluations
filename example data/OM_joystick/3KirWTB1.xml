@@ -16,7 +16,7 @@
 		<description>Stripes 3</description>
 		<flybase />
 	</fly>
-	<experiment type="optomotorR">
+	<experiment type="joystick">
 		<dateTime>2019-05-21T15:28:19.477000</dateTime>
 		<duration>600</duration>
 		<description>"Optmototorics on platform (open loop)"</description>

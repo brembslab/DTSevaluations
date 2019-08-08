@@ -75,14 +75,23 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
 # Time Traces
 ## Interactive Time Traces
 
-```{r dytraces, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12}    
+```{r dytracesraw, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12}    
+    
+    ##dyplot traces
+    dytraces(traces)
+
+```
+
+## Interactive Time Traces (Downsampled data)
+
+```{r dytracesdown, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12}    
     
     ##dyplot traces
     dytraces(rawdata)
 
 ```
 
-## Time Traces by Period
+## Time Traces by Period (20Hz)
 
 ```{r PeriodTraces, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10}
 
@@ -147,8 +156,7 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
         if(l==1){PIprofile[1,i]=sequence$lambda[i]}
       } else if (sequence$type[i]=="yt" || sequence$type[i]=="sw_blue" || sequence$type[i]=="sw_green") #calculate torque PIs
       {
-        table1 <- table(sign(temp$fly)) 
-        t2 = table1[1]
+        t2 = table(sign(temp$fly))[1]
         t1 = nrow(temp)-t2
         sequence$lambda[i] = (t1-t2)/(t1+t2)
         if (sequence$contingency[i] == 'right_torque'){sequence$lambda[i]=-sequence$lambda[i]}
