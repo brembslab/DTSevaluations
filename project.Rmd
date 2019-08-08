@@ -65,6 +65,14 @@ periods[3,periods["outcome",]==1]="training"
 grid.table(periods)
 ```
 
+```{r Grapghdim, eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE, error=FALSE}
+if(lengths(project.data["resources"]) == 1){
+len = as.integer(5)
+} else {
+len = as.integer(8)
+}
+```
+
 # Experimental groups and single fly evaluations
 
 **Number of experimental groups:** `r paste(NofGroups)`
@@ -279,7 +287,7 @@ PIs <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plot
 ```
 
 
-```{r PIbar, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8, comment=NA, results='asis'}
+```{r PIbar, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Performance Indices\n \n## Performance Index bar plot with SEM:\n")
 
 PIplots <- list()
@@ -316,7 +324,7 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 
-```{r BoxWithNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8, comment=NA, results='asis'}
+```{r BoxWithNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Performance Index box&dotplot with notches:\n")
 
 for(x in 1:NofGroups)
@@ -340,7 +348,7 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 
-```{r BoxNoNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8, comment=NA, results='asis'}
+```{r BoxNoNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Performance Index box&dotplot without notches:\n")
 
 for(x in 1:NofGroups)
@@ -363,7 +371,7 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 
-```{r Violin, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 8, comment=NA, results='asis'}
+```{r Violin, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Performance Index Violin Plot:\n")
 
 for(x in 1:NofGroups)

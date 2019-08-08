@@ -75,14 +75,23 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
 # Time Traces
 ## Interactive Time Traces
 
-```{r dytraces, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12}    
+```{r dytracesraw, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12}    
+    
+    ##dyplot traces
+    dytraces(traces)
+
+```
+
+## Interactive Time Traces (Downsampled data)
+
+```{r dytracesdown, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12}    
     
     ##dyplot traces
     dytraces(rawdata)
 
 ```
 
-## Time Traces by Period
+## Time Traces by Period (20Hz)
 
 ```{r PeriodTraces, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10}
 
