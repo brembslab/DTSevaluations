@@ -174,7 +174,7 @@ collect.metadata <-function(singleflydata)
 downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
 
   NofDatapoints = as.numeric(as.character(experiment$duration))*20 #find the number of data points we should be having at 20Hz
-  
+
   # create the vectors in which to save the downsampled data
   a_posDownsampled <- vector(mode = "numeric")
   flyDownsampled <- vector(mode = "numeric")
@@ -194,13 +194,14 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
   }
 
   
-  # downsample fly behavior and a_pos (a_pos still needs work because it's circular!!)
+  # downsample fly behavior and a_pos (stil nees work on a_pos due to +/-180°)
   for (index in 1:NofPeriods){
     f=approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])$y
     flyDownsampled=c(flyDownsampled, round(f))
     p=approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])$y
     a_posDownsampled=c(a_posDownsampled, round(p))
   }
+  
   
   # bind the downsampled vectors into one dataframe
   rawdataDown <- data.frame("time" = timeDownsampled, "a_pos" = a_posDownsampled, "fly" = flyDownsampled, "period" = periodDownsampled)
