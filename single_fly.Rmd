@@ -156,8 +156,7 @@ cat("<b>Actual samplingrate: </b>", paste(round(real_sample_rate,4)), " Hz; <b>D
         if(l==1){PIprofile[1,i]=sequence$lambda[i]}
       } else if (sequence$type[i]=="yt" || sequence$type[i]=="sw_blue" || sequence$type[i]=="sw_green") #calculate torque PIs
       {
-        table1 <- table(sign(temp$fly)) 
-        t2 = table1[1]
+        t2 = table(sign(temp$fly))[1]
         t1 = nrow(temp)-t2
         sequence$lambda[i] = (t1-t2)/(t1+t2)
         if (sequence$contingency[i] == 'right_torque'){sequence$lambda[i]=-sequence$lambda[i]}
