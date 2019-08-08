@@ -45,13 +45,14 @@ source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
 ```
 
-<center><h2>for time series data set: "<b>`r paste(project.data$title)`</b>"</h2></center>
+<center><h2>for time series data set: "<b>`r paste(project.data$experiment$title)`</b>"</h2></center>
 <center>Rendered on `r format(Sys.time(), '%d %B %Y')`</center>
 
 # Metadata
 
-**Project file (YAML):** `r paste('<a href="../', basename(project.file), '">', project.data$title, '</a>', sep = "")`  
-**Description:** `r paste(project.data$description)`  
+**Project file (YAML):** `r paste('<a href="../', basename(project.file), '">', project.data$experiment$title, '</a>', sep = "")`  
+**Description:** `r paste(project.data$experiment$description)`  
+**Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', project.data$experiment$id, '">', project.data$experiment$id, '</a>', sep = "")`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
 
@@ -62,6 +63,14 @@ periods <- periods[-6,]
 periods[3,periods["outcome",]==0]="test"
 periods[3,periods["outcome",]==1]="training"
 grid.table(periods)
+```
+
+```{r Grapghdim, eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE, error=FALSE}
+if(lengths(project.data["resources"]) == 1){
+len = as.integer(5)
+} else {
+len = as.integer(8)
+}
 ```
 
 # Experimental groups and single fly evaluations
@@ -77,7 +86,7 @@ kable(exp_groups) #plot table with links to individual fly evaluations
 ```
 
 # Histograms
-## Torque Histograms
+## Fly Behavior Histograms
 
 ```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
@@ -89,10 +98,9 @@ for(x in 1:NofGroups)
 }  
 ```
 
-## Arena Position Histograms
 
-```{r PositionHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
-
+```{r PositionHistogram, eval=('fs' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+cat("\n## Arena Position Histograms\n")
 for(x in 1:NofGroups)
   {
     cat("<center><h4>",project.data[["resources"]][[x]][["title"]],"</h4></center>")
@@ -109,14 +117,17 @@ om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are opt
 
 `r if (om) '# Optomotor Traces'`
 
-```{r Optomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r Optomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
  plotOM=ldply(grouped.OMdata, data.frame)            #move the dataframes for each group into a single dataframe
  plotOM=plotOM[,c("time","means","sd","group")]
 
  #plot averaged OM traces
 
-  print(ggplot(plotOM, aes(x=time, y=means, group = group)) + 
+  print(ggplot(plotOM, aes(x=time/1000, y=means, group = group)) +
+        theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
+        geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
         geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
+        geom_hline(yintercept = 0, color="black") +
         scale_fill_manual(values = boxcolors) +
         geom_line(aes(colour = group), size = 1) + 
         scale_color_manual(values = boxcolors) +
@@ -124,7 +135,7 @@ om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are opt
         guides(colour = guide_legend(override.aes = list(size=3))) +
         theme_light(base_size = 16) + 
           theme(legend.justification=c(1,0),
-            legend.position=c(0.94,0.60), 
+            legend.position="right", 
             legend.title=element_blank(), 
             legend.key.size = unit(2, 'lines'),
             legend.key = element_rect(size = 6),
@@ -136,14 +147,20 @@ om <- any(grepl("optomotor", sequence$type)==TRUE) ###determine if there are opt
             panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
           theme(axis.text.y = element_text(size=12))+
           ylab("Optomotor Response [rel. units]") + 
-          xlab("Time [ms]"))
+          xlab("Time [s]")+
+          annotate("text", -Inf, Inf, label = "Right (clockwise) arena rotations", hjust = -0.05, vjust = 1.3)+
+          annotate("text", Inf, -Inf, label = "Left (counter-clockwise) arena rotations", hjust =1, vjust = -1.5)+
+          theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
+          scale_x_continuous(expand = expand_scale(add = 0)))
+          
+          
 
 ```
 
 `r if (om) '# Optomotor Parameter Analysis'`
 
-```{r statSetup, echo=FALSE}
-two <- project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2     #determine if we need to do between groups tests
+```{r statvariables, echo=FALSE}
+two <- NofGroups==2     #determine if we need to do between groups tests
     signif = project.data[["statistics"]][["significance-levels"]]                   #get significance levels
     groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
     priorval = project.data[["statistics"]][["priors"]]                              #get priors for FPR calculation
@@ -155,7 +172,7 @@ two <- project.data[["statistics"]][["two.groups"]][["data"]]==1 || NofGroups==2
 plotOMparams=ldply(grouped.OMparams, data.frame)    #move the dataframes from each group into a single dataframe
 samplesizes = as.numeric(table(plotOMparams$group)) #determine sample sizes in each group
 OMvariables = head(names(plotOMparams),-1)
-OMtitles = c("Optomotor Magnitude", "Halfmaximal Rise Time", "Asymmetry Index")
+OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
 #for one group without statistics
 if(NofGroups==1)
@@ -265,20 +282,13 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
 ```
 
 
-# Get graph dimension
-
-```{r Grapghdim, eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 6}
-if(lengths(project.data["resources"]) == 1){
-len = as.integer(5)
-} else {
-len = as.integer(8)
-}
+```{r PIpresent, echo=FALSE}
+PIs <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
 ```
 
-# Performance Indices
-## Performance Index bar plot with SEM:
 
-```{r PIbar, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8}
+```{r PIbar, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+cat("\n# Performance Indices\n \n## Performance Index bar plot with SEM:\n")
 
 PIplots <- list()
 for(x in 1:NofGroups)
@@ -308,14 +318,14 @@ for(x in 1:NofGroups)
               theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]") + 
-              theme(strip.text = element_text(hjust = -0.05), strip.background = element_blank(), aspect.ratio=4/NofPeriods)
+              theme(aspect.ratio=4/NofPeriods)
   }
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
-## Performance Index box&dotplot with notches:
 
-```{r BoxWithNotch, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 6}
+```{r BoxWithNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Performance Index box&dotplot with notches:\n")
 
 for(x in 1:NofGroups)
   {
@@ -337,9 +347,10 @@ for(x in 1:NofGroups)
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
-## Performance Index box&dotplot without notches:
 
-```{r BoxNoNotch, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.height = len, fig.width = 6, fig.align = "center"}
+```{r BoxNoNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Performance Index box&dotplot without notches:\n")
+
 for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
@@ -355,13 +366,13 @@ for(x in 1:NofGroups)
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ xlab("Experiment Sequence") + 
               theme(aspect.ratio=4/NofPeriods)
-}      
+  }      
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
-## Performance Index Violin Plot:
 
-```{r Violin, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8}
+```{r Violin, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Performance Index Violin Plot:\n")
 
 for(x in 1:NofGroups)
   {
@@ -385,33 +396,25 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 
 
 ```{r StatSetup, echo=FALSE}
-stat <- !is.null(project.data[["statistics"]]) ###determine if stats are requested
-```
+twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1      #etermine if statistics for two groups are required
+wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1             #determine if we need to do single tests
+learningscore = project.data[["statistics"]][["learning-score"]][["data"]]        #get the PI that is going to be tested
 
-```{r StatPrep, eval=stat, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE}
-learningscore=project.data[["statistics"]][["learning-score"]][["data"]] #get the PI that is going to be tested
 #create new dataframe with only the chosen PI values
+if(PIs){
 PIstat <- list()
 for(x in 1:NofGroups){PIstat[[x]] <- grouped.PIprofiles[[x]][[learningscore]]}
-PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind))) #convert PI list to data.frame
-colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name')) #add group names as column names to PIstat
+PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind)))                          #convert PI list to data.frame
+colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name'))    #add group names as column names to PIstat
 #compute standard deviations
 SDs<-as.numeric(apply(PIstat, 2, function(x) sd(na.omit(x))))
 if(!om){samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))}
-
-```
-
-```{r WilcoxonSetup, echo=FALSE}
-wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1 ###determine if we need to do single tests
-if(NofGroups == 1){
-stat = as.logical("FALSE")
-} else {
-stat = as.logical("TRUE")
 }
 ```
 
+
 ```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
-cat("# Learning Score Statistics\n## Statistical tests of single groups against zero")
+cat("\n# Learning Score Statistics\n## Statistical tests of single groups against zero\n")
 
   wilcoxon<-numeric()  
   for(x in 1:NofGroups){wilcoxon[x] = signif(wilcox.test(PIstat[[x]])$p.value, 3)} #test all groups against zero
@@ -446,8 +449,8 @@ cat("# Learning Score Statistics\n## Statistical tests of single groups against 
     grid.arrange(grobs = plots.singles, ncol=2)
 ```
 
-```{r Utest, eval=two, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
-cat("## Statistical tests between two groups")
+```{r Utest, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Statistical tests between two groups\n")
 
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
     w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)
@@ -510,12 +513,19 @@ cat("## Statistical tests between two groups")
 
 ```
 
-```{r estimationstats, eval=two, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
-cat("## Estimation statistics")
+```{r estimationstats, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Estimation statistics\n")
 
 PIest=na.omit(melt(PIstat)) #create a dataframe that fits estimation stat requirements and remove missing PIs
 unpaired_median_diff <- dabest(PIest, variable, value, idx = groupnames, paired = FALSE, func = median) #create estimation results list
 print(plot(unpaired_median_diff)) #plot results
 
+```
+
+```{r splitviolins, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Split Violin Plot\n")
+
+PIest$learningscore=project.data$statistics$`learning-score`$title #reuse estimation stat dataframe and add x-axis value for split violin plots
+print(ggplot(PIest, aes(learningscore, value, fill = variable)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
