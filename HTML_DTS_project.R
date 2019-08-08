@@ -1,6 +1,7 @@
 #####################################################################################################################################
 ################## R-script to read YAML DTS project files, visualize and statistically evaluate data. Reports in HTML ##############
 #####################################################################################################################################
+
 library(ggplot2)
 library(tidyr)
 library(dygraphs)
@@ -21,8 +22,8 @@ library(rmarkdown)
 library(markdown)
 library(knitr)
 library(dabestr)
-library(cowplot)
-library(ggpubr)
+library(zoo)
+
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
@@ -43,8 +44,8 @@ setwd(evaluation.path)
 NofGroups = lengths(project.data["resources"])
 
 #what kind of experiment are we dealing with? Default is torquemeter
-if (exists('type', where=project.data)){ExpType = project.data["type"]} else ExpType = "torquemeter"
-if (ExpType=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
+if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
+if (ExpType=="Torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
 
 ### Initialize empty lists where data are collected
 grouped.poshistos <- list()   #Arena position histograms for group in a list of length NofPeriods
@@ -161,7 +162,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     #fly
     flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
       geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-      labs(x="torque [arb units]", y="frequency") +
+      labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
       xlim(maxfly) +
       ggtitle(paste("Period", i))
     
@@ -186,16 +187,18 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
   #fly behavior
   flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) + 
     geom_histogram(binwidth=3) + 
-    labs(x="torque [arb units]", y="frequency") + 
+    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") + 
     xlim(maxfly) +
-    ggtitle("Pooled Torque Histogram")
+    ggtitle("Pooled Behavior Histogram")
   
-  #position
+  #position (if there are fs periods)
+  if ('fs' %in% sequence$type) {
   poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
     geom_histogram(binwidth=10) +
     labs(x="position [arb units]", y="frequency") + 
     xlim(-1800,1800) +
     ggtitle("Pooled Position Histogram")
+  }
 
 } else stop("You have selected files with differing metadata. Please check your DTS files for consistency!")
 
@@ -249,8 +252,8 @@ if(NofGroups>2){}
 ###### continue for all projects with two groups
 
 #### call RMarkdown for project evaluations ################################################
-rmarkdown::render(paste(start.wd,"/project - Kopie.Rmd", sep=""), 
-                  output_file = paste(project.data$name,"html", sep = "."), 
+rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""), 
+                  output_file = paste(project.data$experiment$name,"html", sep = "."), 
                   output_dir = evaluation.path)
 #### end RMarkdown for project evaluations #################################################
 
