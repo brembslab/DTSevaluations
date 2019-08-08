@@ -16,12 +16,12 @@ fly_pos_traces <- function(temp)
   rect(temp$time[1],-1350,temp$time[nrow(temp)],-450, col = "grey95")
   rect(temp$time[1],450,temp$time[nrow(temp)],1350, col = "grey95")
     par(new=TRUE)
-  plot(x = temp$time, y = pos, type = "l", col="red3", xaxs = "i", yaxs = "i", ylim=c(-1800,1800), ylab = "position[arb.units]",xlab="time [ms]")
+  plot(x = temp$time, y = pos, type = "l", col="red3", xaxs = "i", yaxs = "i", ylim=c(-1800,1800), ylab = "Position [arb.units]",xlab="time [ms]")
     par(new=TRUE)
   plot(x = temp$time, temp$fly, type = "l", col="blue", xaxs = "i", ylim=maxfly, main = paste("Fly Traces", flyname, "Period", i), axes=F, xlab=NA, ylab="")
   lines(c(temp$time[1],temp$time[nrow(temp)]),c(0,0),type="l",lty=1,lwd=1, col="black")
   axis(4)
-  mtext("torque [arb_units]", side = 4, line = 3)
+  mtext(paste(FlyBehavior, "[arb units]"), side = 4, line = 3)
   
   return(traces)
 }
@@ -34,7 +34,7 @@ dytraces <- function(rawdata)
     dyAxis("x", drawGrid = FALSE) %>%
     dyAxis("y", label = "Position [arb_units]", valueRange = c(-1800,1800)) %>%
     dyOptions(gridLineColor = "lightgrey") %>%
-    dyAxis("y2", label = "Torque [arb_units]", independentTicks = TRUE, valueRange = maxfly, drawGrid = FALSE) %>%
+    dyAxis("y2", label = paste(FlyBehavior, "[arb units]"), independentTicks = TRUE, valueRange = maxfly, drawGrid = FALSE) %>%
     dyOptions(includeZero = TRUE) %>%
     dyRangeSelector()
 

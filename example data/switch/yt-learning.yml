@@ -49,7 +49,7 @@ statistics:
   learning-score:
     title: PI8
     description: First test after last training
-    data: 12
+    data: 11
   single.groups:
     title: several single group tests against zero
     description: one sided Wilcoxon-Tests and Bayes Factors
