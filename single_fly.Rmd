@@ -130,8 +130,6 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
       #fly behavior
       min = c(-round_any(max(abs(flyrange)), -100, f=ceiling))
       max = c(round_any(max(abs(flyrange)), -100, f=ceiling))
-      zero = 0
-      cont <- any(grepl("left_torque", sequence$contingency[i])==TRUE)
         if(any(grepl("left_torque", sequence$contingency[i])==FALSE))
           {
           flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
