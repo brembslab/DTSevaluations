@@ -71,7 +71,8 @@ len = as.integer(5)
 } else {
 len = as.integer(8)
 }
-aspect_ratio = nrow(drop_na(sequence))
+aspect_ratio = nrow(sequence %>% na.omit())
+
 #aspect_ratio = nrow(sequence %>% filter( contingency != "left_torque" | contingency == "right_torque" | contingency == "color" | contingency == "sw" | contingency == "fs" | contingency == "yt"))
 
 ```
