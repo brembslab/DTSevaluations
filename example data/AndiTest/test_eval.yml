@@ -1,0 +1,70 @@
+---
+experiment:
+    type: Torquemeter
+    id: xy
+    name: wtb-yt-learning
+    title: Wild Type Berlin yaw torque learning
+    description: Standard yaw torque learning by Andi
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: andi-ehweiner
+    description: Andi Ehweiner
+    firstName: Andi
+    lastName: Ehweiner
+    id: 0000-0000-0000-0000
+resources:
+- name: WTB
+  title: wild type Berlin
+  description: control
+  data:
+  - test_neu_2.xml
+  - test_neu_3.xml
+  - test_neu_5.xml #kein drift
+  - test_neu_6.xml #drift
+  #- test_neu_8.xml #drift 4 Einheiten
+  #- test_neu_9.xml #drift 3 Einheiten
+  #- test_neu_10.xml  #leichter drift 1 einheit nach unten
+  #- test_neu_11.xml #kein drift
+  #- test_neu_12.xml #low response, , normal optomotor
+  #- test_neu_15.xml #manipuliert
+  #- test_neu_16.xml #kein optomotor antwort, verwerfen
+  #- test_neu_18.xml #negativer drift etwa -0,4
+  #- test_neu_19.xml #drift -0,2, zu hoer score?
+  #- test_neu_20.xml #oszilation vermutlihch nicht von Fliege, drift nach unten	
+  #- test_neu_21.xml #kein drift
+  #- test_neu_22.xml #kein drift
+  #- FoxP1.xml
+ 
+  
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianred1
+    - plum3
+  learning-score:
+    title:
+    description: 
+    data: 
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #yes
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 0 #no
+mediatype: text/csv/xml
+epid: 245
