@@ -65,7 +65,7 @@ periods[3,periods["outcome",]==1]="training"
 grid.table(periods)
 ```
 
-```{r Grapghdim, eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE, error=FALSE}
+```{r Graphdim, eval=TRUE, echo=False, warning=FALSE, message=FALSE, error=FALSE}
 if(lengths(project.data["resources"]) == 1){
 len = as.integer(5)
 } else {
