@@ -65,7 +65,7 @@ periods[3,periods["outcome",]==1]="training"
 grid.table(periods)
 ```
 
-```{r Grapghparameters, eval=TRUE, echo=TRUE, warning=FALSE, message=FALSE, error=FALSE}
+```{r Graphdim, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
 if(lengths(project.data["resources"]) == 1){
 len = as.integer(5)
 } else {
@@ -246,7 +246,7 @@ if(two)
               ggtitle(paste("U-Test, p=", utest)) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-              geom_signif(comparisons = groupnames, map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5) +
+              geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5) +
               samplesizes.annotate(boxes, samplesizes))
         
           #add table with results and plot
