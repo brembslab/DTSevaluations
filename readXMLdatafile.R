@@ -35,8 +35,10 @@ flyDataImport <- function(xml_name) {
     }
     
   ##adjusting data for shiming
-    if (tolower(experiment$meter_type) == "shiming") {rawdata$time = round(rawdata$time*1000)}
-    if (tolower(experiment$meter_type) == "shiming") {rawdata$torque = rawdata$torque*100}
+    if (tolower(experiment$meter_type) == "shiming") {
+      rawdata$time = round(rawdata$time*1000)
+      rawdata$torque = rawdata$torque*100
+    }
      
   ##change j_pos data from float to integer and shift to make approx. zero symmetric (needs work!)
     if(exists("j_pos", rawdata)){
