@@ -71,9 +71,8 @@ len = as.integer(5)
 } else {
 len = as.integer(8)
 }
-aspect_ratio = nrow(sequence %>% na.omit())
+aspect_ratio = 4/nrow(sequence %>% na.omit())
 
-#aspect_ratio = nrow(sequence %>% filter( contingency != "left_torque" | contingency == "right_torque" | contingency == "color" | contingency == "sw" | contingency == "fs" | contingency == "yt"))
 
 ```
 
@@ -323,7 +322,7 @@ for(x in 1:NofGroups)
               theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]") + 
-              theme(aspect.ratio=4/aspect_ratio)
+              theme(aspect.ratio=aspect_ratio)
   }
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
@@ -347,7 +346,7 @@ for(x in 1:NofGroups)
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
-              theme(aspect.ratio=4/aspect_ratio)
+              theme(aspect.ratio=aspect_ratio)
   }  
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
@@ -370,7 +369,7 @@ for(x in 1:NofGroups)
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ xlab("Experiment Sequence") + 
-              theme(aspect.ratio=4/aspect_ratio)
+              theme(aspect.ratio=aspect_ratio)
   }      
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
@@ -394,7 +393,7 @@ for(x in 1:NofGroups)
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
-              theme(aspect.ratio=4/aspect_ratio)
+              theme(aspect.ratio=aspect_ratio)
   }
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
