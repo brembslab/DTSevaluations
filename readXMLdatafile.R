@@ -74,6 +74,8 @@ flyDataImport <- function(xml_name) {
     rawdata$date<-as.POSIXct(rawdata$time/1000, origin=date(experiment$dateTime), tz="UTC") #required for dygraphs
     traces$date<-as.POSIXct(traces$time/1000, origin=date(experiment$dateTime), tz="UTC") #required for dygraphs
     
+    #remove any extra period numbers, if they exist
+    if (length(table(rawdata$period)) > NofPeriods) {rawdata<-rawdata[!(rawdata$period==length(table(rawdata$period))),]}
     
     ##list all data
     singleflydata <- list(URIs, 
