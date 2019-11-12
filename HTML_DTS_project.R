@@ -57,6 +57,11 @@ grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of le
 exp_groups <- list()    #Individual fly names in each group for display in project evaluation
 grouped.OMdata <-list() #Averaged optomotor data traces for each group
 grouped.OMparams <-list() #Extracted optomotor parameters for each group
+grouped.OMdataBefore <-list() #Averaged optomotor data traces for each group at start of experiment
+grouped.OMparamsBefore <-list() #Extracted optomotor parameters for each group at start of experiment
+grouped.OMdataAfter <-list() #Averaged optomotor data traces for each group at end of experiment
+grouped.OMparamsAfter <-list() #Extracted optomotor parameters for each group at end of experiment
+
 
 for(x in 1:NofGroups)
 {

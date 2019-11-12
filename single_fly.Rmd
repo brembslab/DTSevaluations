@@ -204,7 +204,7 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
 ```{r om, echo=FALSE}
 om <- any(grepl("optomotor", sequence$type)==TRUE)    ###determine if there are optomotor periods
 if (om & any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-optomotor periods...
-  if (grepl("optomotor", sequence$type[1]) & grepl("optomotor", tail(sequence$type, 1))){ ###...and the opto periods are in the beginning and the end
+  if (grepl("optomotor", sequence$type[1]) & grepl("optomotor", tail(sequence$type, 1))){ ###...and the optomotor periods are in the beginning and the end
     beforeafter = TRUE
     om = FALSE
   }
@@ -271,7 +271,7 @@ if(!exists("OMdata"))
 
 ### extract optomotor traces and generate dataframe for right (clockwise) turning arena
 rightOMbefore=which(grepl("optomotorR", head(sequence$type))) #collect the right turning OM periods in the first half of the experiment
-rightOMdataBefore<-filter(rawdata, rawdata$period %in% rightOMperiods) #extract only right turning arena periods
+rightOMdataBefore<-filter(rawdata, rawdata$period %in% rightOMbefore) #extract only right turning arena periods
 rightOMdataBefore <- rightOMdataBefore %>% select(-c(a_pos,date)) #drop unnecessary columns
 rightOMdataBefore$time=ave(rightOMdataBefore$period, rightOMdataBefore$period, FUN=seq_along) #match the time values to start at each period start
 rightOMdataBefore$time=(rightOMdataBefore$time-1)*50 #make 20Hz data into ms time scale
@@ -289,7 +289,7 @@ ggplot(data = rightOMdataBefore, aes(x=time/1000, y=fly)) +
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
 leftOMbefore=which(grepl("optomotorL", head(sequence$type))) #collect the left turning OM periods in the first half of the experiment
-leftOMdataBefore<-filter(rawdata, rawdata$period %in% leftOMperiods)  #extract only left turning arena periods
+leftOMdataBefore<-filter(rawdata, rawdata$period %in% leftOMbefore)  #extract only left turning arena periods
 leftOMdataBefore <- leftOMdataBefore %>% select(-c(a_pos,date))  #drop unnecessary columns
 leftOMdataBefore$time=ave(leftOMdataBefore$period, leftOMdataBefore$period, FUN=seq_along) #match the time values to start at each period start
 leftOMdataBefore$time=((leftOMdataBefore$time)*50)+max(rightOMdataBefore$time) #make 20Hz data into ms time scale, starting after right turning data
@@ -323,8 +323,8 @@ if(!exists("OMdataBefore"))
 ```{r OptomotorTracesAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
 ### extract optomotor traces and generate dataframe for right (clockwise) turning arena
-rightOMafter=which(grepl("optomotorR", tail(sequence$type))) #collect the right turning OM periods in the last half of the experiment
-rightOMdataAfter<-filter(rawdata, rawdata$period %in% rightOMperiods) #extract only right turning arena periods
+rightOMafter=which(grepl("optomotorR", tail(sequence$type, 8)))+NofPeriods-8 #collect the right turning OM periods in the last half of the experiment
+rightOMdataAfter<-filter(rawdata, rawdata$period %in% rightOMafter) #extract only right turning arena periods
 rightOMdataAfter <- rightOMdataAfter %>% select(-c(a_pos,date)) #drop unnecessary columns
 rightOMdataAfter$time=ave(rightOMdataAfter$period, rightOMdataAfter$period, FUN=seq_along) #match the time values to start at each period start
 rightOMdataAfter$time=(rightOMdataAfter$time-1)*50 #make 20Hz data into ms time scale
@@ -341,11 +341,11 @@ ggplot(data = rightOMdataAfter, aes(x=time/1000, y=fly)) +
   theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
-leftOMafter=which(grepl("optomotorL", tail(sequence$type))) #collect the left turning OM periods in the last half of the experiment
-leftOMdataAfter<-filter(rawdata, rawdata$period %in% leftOMperiods)  #extract only left turning arena periods
+leftOMafter=which(grepl("optomotorL", tail(sequence$type, 8)))+NofPeriods-8 #collect the left turning OM periods in the last half of the experiment
+leftOMdataAfter<-filter(rawdata, rawdata$period %in% leftOMafter)  #extract only left turning arena periods
 leftOMdataAfter <- leftOMdataAfter %>% select(-c(a_pos,date))  #drop unnecessary columns
 leftOMdataAfter$time=ave(leftOMdataAfter$period, leftOMdataAfter$period, FUN=seq_along) #match the time values to start at each period start
-leftOMdataAfter$time=((leftOMdataBefore$time)*50)+max(rightOMdataAfter$time) #make 20Hz data into ms time scale, starting after right turning data
+leftOMdataAfter$time=((leftOMdataAfter$time)*50)+max(rightOMdataAfter$time) #make 20Hz data into ms time scale, starting after right turning data
 leftOMdataAfter$period=as.factor(leftOMdataAfter$period)
 ggplot(data = leftOMdataAfter, aes(x=time/1000, y=fly)) + 
   geom_hline(yintercept = 0, color="black") +
