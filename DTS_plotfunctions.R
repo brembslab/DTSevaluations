@@ -1,6 +1,6 @@
 ################### Plotting functions for DTS data ######################
 
-######## Plot fl behavior and position data for each period ########
+######## Plot fly behavior and position data for each period ########
 
 fly_pos_traces <- function(temp)
 {
@@ -153,4 +153,245 @@ geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", po
         params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...))
 }
 # usage: ggplot(my_data, aes(x, y, fill = m)) + geom_split_violin()
+
+
+
+###########################################################################
+#                                                                         #
+#                   Collected Optomotor Functions                         #
+#                                                                         #
+###########################################################################
+
+
+
+##################generate optomotor data for plotting ######################
+generateOMdata <- function(OMperiods){
+  OMdata<-filter(rawdata, rawdata$period %in% OMperiods) #extract only right turning arena periods
+  OMdata <- OMdata %>% select(-c(a_pos,date)) #drop unnecessary columns
+  OMdata$time=ave(OMdata$period, OMdata$period, FUN=seq_along) #match the time values to start at each period start
+  OMdata$time=(OMdata$time-1)*50 #make 20Hz data into ms time scale
+  OMdata$period=as.factor(OMdata$period)
+  return(OMdata)
+}
+
+##########plot raw optomotor traces of a single fly######################
+plotrawOMtraces <- function(OMdata){
+  OMtraces <- ggplot(data = OMdata, aes(x=time/1000, y=fly)) + 
+    geom_hline(yintercept = 0, color="black") +
+    geom_line(aes(group=period, colour=period), size=1) + 
+    geom_smooth(method="loess", span = 0.1) +
+    ylab("Optomotor Response [rel. units]")+ 
+    xlab("Time [s]") + 
+    ggtitle(paste("Right (clockwise) arena rotations -", flyname)) +
+    theme_classic()+
+    scale_x_continuous(expand = expand_scale(add = 0))+
+    theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))
+  return(OMtraces)
+}
+
+#########plot averaged optomotor traces of a single fly##################
+plotaveOMtraces <- function(OMdata){
+  OMtraces <- ggplot(data=OMdata, aes(x=OMdata$time/1000, y=OMdata[[as.character(flyname)]])) + 
+    geom_rect(aes(xmin = mean(OMdata$time/1000),xmax = Inf,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
+    geom_hline(yintercept = 0) +
+    geom_line() +
+    ylab("Optomotor Resoponse [rel. units]")+ 
+    xlab("Time [s]") +
+    theme_classic() + 
+    annotate("text", -Inf, Inf, label = "Right (clockwise) arena rotations", hjust = -0.1, vjust = 1.3)+
+    annotate("text", Inf, -Inf, label = "Left (counter-clockwise) arena rotations", hjust =1.1, vjust = -1.5)+ 
+    theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
+    scale_x_continuous(expand = expand_scale(add = 0))
+  return(OMtraces)
+}
+
+#########plot averaged optomotor traces of several flies #################
+plotOMtracesMean <- function(OMdata){
+    plotOM=ldply(OMdata, data.frame)            #move the dataframes for each group into a single dataframe
+    plotOM=plotOM[,c("time","means","sd","group")]
+    
+    #plot averaged OM traces
+    
+    meanOMtraces <- ggplot(plotOM, aes(x=time/1000, y=means, group = group)) +
+            theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
+            geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
+            geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
+            geom_hline(yintercept = 0, color="black") +
+            scale_fill_manual(values = boxcolors) +
+            geom_line(aes(colour = group), size = 1) + 
+            scale_color_manual(values = boxcolors) +
+            ggtitle("Mean Optomotor Traces and Standard Deviations") +
+            guides(colour = guide_legend(override.aes = list(size=3))) +
+            theme_light(base_size = 16) + 
+            theme(legend.justification=c(1,0),
+                  legend.position="right", 
+                  legend.title=element_blank(), 
+                  legend.key.size = unit(2, 'lines'),
+                  legend.key = element_rect(size = 6),
+                  legend.box.background = element_rect(fill="white"),
+                  legend.box.margin = margin(4, 4, 4, 4),
+                  legend.text=element_text(size=14), 
+                  panel.grid.major.y = element_blank(),
+                  panel.grid.minor = element_blank(),
+                  panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+            theme(axis.text.y = element_text(size=12))+
+            ylab("Optomotor Response [rel. units]") + 
+            xlab("Time [s]")+
+            annotate("text", -Inf, Inf, label = "Right (clockwise) arena rotations", hjust = -0.05, vjust = 1.3)+
+            annotate("text", Inf, -Inf, label = "Left (counter-clockwise) arena rotations", hjust =1, vjust = -1.5)+
+            theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
+            scale_x_continuous(expand = expand_scale(add = 0))
+    return(meanOMtraces)
+
+}
+
+
+############plot box/whisker plots of optomotor parameters ###############
+plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
+  utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$p.value, 3) #compare the two groups with a U-test and collect p-value
+  w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$statistic, 3)
+  #compute effect size Cohen's D
+  cohend = signif(cohen.d(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$estimate, 3)
+  #calculate statistical power
+  alt = project.data[["statistics"]][["two.groups"]][["power"]]
+  power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
+  #calculate Bayes Factor
+  bayesF=extractBF(ttestBF(plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[1]], plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[2]]))
+  #calculate FPR for priors set in project file#
+  #run first prior  
+  prior=priorval[1]
+  out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+  fpz1=out[1]
+  #run second prior  
+  prior=priorval[2]
+  out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+  fpz2=out[1]
+  #Power and likelihood ratio: NB for two sided test, need 2*y0
+  LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
+  
+  #make tidy table of results
+  results.utest<-data.frame(values=c(signif[1],
+                                     w.statistic,
+                                     cohend,
+                                     power,
+                                     signif(bayesF$bf, 3),
+                                     signif(bayesF$error, 3),
+                                     signif(fpz1, 3),
+                                     signif(fpz2, 3),
+                                     signif(LR, 3)))
+  rownames(results.utest)<-c("Significance level",
+                             "MW U-Test, W",
+                             "Cohen's D",
+                             "stat. Power",
+                             "Bayes Factor",
+                             "Bayes Factor error",
+                             paste("FP risk, prior ",priorval[1]),
+                             paste("FP risk, prior ",priorval[2]),
+                             "Likelihood Ratio")
+  
+  # plot two PIs with asterisks
+  plots.2test<-list(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
+                      geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+                      geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+                      ggtitle(paste("U-Test, p=", utest)) +
+                      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+                      theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+                      geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5) +
+                      samplesizes.annotate(boxes, samplesizes))
+  
+  #add table with results and plot
+  plots.2test[[2]]<-tableGrob(results.utest)
+  return(plots.2test)
+}
+
+
+####fit nonlinear model for parameter estimation to optomotor traces #####
+# Find the midpoint in left and right turning in averaged traces (OMdata)
+OMparamextract <- function(OMdata){
+  
+OMmidpoint = OMdata$time[nrow(OMdata)]/2
+
+#right turning traces
+x1=OMdata$time[OMdata$time<=OMmidpoint]                     #time
+y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]  #mean right OM response
+y=rollapply(y, 100,mean, fill="extend")                     #apply rolling average of 100 data points (5s)
+xy <-sortedXyData(x1,y)                                     #create sortedXYdata object
+
+LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata right turning
+
+#plot(xy)
+#abline(LinMod)
+#LinMod$coefficients[2]
+
+if(abs(LinMod$coefficients[2])<0.0001){                     #if the linear model shows hardly any slope, set asymptote as mean of all values
+  right=c(b0=0, b1=mean(y), lrc=-1000)
+} else {
+  right<-tryCatch(                                          #extract the right turning coefficients into a vector. Set vector to zero for errors
+    expr = {
+      right<-NLSstAsymptotic(xy)
+    },
+    error = function(e){
+      right=c(b0=0, b1=0, lrc=-1000)                        #set logarithmic rate constant to -1000 so exp(lrc)=0
+      return(right)
+    },
+    warning = function(w){
+      right=c(b0=0, b1=0, lrc=-1000)                        #set logarithmic rate constant to -1000 so exp(lrc)=0
+      return(right)
+    },
+    finally = {}
+  )}
+
+#left turning traces
+x1=OMdata$time[OMdata$time>OMmidpoint]                      #time
+x1=x1-x1[1]                                                 #set time to start from zero
+y=OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]   #mean left OM response
+y=rollapply(y, 100,mean, fill="extend")                     #apply rolling average of 100 data points (5s)
+xy <-sortedXyData(x1,y)                                     #create sortedXYdata object
+
+LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata left turning
+
+#plot(xy)
+#abline(LinMod)
+#LinMod$coefficients[2]
+
+if(abs(LinMod$coefficients[2])<0.0001){                     #if the linear model shows hardly any slope, set asymptote as mean of all values
+  left=c(b0=0, b1=mean(y), lrc=-1000)
+} else {
+  left<-tryCatch(                                           #extract the left turning coefficients into a vector. Set vector to zero for errors
+    expr = {
+      left<-NLSstAsymptotic(xy)
+    },
+    error = function(e){
+      left=c(b0=0, b1=0, lrc=-1000)                         #set logarithmic rate constant to -1000 so exp(lrc)=0
+      return(left)
+    },
+    warning = function(w){
+      left=c(b0=0, b1=0, lrc=-1000)                         #set logarithmic rate constant to -1000 so exp(lrc)=0
+      return(left)
+    },
+    finally = {}
+  )}
+
+
+###calculate averages and asymmetries to three significant digits and put them into a vector
+rightasymp = right[1]+right[2]
+leftasymp = left[1]+left[2]
+#sanity checks
+if(leftasymp < maxfly[1]){leftasymp=0}
+if(rightasymp > maxfly[2]){rightasymp=0}
+
+if (leftasymp==0 & rightasymp==0){aveOMcoeff=c(0,0,0)
+} else {
+  aveOMcoeff=c(signif((abs(rightasymp)+abs(leftasymp))/2, 3),                                #mean asymptote
+               signif(((exp(right[3])+exp(left[3]))/2)*1000, 3),                             #mean rate constant [s]
+               signif((abs(rightasymp)-abs(leftasymp))/(abs(rightasymp)+abs(leftasymp)), 3)) #asymmetry index
+}
+
+###make vector into a dataframe for easy exporting and plotting
+tempOMparams <- as.data.frame(rbind(as.numeric(aveOMcoeff)))      #convert to dataframe
+names(tempOMparams) = c("asymptote", "rate constant","AI")        #set column names
+rownames(tempOMparams)[1]=as.character(flyname)                   #set row names to flynames
+
+return(tempOMparams)
+}
 
