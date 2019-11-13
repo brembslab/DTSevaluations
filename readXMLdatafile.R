@@ -34,6 +34,12 @@ flyDataImport <- function(xml_name) {
     if (experiment$arena_type=="motor"){rawdata$a_pos = round(rawdata$a_pos*0.87890625)}
     }
     
+  ##adjusting data for shiming
+    if (tolower(experiment$meter_type) == "shiming") {
+      rawdata$time = round(rawdata$time*1000)
+      rawdata$torque = rawdata$torque*100
+    }
+     
   ##change j_pos data from float to integer and shift to make approx. zero symmetric (needs work!)
     if(exists("j_pos", rawdata)){
       rawdata$j_pos = round(rawdata$j_pos*1000)+1100
@@ -68,6 +74,8 @@ flyDataImport <- function(xml_name) {
     rawdata$date<-as.POSIXct(rawdata$time/1000, origin=date(experiment$dateTime), tz="UTC") #required for dygraphs
     traces$date<-as.POSIXct(traces$time/1000, origin=date(experiment$dateTime), tz="UTC") #required for dygraphs
     
+    #remove any extra period numbers, if they exist
+    if (length(table(rawdata$period)) > NofPeriods) {rawdata<-rawdata[!(rawdata$period==length(table(rawdata$period))),]}
     
     ##list all data
     singleflydata <- list(URIs, 
