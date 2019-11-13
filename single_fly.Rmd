@@ -96,23 +96,56 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
 ```{r PeriodTraces, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10}
 
 #add columns for PIs to sequence data
-    sequence$lambda <- NA
-
-    for(i in 1:NofPeriods){
-      
-      #save colors for later plotting
-      if(sequence$outcome[i]==0){
-        sequence$color[i]="lightyellow"
-        sequence$histocolor[i]="darkgreen"
-      } else {
-        sequence$color[i]="orange"
-        sequence$histocolor[i]="orange"
-        }
-     if(sequence$contingency[i]==""){
-        sequence$color[i]=NA
-        sequence$histocolor[i]="red"
-        }
-      
+sequence$lambda <- NA
+#PIcolor <- list()
+sequence$color <- NA
+sequence$PIcolor <- NA
+sequence$combined <- NA
+contingency <- NA
+for(i in 1:NofPeriods){
+  
+  #save colors for later plotting
+  if(sequence$outcome[i]==0){
+    sequence$color[i]="lightyellow"
+    sequence$histocolor[i]="darkgreen"
+  } else {
+    sequence$color[i]="orange"
+    sequence$histocolor[i]="orange"
+  }
+  if(sequence$outcome[i]==0){
+    sequence$color[i]="lightyellow"
+    sequence$histocolor[i]="darkgreen"
+  } else {
+    sequence$color[i]="orange"
+    sequence$histocolor[i]="orange"
+  }
+  if(sequence$contingency[i]==""){
+    sequence$color[i]=NA
+    sequence$histocolor[i]="red"
+ 
+  #the following monstrosity adds a specific color to any of the six possible contingency/pattern combinations   
+  }
+  if(sequence$pattern[i]== 7 & sequence$contingency[i]=="left_torque"){ 
+    sequence$PIcolor[i]="red"
+  }
+  if(sequence$pattern[i]== 7 & sequence$contingency[i]=="right_torque"){
+    sequence$PIcolor[i]="blue"
+  }
+  if(sequence$pattern[i]== 8 & sequence$contingency[i]=="left_torque"){
+    sequence$PIcolor[i]="green"
+  }
+  if(sequence$pattern[i]== 7 & sequence$contingency[i]=="right_torque"){
+    sequence$PIcolor[i]="orange"
+  }
+  if(sequence$pattern[i]== 0 & sequence$contingency[i]=="left_torque"){
+    sequence$PIcolor[i]="black"
+  }
+  if(sequence$pattern[i]== 0 & sequence$contingency[i]=="right_torque"){
+    sequence$PIcolor[i]="purple"
+  }
+  if(sequence$contingency[i]==""){
+  sequence$PIcolor[i]=NA
+  }
       ##only look at period data
       temp  <- rawdata[rawdata$period == i, ]
       keeps = c("a_pos","fly")
@@ -146,7 +179,8 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
       ##calculate PIs
       ##create data.frame for adding PIs if it doesn't eist, yet
       if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))}
-      
+      if(!exists("PIcolor")){PIcolor <- data.frame(matrix(ncol = NofPeriods))}
+      if(!exists("PIcombined")){PIcombined <- data.frame(matrix(ncol = NofPeriods))}
       if(sequence$type[i]=="fs"||sequence$type[i]=="color") #for arena position
       {
         t1 = sum(abs(temp$a_pos) >= 450 & abs(temp$a_pos) <= 1350)
@@ -161,6 +195,9 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
         sequence$lambda[i] = (t1-t2)/(t1+t2)
         if (sequence$contingency[i] == 'right_torque'){sequence$lambda[i]=-sequence$lambda[i]}
         if(l==1){PIprofile[1,i]=sequence$lambda[i]}
+        if(l==1){PIcolor[1,i]=sequence$PIcolor[i]}
+        sequence$combined[i] <- paste(sequence$pattern[i],sequence$contingency[i]) #combines pattern and contingency into a new column
+        if(l==1){PIcombined[1,i]=sequence$combined[i]}
       }
     } #for Number of Periods
     
