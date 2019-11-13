@@ -238,7 +238,7 @@ if(two)
 ```{r OMparamsBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 
 plotOMparamsBefore=ldply(grouped.OMparamsBefore, data.frame)    #move the dataframes from each group into a single dataframe
-samplesizes = as.numeric(table(plotOMparamsBefore$group)) #determine sample sizes in each group
+samplesizes = as.numeric(table(plotOMparamsBefore$group))       #determine sample sizes in each group
 OMvariables = head(names(plotOMparamsBefore),-1)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
@@ -261,9 +261,9 @@ if(two)
   {
         for (v in 1:3) {
           cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
-            plots.2test<-plotOMParamBox(v, plotOMParamsBefore, samplesizes, OMvariables, OMtitles) #call function to plot box/whisker diagram and calculate statistics
+            plots.2test<-plotOMParamBox(v, plotOMparamsBefore, samplesizes, OMvariables, OMtitles) #call function to plot box/whisker diagram and calculate statistics
           grid.arrange(grobs = plots.2test, ncol=2)
-        } #for 
+        }
 }
 ```
 
@@ -293,61 +293,9 @@ if(two)
   {
         for (v in 1:3) {
            cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
-            utest = signif(wilcox.test(plotOMparamsAfter[[OMvariables[v]]] ~ plotOMparamsAfter$group)$p.value, 3) #compare the two groups with a U-test and collect p-value
-            w.statistic = signif(wilcox.test(plotOMparamsAfter[[OMvariables[v]]] ~ plotOMparamsAfter$group)$statistic, 3)
-            #compute effect size Cohen's D
-            cohend = signif(cohen.d(plotOMparamsAfter[[OMvariables[v]]] ~ plotOMparamsAfter$group)$estimate, 3)
-            #calculate statistical power
-            alt = project.data[["statistics"]][["two.groups"]][["power"]]
-            power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
-            #calculate Bayes Factor
-            bayesF=extractBF(ttestBF(plotOMparamsAfter[[OMvariables[v]]][plotOMparamsAfter$group==groupnames[1]], plotOMparamsAfter[[OMvariables[v]]][plotOMparamsAfter$group==groupnames[2]]))
-            #calculate FPR for priors set in project file#
-            #run first prior  
-              prior=priorval[1]
-              out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
-              fpz1=out[1]
-            #run second prior  
-              prior=priorval[2]
-              out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
-              fpz2=out[1]
-            #Power and likelihood ratio: NB for two sided test, need 2*y0
-              LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
-        
-              #make tidy table of results
-            results.utest<-data.frame(values=c(signif[1],
-                                               w.statistic,
-                                               cohend,
-                                               power,
-                                               signif(bayesF$bf, 3),
-                                               signif(bayesF$error, 3),
-                                               signif(fpz1, 3),
-                                               signif(fpz2, 3),
-                                               signif(LR, 3)))
-            rownames(results.utest)<-c("Significance level",
-                                       "MW U-Test, W",
-                                       "Cohen's D",
-                                       "stat. Power",
-                                       "Bayes Factor",
-                                       "Bayes Factor error",
-                                       paste("FP risk, prior ",priorval[1]),
-                                       paste("FP risk, prior ",priorval[2]),
-                                       "Likelihood Ratio")
-            
-        # plot two PIs with asterisks
-          plots.2test<-list(ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
-              geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
-              ggtitle(paste("U-Test, p=", utest)) +
-              theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-              geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5) +
-              samplesizes.annotate(boxes, samplesizes))
-        
-          #add table with results and plot
-          plots.2test[[2]]<-tableGrob(results.utest)
+            plots.2test<-plotOMParamBox(v, plotOMparamsAfter, samplesizes, OMvariables, OMtitles) #call function to plot box/whisker diagram and calculate statistics
           grid.arrange(grobs = plots.2test, ncol=2)
-        } #for 
+        } 
 }
 ```
 

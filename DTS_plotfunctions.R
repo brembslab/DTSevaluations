@@ -289,7 +289,7 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                              paste("FP risk, prior ",priorval[2]),
                              "Likelihood Ratio")
   
-  # plot two PIs with asterisks
+  # plot two optomotor parameters with asterisks
   plots.2test<-list(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
                       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
                       geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
@@ -299,7 +299,7 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                       geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5) +
                       samplesizes.annotate(boxes, samplesizes))
   
-  #add table with results and plot
+  #add table with results
   plots.2test[[2]]<-tableGrob(results.utest)
   return(plots.2test)
 }
