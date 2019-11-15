@@ -335,20 +335,16 @@ for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
   PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
-  PIcolor <- grouped.PIcolor[[x]]
-  PIcolor <- PIcolor[colSums(!is.na(PIcolor)) > 0]#remove empty columns
   PIcombined <- grouped.PIcombined[[x]]
   PIcombined <- PIcombined[colSums(!is.na(PIcombined)) > 0]
-
-  PIcolor["new"] <- NA #the PIcolor does not melt. Adding an empty column fixes this problem
-  PIcombined["new"] <- NA
+  PIcombined["new"] <- NA #issues with melting this df so creating a new column for this reason
   PIcombined = melt(PIcombined,id.vars="new") #melt data frames 
-  PIcolor = melt(PIcolor,id.vars="new")
-  n = length(unique(PIcombined$value))
+   melted = melt(PIprofile)
+   melted["color"] <- PIcombined$value
     PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = melt(PIprofile), aes(x=variable, y=value, fill=PIcombined$value), position=position_jitter(0.3), shape=21, size=3, colour="black") +
+              geom_jitter(data = melted, aes(x=variable, y=value, fill=color), position=position_jitter(0.3), shape=21, size=3, colour="black") +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
@@ -356,8 +352,7 @@ for(x in 1:NofGroups)
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
-              theme(aspect.ratio=aspect_ratio) +
-              scale_fill_manual(values=wes_palette(n = n, name="FantasticFox1", type = c("discrete"))) + #changes the fill color using a Wes Anderson package. Because Wes Anderson.
+              theme(aspect.ratio=0.8*aspect_ratio) +
               scale_fill_discrete(name = "Punishment") #changes the title of the legend. Can be set to anything but in this case I went with "Punishment" 
   }  
 grid.arrange(grobs = PIplots, nrow=NofGroups)
