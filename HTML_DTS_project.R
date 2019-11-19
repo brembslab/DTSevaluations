@@ -177,8 +177,14 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
         ggtitle(paste("Period", i))
     }
   }
-  
+  Title = "Pooled Behavior Histogram"
   ## pool all fly and position data into single data.frame
+  if('right_torque' %in% sequence$contingency){
+    pooled.data[[i]][[2]]  = -pooled.data[[i]][[2]]
+  Title = "Flipped Behavior histogram" 
+  } else { 
+    pooled.data  = pooled.data[[i]][[2]]
+  }
   
   all.data <- do.call(rbind, pooled.data)
   
@@ -190,7 +196,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     geom_histogram(binwidth=3) + 
     labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") + 
     xlim(maxfly) +
-    ggtitle("Pooled Behavior Histogram")
+    ggtitle(Title)
   
   #position (if there are fs periods)
   if ('fs' %in% sequence$type) {
