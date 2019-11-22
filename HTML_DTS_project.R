@@ -59,7 +59,7 @@ grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of le
 exp_groups <- list()    #Individual fly names in each group for display in project evaluation
 grouped.OMdata <-list() #Averaged optomotor data traces for each group
 grouped.OMparams <-list() #Extracted optomotor parameters for each group
-
+grouped.PIstatcolor <- list()
 for(x in 1:NofGroups)
 {
   grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
@@ -121,6 +121,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
       PIcombined <- rbind2(PIcombined, as.vector(t(sequence$combined)))
     }
     
+    grouped.PIstatcolor[[l]] = rbind2(as.vector(PIstatcolor))
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
     grouped.PIcolor[[l]] <- PIcolor
@@ -213,7 +214,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
 
 #Period sequence design meta-data
 grouped.periods[[x]] = periods
-
+grouped.color[[x]] = grouped.PIstatcolor
 #fly Histograms
 grouped.flyhistos[[x]] = flyhistos #add fly histograms to list of grouped histograms
 flyhistos <- list() #empty fly histograms
