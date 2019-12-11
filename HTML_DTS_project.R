@@ -2,6 +2,9 @@
 ################## R-script to read YAML DTS project files, visualize and statistically evaluate data. Reports in HTML ##############
 #####################################################################################################################################
 
+rm(list=ls()) #clean memory
+gc()          #collect garbage
+
 library(ggplot2)
 library(tidyr)
 library(dygraphs)
