@@ -196,7 +196,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     ggtitle("Pooled Behavior Histogram")
   
   #position (if there are fs periods)
-  if ('fs' %in% sequence$type) {
+  if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
   poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
     geom_histogram(binwidth=10) +
     labs(x="position [arb units]", y="frequency") + 
