@@ -113,10 +113,16 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
         sequence$histocolor[i]="red"
         }
       
-      ##only look at period data
+      ##only look at period data and save period data for later use
       temp  <- rawdata[rawdata$period == i, ]
       keeps = c("a_pos","fly")
-      period.data[[i]] <- temp[keeps] #list only arena position and fly behavior data by period
+      if((sequence$type[i]=="fs"||sequence$type[i]=="color") & sequence$contingency[i]=="2_4_Q")
+      {
+        temp_shifted = temp
+        temp_shifted$a_pos = temp_shifted$a_pos + 900 #shift the position values by 90°
+        temp_shifted$a_pos[temp_shifted$a_pos>1796] = temp_shifted$a_pos[temp_shifted$a_pos>1796]-3600 #wrap the shifted 90° back around to -90°..-180°
+        period.data[[i]] <- temp_shifted[keeps] #list only arena position and fly behavior data by period
+      } else period.data[[i]] <- temp[keeps] #list only arena position and fly behavior data by period
       
       if(sequence$type[i]=="fs"||sequence$type[i]=="yt"||sequence$type[i]=="color"||sequence$type[i]=="optomotorR"||sequence$type[i]=="optomotorL")
       {
