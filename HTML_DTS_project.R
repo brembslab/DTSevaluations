@@ -43,8 +43,14 @@ evaluation.path = paste(project.path,"evaluations", sep = "/")
 dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)
 
-#how many experimental groups will need to be evaluated
-NofGroups = lengths(project.data["resources"])
+#hcollecting essential data for statistics and plots
+NofGroups = lengths(project.data["resources"])                                   #get number of experimental groups
+signif = project.data[["statistics"]][["significance-levels"]]                   #get significance levels
+groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
+priorval = project.data[["statistics"]][["priors"]]                              #get priors for FPR calculation
+twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1       #etermine if statistics for two groups are required
+wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1              #determine if we need to do single tests
+learningscore = project.data[["statistics"]][["learning-score"]][["data"]]       #get the PI that is going to be tested
 
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
@@ -66,6 +72,7 @@ for(x in 1:NofGroups)
   grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
   grp_description = project.data[["resources"]][[x]][["description"]] #collect description of the group
   xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
+  if(!exists("samplesizes")) {samplesizes = length(project.data[["resources"]][[x]][["data"]])} else samplesizes[x] = length(project.data[["resources"]][[x]][["data"]]) #samplesizes
 
 #create/empty lists for collecting all single fly data by period
 period.data <- list()     #data grouped by period
@@ -202,6 +209,22 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     labs(x="position [arb units]", y="frequency") + 
     xlim(-1800,1800) +
     ggtitle("Pooled Position Histogram")
+  }
+  
+  ## collect data for superimposed position histograms from two groups
+  if (NofGroups==2 & ('fs' %in% sequence$type || 'color' %in% sequence$type))
+  {
+    if(x==1){
+      histo1 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
+      histo1$v2 = groupnames[x]
+      #colnames(histo1)=c("v1","v2")
+      } else {
+        histo2 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
+        histo2$v2 = groupnames[x]
+       # colnames(histo2)=c("v1","v2")
+      }
+    supHistos <- rbind(histo1,histo2)
+    colnames(supHistos) = c("a_pos", "group")
   }
 
 } else stop("You have selected files with differing metadata. Please check your DTS files for consistency!")

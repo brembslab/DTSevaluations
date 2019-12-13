@@ -119,8 +119,8 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
       if((sequence$type[i]=="fs"||sequence$type[i]=="color") & sequence$contingency[i]=="2_4_Q")
       {
         temp_shifted = temp
-        temp_shifted$a_pos = temp_shifted$a_pos + 900 #shift the position values by 90°
-        temp_shifted$a_pos[temp_shifted$a_pos>1796] = temp_shifted$a_pos[temp_shifted$a_pos>1796]-3600 #wrap the shifted 90° back around to -90°..-180°
+        temp_shifted$a_pos = temp_shifted$a_pos + 900 #shift the position values by 90?
+        temp_shifted$a_pos[temp_shifted$a_pos>1796] = temp_shifted$a_pos[temp_shifted$a_pos>1796]-3600 #wrap the shifted 90? back around to -90?..-180?
         period.data[[i]] <- temp_shifted[keeps] #list only arena position and fly behavior data by period
       } else period.data[[i]] <- temp[keeps] #list only arena position and fly behavior data by period
       
@@ -185,15 +185,6 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
       xlim(-maxfly) +
       ggtitle(paste(flyname, "total"))
     
-    # add pooled position histogram - if there are any periods with meaningful position data
-    if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
-      poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
-      geom_histogram(binwidth=10) +
-      labs(x="position [degrees*10]", y="frequency") + 
-      xlim(-1800,1800) +
-      ggtitle(paste(flyname, "total"))
-    }
-    
     ##write histograms
     #fly behavior
     multiplot(plotlist = flyhistos, cols=round(NofPeriods/5))
@@ -201,6 +192,14 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
 
 ```{r PositionHistogram, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
       cat("\n## Arena Position Histograms\n")
+    # add pooled position histogram
+      poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
+      geom_histogram(binwidth=10) +
+      labs(x="position [degrees*10]", y="frequency") + 
+      xlim(-1800,1800) +
+      ggtitle(paste(flyname, "total"))
+    
+   ##write positioon histograms
       multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5)) #only print position histograms if there are any
 
 ```
