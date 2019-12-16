@@ -217,14 +217,17 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     if(x==1){
       histo1 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
       histo1$v2 = groupnames[x]
-      #colnames(histo1)=c("v1","v2")
+      colnames(histo1)=c("a_pos","group")
+      histo1$a_pos = abs(histo1$a_pos)/10    #fold position data over to look at 180° equivalent fixation and bring into degree range
+      histo1$a_pos[histo1$a_pos>90] = -histo1$a_pos[histo1$a_pos>90]+180 #fold anything larger than 90° to 0..90°
       } else {
         histo2 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
         histo2$v2 = groupnames[x]
-       # colnames(histo2)=c("v1","v2")
+        colnames(histo2)=c("a_pos","group")
+        histo2$a_pos = abs(histo2$a_pos)/10  #fold position data over to look at 180° equivalent fixation and bring into degree range
+        histo2$a_pos[histo2$a_pos>90] = -histo2$a_pos[histo2$a_pos>90]+180 #fold anything larger than 90° to 0..90°
+        supHistos <- rbind(histo1,histo2)
       }
-    supHistos <- rbind(histo1,histo2)
-    colnames(supHistos) = c("a_pos", "group")
   }
 
 } else stop("You have selected files with differing metadata. Please check your DTS files for consistency!")

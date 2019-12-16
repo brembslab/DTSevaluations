@@ -119,8 +119,8 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
       if((sequence$type[i]=="fs"||sequence$type[i]=="color") & sequence$contingency[i]=="2_4_Q")
       {
         temp_shifted = temp
-        temp_shifted$a_pos = temp_shifted$a_pos + 900 #shift the position values by 90?
-        temp_shifted$a_pos[temp_shifted$a_pos>1796] = temp_shifted$a_pos[temp_shifted$a_pos>1796]-3600 #wrap the shifted 90? back around to -90?..-180?
+        temp_shifted$a_pos = temp_shifted$a_pos + 900 #shift the position values by 90°
+        temp_shifted$a_pos[temp_shifted$a_pos>1796] = temp_shifted$a_pos[temp_shifted$a_pos>1796]-3600 #wrap the shifted 90° back around to -90°..-180°
         period.data[[i]] <- temp_shifted[keeps] #list only arena position and fly behavior data by period
       } else period.data[[i]] <- temp[keeps] #list only arena position and fly behavior data by period
       
@@ -269,7 +269,7 @@ if(!exists("OMdata"))
 ```{r OptomotorAverage, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
 ggplot(data=OMdata, aes(x=OMdata$time/1000, y=OMdata[[as.character(flyname)]])) + 
-  geom_rect(aes(xmin = mean(OMdata$time/1000),xmax = Inf,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
+  geom_rect(aes(xmin = mean(OMdata$time/1000),xmax = Inf,ymin = -Inf, ymax = Inf),fill=("lightgrey"))+
   geom_hline(yintercept = 0) +
   geom_line() +
   ylab("Optomotor Resoponse [rel. units]")+ 
