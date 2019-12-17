@@ -172,7 +172,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     
     #fly
     flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
-      geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
+     geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
       labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
       xlim(maxfly) +
       ggtitle(paste("Period", i))
@@ -181,9 +181,17 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     if(sequence$type[i]=="fs" || sequence$type[i]=="color")
     {
       poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
+        geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
         geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
         labs(x="arena position [arb units]", y="frequency") +
-        xlim(-1800,1800) +
+        theme_light() +
+        theme(panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank()) +
+        scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), expand = c(0,0)) +
+        scale_y_continuous(expand = c(0,0)) +
         ggtitle(paste("Period", i))
     }
   }
