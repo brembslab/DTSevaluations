@@ -57,6 +57,11 @@ grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of le
 exp_groups <- list()    #Individual fly names in each group for display in project evaluation
 grouped.OMdata <-list() #Averaged optomotor data traces for each group
 grouped.OMparams <-list() #Extracted optomotor parameters for each group
+grouped.OMdataBefore <-list() #Averaged optomotor data traces for each group at start of experiment
+grouped.OMparamsBefore <-list() #Extracted optomotor parameters for each group at start of experiment
+grouped.OMdataAfter <-list() #Averaged optomotor data traces for each group at end of experiment
+grouped.OMparamsAfter <-list() #Extracted optomotor parameters for each group at end of experiment
+
 
 for(x in 1:NofGroups)
 {
@@ -127,14 +132,41 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
   
   # derive means and SDs for optomotor data in the group and collect extracted OM parameters
 if(any(grepl("optomotor", sequence$type)==TRUE)){
-  OMdata$means=rowMeans(OMdata[-1])
-  OMdata$sd=rowSds(OMdata[-1])
-  OMdata$group=project.data[["resources"]][[x]][["name"]]
-  grouped.OMdata[[x]] <- OMdata #save optomotor data to groupwise list
-  rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group
-  OMparams$group=project.data[["resources"]][[x]][["name"]]
-  grouped.OMparams[[x]] <- OMparams #save extracted optomotor parameters to groupwise list
-  rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
+}
+  
+ if(any(grepl("optomotor", sequence$type)==TRUE)){    ###determine if there are optomotor periods
+  if (any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-optomotor periods...
+    if (grepl("optomotor", sequence$type[1]) & grepl("optomotor", tail(sequence$type, 1))){ ###...and the opto periods are in the beginning and the end
+      ##then we have before/after optomotor data
+      #before
+      OMdataBefore$means=rowMeans(OMdataBefore[-1])
+      OMdataBefore$sd=rowSds(OMdataBefore[-1])
+      OMdataBefore$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMdataBefore[[x]] <- OMdataBefore #save optomotor data to groupwise list
+      rm(OMdataBefore) #remove the optomotor data frame so it can be generated again for the next group
+      OMparamsBefore$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMparamsBefore[[x]] <- OMparamsBefore #save extracted optomotor parameters to groupwise list
+      rm(OMparamsBefore) #remove the optomotor parameters dataframe so it can be generated again for the next group
+      #after
+      OMdataAfter$means=rowMeans(OMdataAfter[-1])
+      OMdataAfter$sd=rowSds(OMdataAfter[-1])
+      OMdataAfter$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMdataAfter[[x]] <- OMdataAfter #save optomotor data to groupwise list
+      rm(OMdataAfter) #remove the optomotor data frame so it can be generated again for the next group
+      OMparamsAfter$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMparamsAfter[[x]] <- OMparamsAfter #save extracted optomotor parameters to groupwise list
+      rm(OMparamsAfter) #remove the optomotor parameters dataframe so it can be generated again for the next group
+    }
+  } else {
+    OMdata$means=rowMeans(OMdata[-1])
+    OMdata$sd=rowSds(OMdata[-1])
+    OMdata$group=project.data[["resources"]][[x]][["name"]]
+    grouped.OMdata[[x]] <- OMdata #save optomotor data to groupwise list
+    rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group
+    OMparams$group=project.data[["resources"]][[x]][["name"]]
+    grouped.OMparams[[x]] <- OMparams #save extracted optomotor parameters to groupwise list
+    rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
+  }
 }
   
 
