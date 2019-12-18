@@ -186,6 +186,9 @@ plotOMtracesMean(grouped.OMdataAfter) #call function to plot OM traces at end of
 
 ```{r OMparams, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 
+####### Do not separate optomotor dat at all ##########
+
+
 plotOMparams=ldply(grouped.OMparams, data.frame)    #move the dataframes from each group into a single dataframe
 OMvariables = head(names(plotOMparams),-1)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
@@ -269,8 +272,9 @@ if(NofGroups==2)
 
 ```{r OMparamsBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 
+######### Separate optomotor evaluations: optomotor data at the start of the experiment ###############
+
 plotOMparamsBefore=ldply(grouped.OMparamsBefore, data.frame)    #move the dataframes from each group into a single dataframe
-samplesizes = as.numeric(table(plotOMparamsBefore$group))       #determine sample sizes in each group
 OMvariables = head(names(plotOMparamsBefore),-1)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
@@ -289,7 +293,7 @@ if(NofGroups==1)
 }
 
 #for two groups with statistics
-if(two)
+if(NofGroups==2)
   {
         for (v in 1:3) {
           cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
@@ -301,8 +305,9 @@ if(two)
 
 ```{r OMparamsAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 
+######### Separate optomotor evaluations: optomotor data at the end of the experiment ###############
+
 plotOMparamsAfter=ldply(grouped.OMparamsAfter, data.frame)    #move the dataframes from each group into a single dataframe
-samplesizes = as.numeric(table(plotOMparamsAfter$group)) #determine sample sizes in each group
 OMvariables = head(names(plotOMparamsAfter),-1)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
@@ -321,7 +326,7 @@ if(NofGroups==1)
 }
 
 #for two groups with statistics
-if(two)
+if(NofGroups==2)
   {
         for (v in 1:3) {
            cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
