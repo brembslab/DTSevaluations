@@ -2,6 +2,9 @@
 ################## R-script to read YAML DTS project files, visualize and statistically evaluate data. Reports in HTML ##############
 #####################################################################################################################################
 
+rm(list=ls()) #clean memory
+gc()          #collect garbage
+
 library(ggplot2)
 library(tidyr)
 library(dygraphs)
@@ -40,8 +43,14 @@ evaluation.path = paste(project.path,"evaluations", sep = "/")
 dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)
 
-#how many experimental groups will need to be evaluated
-NofGroups = lengths(project.data["resources"])
+#collecting essential data for statistics and plots
+NofGroups = lengths(project.data["resources"])                                   #get number of experimental groups
+signif = project.data[["statistics"]][["significance-levels"]]                   #get significance levels
+groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
+priorval = project.data[["statistics"]][["priors"]]                              #get priors for FPR calculation
+twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1       #etermine if statistics for two groups are required
+wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1              #determine if we need to do single tests
+learningscore = project.data[["statistics"]][["learning-score"]][["data"]]       #get the PI that is going to be tested
 
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
@@ -68,6 +77,7 @@ for(x in 1:NofGroups)
   grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
   grp_description = project.data[["resources"]][[x]][["description"]] #collect description of the group
   xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
+  if(!exists("samplesizes")) {samplesizes = length(project.data[["resources"]][[x]][["data"]])} else samplesizes[x] = length(project.data[["resources"]][[x]][["data"]]) #get samplesizes
 
 #create/empty lists for collecting all single fly data by period
 period.data <- list()     #data grouped by period
@@ -203,9 +213,17 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     if(sequence$type[i]=="fs" || sequence$type[i]=="color")
     {
       poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
+        geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
         geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
         labs(x="arena position [arb units]", y="frequency") +
-        xlim(-1800,1800) +
+        theme_light() +
+        theme(panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank()) +
+        scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), expand = c(0,0)) +
+        scale_y_continuous(expand = c(0,0)) +
         ggtitle(paste("Period", i))
     }
   }
@@ -225,13 +243,49 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     ggtitle("Pooled Behavior Histogram")
   
   #position (if there are fs periods)
-  if ('fs' %in% sequence$type) {
+  if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
   poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
     geom_histogram(binwidth=10) +
     labs(x="position [arb units]", y="frequency") + 
     xlim(-1800,1800) +
     ggtitle("Pooled Position Histogram")
   }
+
+  ## if we have two groups, collect data for superimposed histograms for either fly behavior or position
+  if (NofGroups==2){
+      if('yt' %in% sequence$type || 'sw' %in% sequence$type) #for yt or sw experiments, collect fly data
+      {
+        if(x==1){
+          histo1 <- data.frame(pooled.data[[learningscore]][["fly"]])
+          histo1$v2 = groupnames[x]
+          colnames(histo1)=c("fly","group")
+        } else {
+          histo2 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
+          histo2$v2 = groupnames[x]
+          colnames(histo2)=c("fly","group")
+          supHistos <- rbind(histo1,histo2) #make dataframe with fly data from both groups and group name as factor
+        }
+      } else if ('fs' %in% sequence$type || 'color' %in% sequence$type) #for fs or color experiments, collect arena position data and fold them to 0..90°
+      {
+        if(x==1){
+          histo1 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
+          histo1$v2 = groupnames[x]
+          colnames(histo1)=c("a_pos","group")
+          histo1$a_pos = abs(histo1$a_pos)/10    #fold position data over to look at 180° equivalent fixation and bring into degree range
+          histo1$a_pos[histo1$a_pos>90] = -histo1$a_pos[histo1$a_pos>90]+180 #fold anything larger than 90° to 0..90°
+        } else {
+          histo2 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
+          histo2$v2 = groupnames[x]
+          colnames(histo2)=c("a_pos","group")
+          histo2$a_pos = abs(histo2$a_pos)/10  #fold position data over to look at 180° equivalent fixation and bring into degree range
+          histo2$a_pos[histo2$a_pos>90] = -histo2$a_pos[histo2$a_pos>90]+180 #fold anything larger than 90° to 0..90°
+          supHistos <- rbind(histo1,histo2)  #make dataframe with position data from both groups and group name as factor
+        }
+      }  
+    
+  }
+  
+  ## collect data for superimposed position histograms from two groups
 
 } else stop("You have selected files with differing metadata. Please check your DTS files for consistency!")
 

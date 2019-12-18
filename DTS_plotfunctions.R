@@ -175,14 +175,14 @@ generateOMdata <- function(OMperiods){
 }
 
 ##########plot raw optomotor traces of a single fly######################
-plotrawOMtraces <- function(OMdata){
+plotrawOMtraces <- function(OMdata, omtitle){
   OMtraces <- ggplot(data = OMdata, aes(x=time/1000, y=fly)) + 
     geom_hline(yintercept = 0, color="black") +
     geom_line(aes(group=period, colour=period), size=1) + 
     geom_smooth(method="loess", span = 0.1) +
     ylab("Optomotor Response [rel. units]")+ 
     xlab("Time [s]") + 
-    ggtitle(paste("Right (clockwise) arena rotations -", flyname)) +
+    ggtitle(paste(omtitle, flyname)) +
     theme_classic()+
     scale_x_continuous(expand = expand_scale(add = 0))+
     theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))
@@ -198,9 +198,9 @@ plotaveOMtraces <- function(OMdata){
     ylab("Optomotor Resoponse [rel. units]")+ 
     xlab("Time [s]") +
     theme_classic() + 
-    annotate("text", -Inf, Inf, label = "Right (clockwise) arena rotations", hjust = -0.1, vjust = 1.3)+
-    annotate("text", Inf, -Inf, label = "Left (counter-clockwise) arena rotations", hjust =1.1, vjust = -1.5)+ 
-    theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
+    annotate("text", -Inf, -Inf, label = "Right (clockwise) arena rotations", hjust = -.4, vjust = -1.3)+
+    annotate("text", Inf, Inf, label = "Left (counter-clockwise) arena rotations", hjust =1.1, vjust = 1.5)+ 
+    theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line(colour = "black",linetype="dashed",size=0.1))+
     scale_x_continuous(expand = expand_scale(add = 0))
   return(OMtraces)
 }
@@ -215,8 +215,8 @@ plotOMtracesMean <- function(OMdata){
     meanOMtraces <- ggplot(plotOM, aes(x=time/1000, y=means, group = group)) +
             theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
             geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
-            geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
             geom_hline(yintercept = 0, color="black") +
+            geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
             scale_fill_manual(values = boxcolors) +
             geom_line(aes(colour = group), size = 1) + 
             scale_color_manual(values = boxcolors) +
@@ -237,8 +237,8 @@ plotOMtracesMean <- function(OMdata){
             theme(axis.text.y = element_text(size=12))+
             ylab("Optomotor Response [rel. units]") + 
             xlab("Time [s]")+
-            annotate("text", -Inf, Inf, label = "Right (clockwise) arena rotations", hjust = -0.05, vjust = 1.3)+
-            annotate("text", Inf, -Inf, label = "Left (counter-clockwise) arena rotations", hjust =1, vjust = -1.5)+
+            annotate("text", -Inf, -Inf, label = "Right (clockwise) arena rotations", hjust = -.4, vjust = -1.3)+
+            annotate("text", Inf, Inf, label = "Left (counter-clockwise) arena rotations", hjust =1.1, vjust = 1.5)+ 
             theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
             scale_x_continuous(expand = expand_scale(add = 0))
     return(meanOMtraces)

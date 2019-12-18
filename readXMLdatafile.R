@@ -248,7 +248,7 @@ weightedDownsample20Hz <- function(rawdata, sequence, experiment, NofPeriods) {
        if(any(abs(as.numeric(difference$deviation))>1)) stop("Number of data points does not match expectations. Check DTS Rawdata!") #check if there is more than one missing/additional data point
        
        diff_periods = rownames(difference)[difference$deviation!=0] #find periods with differing numbers of data points
-       #mark the last data pont of each offending period (assuming we're only one data point off!)
+       #mark the last data point of each offending period (assuming we're only one data point off!)
        if (length(diff_periods)!=0){
          rawdataDown$last = NA
          rawdataDown$last = with(rawdataDown, ave(last, match(rawdataDown$period, diff_periods), FUN = function(x) ifelse(seq_along(x) == length(x), 1, x))) # "1" marking the last data püoint in an offending period

@@ -48,7 +48,7 @@ source("DTS_plotfunctions.R")
 
 # Metadata
 
-**Date and time of the experiment:** `r paste(experiment$dateTime)`  
+**Date and time of the experiment:** `r format(as.POSIXct(gsub("T", " ", experiment$dateTime)),'%A, %B %d, %Y %H:%M:%S')`  
 **Raw data file (XML):** `r paste('<a href="../', basename(xml_name), '">', flyname, '</a>', sep = "")`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment description:** `r paste(experiment$description)`  
@@ -113,10 +113,22 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
         sequence$histocolor[i]="red"
         }
       
-      ##only look at period data
+  ###divide raw data into period chunks and prepare period data for later use in group evaluations
       temp  <- rawdata[rawdata$period == i, ]
       keeps = c("a_pos","fly")
-      period.data[[i]] <- temp[keeps] #list only arena position and fly behavior data by period
+      
+      if((sequence$type[i]=="yt"||sequence$type[i]=="sw") & sequence$contingency[i]=="right_torque")   #inverse torque data for group histograms
+      {
+        temp_inv = temp
+        temp_inv$fly = -temp_inv$fly # invert the torque values
+        period.data[[i]] <- temp_inv[keeps] #list only arena position and fly behavior data by period
+      } else if((sequence$type[i]=="fs"||sequence$type[i]=="color") & sequence$contingency[i]=="2_4_Q") #shift position data for group histograms
+      {
+        temp_shifted = temp
+        temp_shifted$a_pos = temp_shifted$a_pos + 900 #shift the position values by 90°
+        temp_shifted$a_pos[temp_shifted$a_pos>1796] = temp_shifted$a_pos[temp_shifted$a_pos>1796]-3600 #wrap the shifted 90° back around to -90°..-180°
+        period.data[[i]] <- temp_shifted[keeps] #list only arena position and fly behavior data by period
+      } else period.data[[i]] <- temp[keeps] #keep only arena position and fly behavior data by period
       
       if(sequence$type[i]=="fs"||sequence$type[i]=="yt"||sequence$type[i]=="color"||sequence$type[i]=="optomotorR"||sequence$type[i]=="optomotorL")
       {
@@ -124,22 +136,77 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
         fly_pos_traces(temp)
       }
 
-      ##Calculate period histograms
-      #fly behavior
-      flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
-        geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-        labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
-        xlim(maxfly) +
-        ggtitle(paste(flyname, "Period", i))
+      ####Calculate period histograms####
       
+      #fly behavior
+        if(sequence$contingency[i]=="left_torque"){         #shade left torque area
+          flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
+                    geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+                    geom_vline(xintercept=0, linetype="dotted") +
+                    geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
+                    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
+                    theme_light() +
+                    theme(panel.grid.major = element_blank(),
+                          panel.grid.minor = element_blank()) +
+                    xlim(maxfly) +
+                    scale_y_continuous(expand = c(0,0)) +
+                    ggtitle(paste(flyname, "Period", i))
+        } else if(sequence$contingency[i]=="right_torque"){  #shade right torque area
+          flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
+                    geom_rect(aes(xmin = 0, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+                    geom_vline(xintercept=0, linetype="dotted") +
+                    geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
+                    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
+                    theme_light() +
+                    theme(panel.grid.major = element_blank(),
+                          panel.grid.minor = element_blank()) +
+                    xlim(maxfly) +
+                    scale_y_continuous(expand = c(0,0)) +
+                    ggtitle(paste(flyname, "Period", i))
+        } else {                                            #no shading
+          flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
+                    geom_vline(xintercept=0, linetype="dotted") +
+                    geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
+                    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
+                    theme_light() +
+                    theme(panel.grid.major = element_blank(),
+                          panel.grid.minor = element_blank()) +
+                    xlim(maxfly) +
+                    scale_y_continuous(expand = c(0,0)) +
+                    ggtitle(paste(flyname, "Period", i))
+        }
+
+          
       #arena position
       if(sequence$type[i]=="fs"||sequence$type[i]=="color")
       {
-        poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
-          geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
-          labs(x="Arena Position [degrees*10]", y="frequency") +
-          xlim(-1800,1800) +
-          ggtitle(paste(flyname, "Period", i))
+        if(sequence$contingency[i]=="1_3_Q"){  #shade first and third quadrant
+          poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
+                    geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+                    geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+                    geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+                    geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
+                    geom_histogram(binwidth=20, fill = sequence$histocolor[i]) +
+                    labs(x="Arena Position [degrees*10]", y="frequency") +
+                    theme_light() +
+                    theme(panel.grid.major = element_blank(),
+                          panel.grid.minor = element_blank()) +
+                    scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), limits = c(-1800,1800), expand = c(0,0)) +
+                    scale_y_continuous(expand = c(0,0)) +
+                    ggtitle(paste(flyname, "Period", i))
+        } else {                                #shade second and fourth quadrant
+                poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
+                    geom_rect(aes(xmin = -1350, xmax = -450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+                    geom_rect(aes(xmin = 450, xmax = 1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+                    geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
+                    geom_histogram(binwidth=20, fill = sequence$histocolor[i]) +
+                    labs(x="Arena Position [degrees*10]", y="frequency") +
+                    theme_light() +
+                    theme(panel.grid.major = element_blank(),
+                          panel.grid.minor = element_blank()) +
+                    scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), limits = c(-1800,1800), expand = c(0,0)) +
+                    scale_y_continuous(expand = c(0,0)) +
+                    ggtitle(paste(flyname, "Period", i))
       }
       
       
@@ -179,15 +246,6 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
       xlim(-maxfly) +
       ggtitle(paste(flyname, "total"))
     
-    # add pooled position histogram - if there are any periods with meaningful position data
-    if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
-      poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
-      geom_histogram(binwidth=10) +
-      labs(x="position [degrees*10]", y="frequency") + 
-      xlim(-1800,1800) +
-      ggtitle(paste(flyname, "total"))
-    }
-    
     ##write histograms
     #fly behavior
     multiplot(plotlist = flyhistos, cols=round(NofPeriods/5))
@@ -195,6 +253,16 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
 
 ```{r PositionHistogram, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
       cat("\n## Arena Position Histograms\n")
+    # add pooled position histogram
+      poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
+      geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
+      geom_histogram(binwidth=10) +
+      labs(x="position [degrees*10]", y="frequency") + 
+      scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), limits = c(-1800,1800), expand = c(0,0)) +
+      scale_y_continuous(expand = c(0,0)) +
+      ggtitle(paste(flyname, "total"))
+    
+   ##write positioon histograms
       multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5)) #only print position histograms if there are any
 
 ```
@@ -214,23 +282,27 @@ if (om & any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-o
 `r if (om | beforeafter) '# Optomotor evaluations'`
 `r if (om | beforeafter) '## Optomotor traces (right/left)'`
 
-```{r OptomotorTraces, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r OptomotorTraces, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
+
+####### Do not separate optomotor dat at all ##########
 
 ### extract optomotor traces and generate dataframe for right (clockwise) turning arena
-OMperiods = which(grepl("optomotorR", sequence$type)) #collect the right turning OM periods
-rightOMdata <- generateOMdata(OMperiods) #call function which assembles optomotor data for the identified periods
-plotrawOMtraces(rightOMdata) #call function to pot the OM traces
+OMperiods = which(grepl("optomotorR", sequence$type))                                     #collect the right turning OM periods
+rightOMdata <- generateOMdata(OMperiods)                                                  #call function which assembles optomotor data for the identified periods
+omtitle = "Right (clockwise) arena rotations -"                                           #set plot title
+plotrawOMtraces(rightOMdata, omtitle)                                                     #call function to pot the OM traces
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
-OMperiods = which(grepl("optomotorL", sequence$type)) #collect the left turning OM periods
-leftOMdata <- generateOMdata(OMperiods) #call function which assembles optomotor data for the identified periods
-leftOMdata$time=leftOMdata$time+max(rightOMdata$time) #make left data start after right data
-plotrawOMtraces(leftOMdata)  #call function to pot the OM traces
+OMperiods = which(grepl("optomotorL", sequence$type))                                     #collect the left turning OM periods
+leftOMdata <- generateOMdata(OMperiods)                                                   #call function which assembles optomotor data for the identified periods
+leftOMdata$time=leftOMdata$time+max(rightOMdata$time)                                     #make left data start after right data
+omtitle = "Left (counter-clockwise) arena rotations -"                                    #set plot title
+plotrawOMtraces(leftOMdata, omtitle)                                                      #call function to pot the OM traces
 
 ### generate averaged optomotor responses over both rotation directions
-tempOMdata=rbind(rightOMdata,leftOMdata) #combine left and right OMdata in one dataframe
-tempOMdata=aggregate(tempOMdata$fly,FUN=mean,by=list(tempOMdata$time)) #average across periods
-colnames(tempOMdata) <- c("time", as.character(flyname)) #set dataframe names
+tempOMdata=rbind(rightOMdata,leftOMdata)                                                  #combine left and right OMdata in one dataframe
+tempOMdata=aggregate(tempOMdata$fly,FUN=mean,by=list(tempOMdata$time))                    #average across periods
+colnames(tempOMdata) <- c("time", as.character(flyname))                                  #set dataframe names
 
 if(!exists("OMdata"))
 {
@@ -242,23 +314,27 @@ if(!exists("OMdata"))
 
 `r if (beforeafter) '### Optomotor traces at start'`
 
-```{r OptomotorTracesBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r OptomotorTracesBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
+
+######### Separate optomotor evaluations: optomotor data at the start of the experiment ###############
 
 ### extract and plot optomotor traces for right (clockwise) turning arena at start of experiment
-OMperiods = which(grepl("optomotorR", head(sequence$type))) #collect the right turning OM periods in the first half of the experiment
-rightOMdataBefore <- generateOMdata(OMperiods) #call function which assembles optomotor data for the identified periods
-plotrawOMtraces(rightOMdataBefore) #call function to pot the OM traces
+OMperiods = which(grepl("optomotorR", head(sequence$type)))                               #collect the right turning OM periods in the first half of the experiment
+rightOMdataBefore <- generateOMdata(OMperiods)                                            #call function which assembles optomotor data for the identified periods
+omtitle = "Right (clockwise) arena rotations -"                                           #set plot title
+plotrawOMtraces(rightOMdataBefore, omtitle)                                               #call function to pot the OM traces
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena at start of experiment
-OMperiods = which(grepl("optomotorL", head(sequence$type))) #collect the left turning OM periods in the first half of the experiment
-leftOMdataBefore <- generateOMdata(OMperiods) #call function which assembles optomotor data for the identified periods
-leftOMdataBefore$time=leftOMdataBefore$time+max(rightOMdataBefore$time) #make left data start after right data
-plotrawOMtraces(leftOMdataBefore)  #call function to pot the OM traces
+OMperiods = which(grepl("optomotorL", head(sequence$type)))                               #collect the left turning OM periods in the first half of the experiment
+leftOMdataBefore <- generateOMdata(OMperiods)                                             #call function which assembles optomotor data for the identified periods
+leftOMdataBefore$time=leftOMdataBefore$time+max(rightOMdataBefore$time)                   #make left data start after right data
+omtitle = "Left (counter-clockwise) arena rotations -"                                    #set plot title
+plotrawOMtraces(leftOMdataBefore, omtitle)                                                #call function to pot the OM traces
 
 ### generate averaged optomotor responses over both rotation directions
-tempOMdataBefore=rbind(rightOMdataBefore,leftOMdataBefore) #combine left and right OMdata in one dataframe
-tempOMdataBefore=aggregate(tempOMdataBefore$fly,FUN=mean,by=list(tempOMdataBefore$time)) #average across periods
-colnames(tempOMdataBefore) <- c("time", as.character(flyname)) #set dataframe names
+tempOMdataBefore=rbind(rightOMdataBefore,leftOMdataBefore)                                #combine left and right OMdata in one dataframe
+tempOMdataBefore=aggregate(tempOMdataBefore$fly,FUN=mean,by=list(tempOMdataBefore$time))  #average across periods
+colnames(tempOMdataBefore) <- c("time", as.character(flyname))                            #set dataframe names
 
 if(!exists("OMdataBefore"))
 {
@@ -270,23 +346,27 @@ if(!exists("OMdataBefore"))
 
 `r if (beforeafter) '### Optomotor traces at end'`
 
-```{r OptomotorTracesAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r OptomotorTracesAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
+
+######### Separate optomotor evaluations: optomotor data at the end of the experiment ###############
 
 ### extract optomotor traces and generate dataframe for right (clockwise) turning arena at the end of the experiment
-OMperiods = which(grepl("optomotorR", tail(sequence$type, 8)))+NofPeriods-8 #collect the right turning OM periods in the last half of the experiment
-rightOMdataAfter <- generateOMdata(OMperiods) #call function which assembles optomotor data for the identified periods
-plotrawOMtraces(rightOMdataAfter) #call function to pot the OM traces
+OMperiods = which(grepl("optomotorR", tail(sequence$type, 8)))+NofPeriods-8               #collect the right turning OM periods in the last half of the experiment
+rightOMdataAfter <- generateOMdata(OMperiods)                                             #call function which assembles optomotor data for the identified periods
+omtitle = "Right (clockwise) arena rotations -"                                           #set plot title
+plotrawOMtraces(rightOMdataAfter, omtitle)                                                #call function to pot the OM traces
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena at end of experiment
-OMperiods = which(grepl("optomotorL", tail(sequence$type, 8)))+NofPeriods-8 #collect the left turning OM periods in the last half of the experiment
-leftOMdataAfter <- generateOMdata(OMperiods) #call function which assembles optomotor data for the identified periods
-leftOMdataAfter$time=leftOMdataAfter$time+max(rightOMdataAfter$time) #make left data start after right data
-plotrawOMtraces(leftOMdataAfter)  #call function to pot the OM traces
+OMperiods = which(grepl("optomotorL", tail(sequence$type, 8)))+NofPeriods-8               #collect the left turning OM periods in the last half of the experiment
+leftOMdataAfter <- generateOMdata(OMperiods)                                              #call function which assembles optomotor data for the identified periods
+leftOMdataAfter$time=leftOMdataAfter$time+max(rightOMdataAfter$time)                      #make left data start after right data
+omtitle = "Left (counter-clockwise) arena rotations -"                                    #set plot title
+plotrawOMtraces(leftOMdataAfter, omtitle)                                                 #call function to pot the OM traces
 
 ### generate averaged optomotor responses over both rotation directions
-tempOMdataAfter=rbind(rightOMdataAfter,leftOMdataAfter) #combine left and right OMdata in one dataframe
-tempOMdataAfter=aggregate(tempOMdataAfter$fly,FUN=mean,by=list(tempOMdataAfter$time)) #average across periods
-colnames(tempOMdataAfter) <- c("time", as.character(flyname)) #set dataframe names
+tempOMdataAfter=rbind(rightOMdataAfter,leftOMdataAfter)                                   #combine left and right OMdata in one dataframe
+tempOMdataAfter=aggregate(tempOMdataAfter$fly,FUN=mean,by=list(tempOMdataAfter$time))     #average across periods
+colnames(tempOMdataAfter) <- c("time", as.character(flyname))                             #set dataframe names
 
 if(!exists("OMdataAfter"))
 {
@@ -298,28 +378,28 @@ if(!exists("OMdataAfter"))
 
 `r if (om | beforeafter) '## Averaged optomotor response'`
 
-```{r OptomotorAverage, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r OptomotorAverage, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
 plotaveOMtraces(OMdata)
 ```
 
 `r if (beforeafter) '### Averaged optomotor response at start'`
 
-```{r OptomotorAverageBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r OptomotorAverageBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
 plotaveOMtraces(OMdataBefore)
 ```
 
 `r if (beforeafter) '### Averaged optomotor response at end'`
 
-```{r OptomotorAverageAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r OptomotorAverageAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
 plotaveOMtraces(OMdataAfter)
 ```
 
 `r if (om | beforeafter) '## Further optomotor evaluations'`
 
-```{r moreOptomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r moreOptomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 6, comment=NA, results='asis'}    
 
 tempOMparams <- OMparamextract(OMdata) #call fucntion for parameter estimation
 kable(tempOMparams)  #plot table with data
@@ -336,7 +416,7 @@ if(!exists("OMparams"))
 
 `r if (beforeafter) '### Optomotor parameters at start'`
 
-```{r OMparamsBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r OMparamsBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
 tempOMparamsBefore<-OMparamextract(OMdataBefore) #call fucntion for parameter estimation
 kable(tempOMparamsBefore)  #plot table with data
@@ -353,7 +433,7 @@ if(!exists("OMparamsBefore"))
 
 `r if (beforeafter) '### Optomotor parameters at end'`
 
-```{r OMparamsAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r OMparamsAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
 tempOMparamsAfter<-OMparamextract(OMdataAfter) #call fucntion for parameter estimation
 kable(tempOMparamsAfter)  #plot table with data
