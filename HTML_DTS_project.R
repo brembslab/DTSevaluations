@@ -57,19 +57,19 @@ if (exists('type', where=project.data$experiment)){ExpType = project.data$experi
 if (ExpType=="Torquemeter" || ExpType=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
 
 ### Initialize empty lists where data are collected
-grouped.poshistos <- list()   #Arena position histograms for group in a list of length NofPeriods
-grouped.PIprofiles <- list()  #PIProfile data frames in a list of length NofGroups
-grouped.periods <- list()     #Period designs in a list of length NofGroups
-grouped.spectra <- list()     #Power spectra in a list of length NofGroups
-grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of length NofPeriods
+grouped.poshistos <- list()       #Arena position histograms for group in a list of length NofPeriods
+grouped.PIprofiles <- list()      #PIProfile data frames in a list of length NofGroups
+grouped.periods <- list()         #Period designs in a list of length NofGroups
+grouped.spectra <- list()         #Power spectra in a list of length NofGroups
+grouped.flyhistos <- list()       #Fly behavior histograms for group in a list of length NofPeriods
 
-exp_groups <- list()    #Individual fly names in each group for display in project evaluation
-grouped.OMdata <-list() #Averaged optomotor data traces for each group
-grouped.OMparams <-list() #Extracted optomotor parameters for each group
-grouped.OMdataBefore <-list() #Averaged optomotor data traces for each group at start of experiment
-grouped.OMparamsBefore <-list() #Extracted optomotor parameters for each group at start of experiment
-grouped.OMdataAfter <-list() #Averaged optomotor data traces for each group at end of experiment
-grouped.OMparamsAfter <-list() #Extracted optomotor parameters for each group at end of experiment
+exp_groups <- list()              #Individual fly names in each group for display in project evaluation
+grouped.OMdata <-list()           #Averaged optomotor data traces for each group
+grouped.OMparams <-list()         #Extracted optomotor parameters for each group
+grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group at start of experiment
+grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
+grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
+grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
 
 
 for(x in 1:NofGroups)
@@ -82,7 +82,7 @@ for(x in 1:NofGroups)
 #create/empty lists for collecting all single fly data by period
 period.data <- list()     #data grouped by period
 grouped.data <- list()    #total data grouped
-speclist <- list()
+speclist <- list()        #spectograms
 
 #start evaluating
 if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group have the identical experimental design
@@ -204,9 +204,16 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     
     #fly
     flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
+      geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+      geom_vline(xintercept=0, linetype="dotted") +
       geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
       labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
       xlim(maxfly) +
+      theme_light() +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank()) +
+      scale_x_continuous(expand = c(0,0)) +
+      scale_y_continuous(expand = c(0,0)) +
       ggtitle(paste("Period", i))
     
     #position
@@ -260,7 +267,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
           histo1$v2 = groupnames[x]
           colnames(histo1)=c("fly","group")
         } else {
-          histo2 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
+          histo2 <- data.frame(pooled.data[[learningscore]][["fly"]])
           histo2$v2 = groupnames[x]
           colnames(histo2)=c("fly","group")
           supHistos <- rbind(histo1,histo2) #make dataframe with fly data from both groups and group name as factor

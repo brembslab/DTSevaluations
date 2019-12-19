@@ -276,8 +276,8 @@ if (om & any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-o
   if (grepl("optomotor", sequence$type[1]) & grepl("optomotor", tail(sequence$type, 1))){ ###...and the optomotor periods are in the beginning and the end
     beforeafter = TRUE
     om = FALSE
-  }
-}
+  } else {beforeafter = FALSE}
+}  else {beforeafter = FALSE}
 ```
 
 `r if (om | beforeafter) '# Optomotor evaluations'`
@@ -285,7 +285,7 @@ if (om & any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-o
 
 ```{r OptomotorTraces, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
-####### Do not separate optomotor dat at all ##########
+####### Do not separate optomotor traces at all ##########
 
 ### extract optomotor traces and generate dataframe for right (clockwise) turning arena
 OMperiods = which(grepl("optomotorR", sequence$type))                                     #collect the right turning OM periods
@@ -317,7 +317,7 @@ if(!exists("OMdata"))
 
 ```{r OptomotorTracesBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
-######### Separate optomotor evaluations: optomotor data at the start of the experiment ###############
+######### Separate optomotor evaluations: optomotor raw traces at the start of the experiment ###############
 
 ### extract and plot optomotor traces for right (clockwise) turning arena at start of experiment
 OMperiods = which(grepl("optomotorR", head(sequence$type)))                               #collect the right turning OM periods in the first half of the experiment
@@ -349,7 +349,7 @@ if(!exists("OMdataBefore"))
 
 ```{r OptomotorTracesAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
-######### Separate optomotor evaluations: optomotor data at the end of the experiment ###############
+######### Separate optomotor evaluations: optomotor raw traces at the end of the experiment ###############
 
 ### extract optomotor traces and generate dataframe for right (clockwise) turning arena at the end of the experiment
 OMperiods = which(grepl("optomotorR", tail(sequence$type, 8)))+NofPeriods-8               #collect the right turning OM periods in the last half of the experiment
@@ -402,6 +402,8 @@ plotaveOMtraces(OMdataAfter)
 
 ```{r moreOptomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 6, comment=NA, results='asis'}    
 
+####### Do not separate optomotor parameters at all ##########
+
 tempOMparams <- OMparamextract(OMdata) #call fucntion for parameter estimation
 kable(tempOMparams)  #plot table with data
 
@@ -419,6 +421,8 @@ if(!exists("OMparams"))
 
 ```{r OMparamsBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
+######### Separate optomotor evaluations: optomotor parameters at the start of the experiment ###############
+
 tempOMparamsBefore<-OMparamextract(OMdataBefore) #call fucntion for parameter estimation
 kable(tempOMparamsBefore)  #plot table with data
 
@@ -435,6 +439,8 @@ if(!exists("OMparamsBefore"))
 `r if (beforeafter) '### Optomotor parameters at end'`
 
 ```{r OMparamsAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
+
+######### Separate optomotor evaluations: optomotor parameters at the end of the experiment ###############
 
 tempOMparamsAfter<-OMparamextract(OMdataAfter) #call fucntion for parameter estimation
 kable(tempOMparamsAfter)  #plot table with data

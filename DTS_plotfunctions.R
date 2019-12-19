@@ -319,6 +319,7 @@ xy <-sortedXyData(x1,y)                                     #create sortedXYdata
 
 LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata right turning
 
+#uncomment for debugging
 #plot(xy)
 #abline(LinMod)
 #LinMod$coefficients[2]
@@ -350,6 +351,7 @@ xy <-sortedXyData(x1,y)                                     #create sortedXYdata
 
 LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata left turning
 
+#uncomment for debugging
 #plot(xy)
 #abline(LinMod)
 #LinMod$coefficients[2]
@@ -372,13 +374,20 @@ if(abs(LinMod$coefficients[2])<0.0001){                     #if the linear model
     finally = {}
   )}
 
+#uncomment for debugging
+#print("right: ")
+#print(right[1])
+#print(right[2])
+#print("<br>left: ")
+#print(left[1])
+#print(left[2])
 
 ###calculate averages and asymmetries to three significant digits and put them into a vector
 rightasymp = right[1]+right[2]
 leftasymp = left[1]+left[2]
 #sanity checks
-if(leftasymp < maxfly[1]){leftasymp=0}
-if(rightasymp > maxfly[2]){rightasymp=0}
+if(!between(leftasymp, maxfly[1], maxfly[2])){leftasymp=0}
+if(!between(rightasymp, maxfly[1], maxfly[2])){rightasymp=0}
 
 if (leftasymp==0 & rightasymp==0){aveOMcoeff=c(0,0,0)
 } else {
