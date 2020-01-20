@@ -41,7 +41,7 @@ flyDataImport <- function(xml_name) {
      
   ##change j_pos data from float to integer and shift to make approx. zero symmetric (needs work!)
     if(exists("j_pos", rawdata)){
-      rawdata$j_pos = round(rawdata$j_pos*1000)+1100
+      rawdata$j_pos = round(rawdata$j_pos*1000)
     }
   ##change a_pos data from float to integer in Joystick experiments
     if(experiment$meter_type=="Joystick"){
