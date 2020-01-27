@@ -109,7 +109,8 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     #create/empty plot lists
     poshistos <- list()
     flyhistos <- list()
-    
+    dwellingtime <- list()
+    mediandwell <- list()
 #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
                       output_file = paste(flyname,"descr_anal.html", sep="_"),            ######
@@ -208,6 +209,37 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
         xlim(-1800,1800) +
         ggtitle(paste("Period", i))
     }
+  }
+  ## plot pooled dwelling times by period ##
+  
+  for(i in 1:NofPeriods)
+  {
+    temp<-pooled.data[[i]]
+    
+    
+    temp  <- rawdata[rawdata$period == i, ]
+    dwell = temp[temp["fly"] < 0, ] # sort negative data
+    dwell <- melt(table(lengths(split(dwell$time, cumsum(c(TRUE, diff(dwell$time) != 50)))))) #finds cumulative data and adds it to a melted table
+    sum = sum(dwell$value) #total number of data points
+    dwell$perctest = 100-(cumsum(dwell$value/sum)*100) # subtracts the cumulative
+    dwell <- na.omit(transform(dwell, perctest = c(NA, perctest[-nrow(dwell)]))) # shifting the data downwards
+    dwell$Var1 = (dwell$Var1 * 50)
+    dwell$Var1 = dwell$Var1/1000
+    insert <- c(0,100,100)
+    dwell = rbind(dwell, insert)
+    mediandwell[[i]] = median(dwell$Var1)
+    medianmelt = melt(mediandwell)
+    dwellingtime[[i]] <- ggplot(data=dwell, aes(x=Var1, y=perctest)) +
+      geom_line(color="red")+
+      geom_point()+
+      scale_y_log10( breaks=c(0,10,100))+
+      scale_x_log10() +
+      ggtitle(paste(flyname, "Period", i))+
+      theme_light() +
+      
+      labs(x="time [sec]", y="% events") +
+      theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+      theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))
   }
   
   ## pool all fly and position data into single data.frame
