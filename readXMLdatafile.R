@@ -182,13 +182,9 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
 
   NofDatapoints = as.numeric(as.character(experiment$duration))*20 #find the number of data points we should be having at 20Hz
 
-  # create the vectors in which to save the downsampled data
-  a_posDownsampled <- vector(mode = "numeric")
-  flyDownsampled <- vector(mode = "numeric")
-  periodDownsampled <- vector(mode = "numeric", length = NofDatapoints)
-  
   # create new time and period values
   timeDownsampled = seq(0, (as.numeric(as.character(experiment$duration))*1000)-50, 50)
+  periodDownsampled <- vector(mode = "numeric", length = NofDatapoints)
   p=1
   t=0
   for (index in 1:NofDatapoints){
@@ -204,7 +200,6 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
   # downsample fly behavior and a_pos
   for (index in 1:NofPeriods){
     f=approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])$y
-    flyDownsampled=c(flyDownsampled, round(f))
     p=approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])$y
     #create a position trace where the +/-180° point is shifted by 90°
     p_s=rawdata$a_pos #make a copy of position trace
@@ -213,12 +208,11 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
     p_s=approx(subset(p_s, rawdata$period==index), n=table(periodDownsampled)[index])$y
     p[round(p_s) %in% -1000:-800] <- p_s[round(p_s) %in% -1000:-800]-900 #replace values with shifted values
     p[p < -1800]=p[p < -1800] + 3600 #wrap the too small values around
-    a_posDownsampled=c(a_posDownsampled, round(p))
   }
   
   
   # bind the downsampled vectors into one dataframe
-  rawdataDown <- data.frame("time" = timeDownsampled, "a_pos" = a_posDownsampled, "fly" = flyDownsampled, "period" = periodDownsampled)
+  rawdataDown <- data.frame("time" = timeDownsampled, "a_pos" = round(p), "fly" = round(f), "period" = periodDownsampled)
   
   # return the downsampled data
   return(rawdataDown)
