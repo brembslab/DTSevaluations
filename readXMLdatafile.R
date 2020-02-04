@@ -39,7 +39,7 @@ flyDataImport <- function(xml_name) {
       rawdata$torque = rawdata$torque*100
     }
      
-  ##change j_pos data from float to integer and shift to make approx. zero symmetric (needs work!)
+  ##change j_pos data from float to integer in Joystick experiments
     if(exists("j_pos", rawdata)){
       rawdata$j_pos = round(rawdata$j_pos*1000)
     }
@@ -201,11 +201,18 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
   }
 
   
-  # downsample fly behavior and a_pos (stil nees work on a_pos due to +/-180°)
+  # downsample fly behavior and a_pos
   for (index in 1:NofPeriods){
     f=approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])$y
     flyDownsampled=c(flyDownsampled, round(f))
     p=approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])$y
+    #create a position trace where the +/-180° point is shifted by 90°
+    p_s=rawdata$a_pos #make a copy of position trace
+    p_s = p_s + 900 #shift the position values by 90°
+    p_s[p_s>1796] = p_s[p_s>1796]-3600 #wrap the shifted 90° back around to -90°..-180°
+    p_s=approx(subset(p_s, rawdata$period==index), n=table(periodDownsampled)[index])$y
+    p[round(p_s) %in% -1000:-800] <- p_s[round(p_s) %in% -1000:-800]-900 #replace values with shifted values
+    p[p < -1800]=p[p < -1800] + 3600 #wrap the too small values around
     a_posDownsampled=c(a_posDownsampled, round(p))
   }
   
