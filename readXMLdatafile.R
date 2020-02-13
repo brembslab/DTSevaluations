@@ -135,7 +135,7 @@ MultiFlyDataVerification <- function(xml_list)
 for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
-    ##### read the data with the corresponding function (readXMLdatafile.R) #######
+    ## read the data
     singleflymetadata <- flyMetaDataImport(xml_name)
     
     ##extract meta-data
@@ -150,10 +150,31 @@ for (l in 1:length(xml_list))
                     as.vector(sequence$outcome),
                     as.vector(sequence$coup_coeff))
     if(l==1){
-      metadata<-data.frame(flymetadata)}else{
+      metadata<-data.frame(flymetadata)} else {
       metadata[,l]<-data.frame(flymetadata)}
   }
-  return(length(unique(as.list(metadata))) == 1)
+  metadata <- data.frame(lapply(metadata, as.character), stringsAsFactors=FALSE) #convert factors to characters
+  colnames(metadata)=xml_list #add filenames to metadata dataframe
+  offending_metanames <- colnames(metadata[metadata %in% unique(as.list(metadata))[-1]]) #store offending filenames for each deviation
+#  if(!is_empty(offending_metanames)){return(offending_metanames)}else{return(NULL)} #return vector with offending filenames or NULL if empty
+}
+
+#### make sure there are no duplicated traces in the list ####
+MultiFlyDuplicateCheck <- function(xml_list)
+{
+  for (l in 1:length(xml_list)) 
+  {
+    xml_name=xml_list[l]
+    ## read data and extract traces
+    singledata <- flyDataImport(xml_name)
+    behav = singledata[[13]]$fly
+    if(l==1){
+      behavior<-data.frame(behav)} else {
+        behavior[,l]<-data.frame(behav)}
+  }
+  colnames(behavior)=xml_list #add filenames to behavior dataframe
+  offending_behavnames = names(which(duplicated(t(behavior))))
+#  if(!is_empty(offending_behavnames)){return(offending_behavnames)}else{return(NULL)} #return vector with offending filenames or NULL if empty
 }
 
 ##gather experimental metadata in a single vector for plotting in summary pages
