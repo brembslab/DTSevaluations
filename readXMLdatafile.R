@@ -18,7 +18,7 @@ flyDataImport <- function(xml_name) {
     experiment <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experiment"))
   ##parse sequence data
     NofPeriods = as.integer(xmlGetAttr(flyDataXMLtop[['sequence']], "periods"))
-    ExperimentType = xmlGetAttr(flyDataXMLtop[['metadata']][['experiment']], "type")
+    ExpType = xmlGetAttr(flyDataXMLtop[['metadata']][['experiment']], "type")
     sequence <- xmlToDataFrame(nodes=getNodeSet(flyData,"//sequence/period"))    
   ##parse time series meta-data
     CSV_descriptor <- xmlToDataFrame(nodes=getNodeSet(flyData,"//timeseries/CSV_descriptor"))
@@ -28,7 +28,7 @@ flyDataImport <- function(xml_name) {
   ##reset periods to start from 1 of they start from 0
     if (rawdata$period[1]==0){rawdata$period=rawdata$period+1}
   ##reset position data to +/-180° [-1800..1796] for torquemeter experiments
-    if (tolower(ExperimentType)=="torquemeter"){
+    if (tolower(ExpType)=="torquemeter"){
     if (experiment$arena_type=="lightguides"){rawdata$a_pos = rawdata$a_pos-1800}
     if (experiment$arena_type=="motor"){rawdata$a_pos = round(rawdata$a_pos*0.87890625)}
     }
@@ -87,7 +87,8 @@ flyDataImport <- function(xml_name) {
                           flyrange,
                           real_sample_rate,
                           down_sample_rate,
-                          traces)
+                          traces,
+                          ExpType)
   
   return(singleflydata)
 }
