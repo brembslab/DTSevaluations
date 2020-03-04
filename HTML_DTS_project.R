@@ -39,6 +39,16 @@ project.file <- file.choose()
 project.path = dirname(project.file)
 project.data<-yaml.load_file(project.file)
 
+#make sure all flies have the identical experimental design and find out which don't
+xml_list = paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/") #create list of all file names
+offending_metanames <- MultiFlyDataVerification(xml_list)
+if(!is_null(offending_metanames)) stop("You have selected files with non-equal metadata. Please check the file(s) above for consistency!", cat("Error! File(s) with differing metadata: ", offending_metanames, sep = "\n")) 
+
+#check for duplicates in the raw data and report any occurrences
+offending_behavnames <- MultiFlyDuplicateCheck(xml_list)
+if(!is.null(offending_behavnames)) stop("There are duplicates in the raw data!", cat("Error! List of duplicate file(s): ", offending_behavnames, sep = "\n"))
+
+
 #make sure the evaluations are written in a subfolder of the data folder
 evaluation.path = paste(project.path,"evaluations", sep = "/")
 dir.create(evaluation.path, showWarnings = FALSE)
@@ -77,6 +87,7 @@ grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group
 
 for(x in 1:NofGroups)
 {
+#gather necessary data and variables
   grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
   grp_description = project.data[["resources"]][[x]][["description"]] #collect description of the group
   xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
@@ -87,10 +98,9 @@ period.data <- list()     #data grouped by period
 grouped.data <- list()    #total data grouped
 speclist <- list()        #spectograms
 
-#start evaluating
-if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group have the identical experimental design
-{
-  for (l in 1:length(xml_list)) 
+
+#start actually evaluating
+for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
     
@@ -297,7 +307,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
   
   ## collect data for superimposed position histograms from two groups
 
-} else stop("You have selected files with differing metadata. Please check your DTS files for consistency!")
+
 
 ###Collect the data from each group in their respective lists and empty the variables
 

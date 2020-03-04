@@ -136,7 +136,7 @@ MultiFlyDataVerification <- function(xml_list)
 for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
-    ##### read the data with the corresponding function (readXMLdatafile.R) #######
+    ## read the data
     singleflymetadata <- flyMetaDataImport(xml_name)
     
     ##extract meta-data
@@ -151,11 +151,36 @@ for (l in 1:length(xml_list))
                     as.vector(sequence$outcome),
                     as.vector(sequence$coup_coeff))
     if(l==1){
-      metadata<-data.frame(flymetadata)}else{
+      metadata<-data.frame(flymetadata)} else {
       metadata[,l]<-data.frame(flymetadata)}
   }
-  return(length(unique(as.list(metadata))) == 1)
+  metadata <- data.frame(lapply(metadata, as.character), stringsAsFactors=FALSE) #convert factors to characters
+  colnames(metadata)=xml_list #add filenames to metadata dataframe
+  offending_metanames <- colnames(metadata[metadata %in% unique(as.list(metadata))[-1]]) #store offending filenames for each deviation
+  if(!is_empty(offending_metanames)){return(offending_metanames)}else{return(NULL)} #return vector with offending filenames or NULL if empty
 }
+
+
+
+#### make sure there are no duplicated fly behavior traces in the list ####
+MultiFlyDuplicateCheck <- function(xml_list)
+{
+  for (l in 1:length(xml_list)) 
+  {
+    xml_name=xml_list[l]
+    ## read data and extract traces
+    singledata <- flyDataImport(xml_name)
+    temp.behav = singledata[[9]]$fly
+    if(l==1){
+      behavior<-data.frame(temp.behav)} else {
+        behavior[,l]<-data.frame(temp.behav)}
+  }
+  colnames(behavior)=xml_list #add filenames to behavior dataframe
+  offending_behavnames = colnames(behavior[behavior %in% behavior[which(duplicated(t(behavior)))]]) #find the pairs of files which are duplicated
+  if(!is_empty(offending_behavnames)){return(offending_behavnames)}else{return(NULL)} #return vector with offending filenames or NULL if empty
+}
+
+
 
 ##gather experimental metadata in a single vector for plotting in summary pages
 collect.metadata <-function(singleflydata)
@@ -175,6 +200,8 @@ collect.metadata <-function(singleflydata)
   mdata = c(exp.name, exp.orcid, exp.date, exp.duration, exp.description, exp.setup, fly)
   return(mdata)
 }
+
+
 
 ### Downsample the rawdata using approx function (for data with period/time jitter)
 downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods, NofDatapoints) {
@@ -197,7 +224,6 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods, NofDatap
     }
   }
 
-  
   # downsample fly behavior and a_pos
   for (index in 1:NofPeriods){
     f=round(approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])$y)
@@ -211,8 +237,7 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods, NofDatap
     p[p < -1800]=p[p < -1800] + 3600 #wrap the too small values around
     a_posDownsampled=c(a_posDownsampled, p)
   }
-  
-  
+
   # bind the downsampled vectors into one dataframe
   rawdataDown <- data.frame("time" = timeDownsampled, "a_pos" = a_posDownsampled, "fly" = flyDownsampled, "period" = periodDownsampled)
   
@@ -220,7 +245,7 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods, NofDatap
   return(rawdataDown)
 }
 
-### Downsampling to 20Hz by weighting according to the measured time within the 50ms bin (for accurate data traces)
+### Downsampling to 20Hz by weighting according to the measured time within the 50ms bin (deprecated - could be re-used later)
 
 weightedDownsample20Hz <- function(rawdata, sequence, experiment, NofPeriods) {
   

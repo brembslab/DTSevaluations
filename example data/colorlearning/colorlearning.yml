@@ -25,10 +25,10 @@ resources:
   - wtb_color_04.xml
   - wtb_color_05.xml
   - wtb_color_06.xml #something not right
-  - wtb_color_07.xml
-  - wtb_color_08.xml
+#  - wtb_color_07.xml duplicate
+#  - wtb_color_08.xml duplicate
   - wtb_color_09.xml
-  - wtb_color_10.xml
+#  - wtb_color_10.xml duplicate
   - wtb_color_11.xml
   - wtb_color_12.xml
   - wtb_color_13.xml
@@ -55,10 +55,10 @@ resources:
   - rut_color_04.xml
   - rut_color_05.xml
   - rut_color_06.xml
-  - rut_color_07.xml #didn't fly well
-  - rut_color_08.xml
+#  - rut_color_07.xml duplicate
+#  - rut_color_08.xml duplicate
   - rut_color_09.xml
-  - rut_color_10.xml
+#  - rut_color_10.xml duplicate
   - rut_color_11.xml
   - rut_color_12.xml
   - rut_color_13.xml
