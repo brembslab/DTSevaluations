@@ -55,11 +55,12 @@ grouped.PIprofiles <- list()  #PIProfile data frames in a list of length NofGrou
 grouped.periods <- list()     #Period designs in a list of length NofGroups
 grouped.spectra <- list()     #Power spectra in a list of length NofGroups
 grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of length NofPeriods
+grouped.PIcombined <- list()  #For categorical color coding
 
 exp_groups <- list()    #Individual fly names in each group for display in project evaluation
 grouped.OMdata <-list() #Averaged optomotor data traces for each group
 grouped.OMparams <-list() #Extracted optomotor parameters for each group
-grouped.PIstatcolor <- list()
+
 for(x in 1:NofGroups)
 {
   grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
@@ -106,8 +107,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     #create/empty plot lists
     poshistos <- list()
     flyhistos <- list()
-    grouped.PIcolor <- list()
-    grouped.PIcombined <- list()
+
 #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
                       output_file = paste(flyname,"descr_anal.html", sep="_"),            ######
@@ -117,15 +117,11 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     ##move PIs to multi-experiment data.frame
     if(l>1){
       PIprofile <- rbind2(PIprofile, as.vector(t(sequence$lambda)))
-      PIcolor <- rbind2(PIcolor, as.vector(t(sequence$PIcolor)))
       PIcombined <- rbind2(PIcombined, as.vector(t(sequence$combined)))
     }
     
-    grouped.PIstatcolor[[l]] = rbind2(as.vector(PIstatcolor))
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
-    grouped.PIcolor[[l]] <- PIcolor
-    grouped.PIcombined <- PIcombined
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
 
   } #for number of flies in xml_list
@@ -214,7 +210,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
 
 #Period sequence design meta-data
 grouped.periods[[x]] = periods
-grouped.color[[x]] = grouped.PIstatcolor
+
 #fly Histograms
 grouped.flyhistos[[x]] = flyhistos #add fly histograms to list of grouped histograms
 flyhistos <- list() #empty fly histograms
@@ -227,8 +223,11 @@ poshistos <- list() #empty list of position histograms
 colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods) #make colnames in PIprofile
 grouped.PIprofiles[[x]] = PIprofile #add PIprofile to list of grouped PIs
 PIprofile <- PIprofile[0,] #empty PIprofile
-grouped.PIcolor[[x]] = PIcolor
+
+#Categorical colors
+colnames(PIcombined) <- sprintf("PI%d", 1:NofPeriods)
 grouped.PIcombined[[x]] = PIcombined
+PIcombined <- PIcombined[0,] 
 
 #Power spectra
 spectemp <- do.call(cbind, speclist) #combine all power spectra
