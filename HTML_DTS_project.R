@@ -27,6 +27,7 @@ library(knitr)
 library(dabestr)
 library(zoo)
 library(tidyverse)
+
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
@@ -57,11 +58,12 @@ if (exists('type', where=project.data$experiment)){ExpType = project.data$experi
 if (ExpType=="Torquemeter" || ExpType=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
 
 ### Initialize empty lists where data are collected
-grouped.poshistos <- list()       #Arena position histograms for group in a list of length NofPeriods
-grouped.PIprofiles <- list()      #PIProfile data frames in a list of length NofGroups
-grouped.periods <- list()         #Period designs in a list of length NofGroups
-grouped.spectra <- list()         #Power spectra in a list of length NofGroups
-grouped.flyhistos <- list()       #Fly behavior histograms for group in a list of length NofPeriods
+grouped.poshistos <- list()   #Arena position histograms for group in a list of length NofPeriods
+grouped.PIprofiles <- list()  #PIProfile data frames in a list of length NofGroups
+grouped.periods <- list()     #Period designs in a list of length NofGroups
+grouped.spectra <- list()     #Power spectra in a list of length NofGroups
+grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of length NofPeriods
+grouped.PIcombined <- list()  #For categorical color coding
 
 exp_groups <- list()              #Individual fly names in each group for display in project evaluation
 grouped.OMdata <-list()           #Averaged optomotor data traces for each group
@@ -70,6 +72,7 @@ grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group
 grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
+
 
 
 for(x in 1:NofGroups)
@@ -119,7 +122,7 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     #create/empty plot lists
     poshistos <- list()
     flyhistos <- list()
-    
+
 #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
                       output_file = paste(flyname,"descr_anal.html", sep="_"),            ######
@@ -129,11 +132,11 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
     ##move PIs to multi-experiment data.frame
     if(l>1){
       PIprofile <- rbind2(PIprofile, as.vector(t(sequence$lambda)))
+      PIcombined <- rbind2(PIcombined, as.vector(t(sequence$combined)))
     }
     
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
-
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
 
   } #for number of flies in xml_list
@@ -272,20 +275,20 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
           colnames(histo2)=c("fly","group")
           supHistos <- rbind(histo1,histo2) #make dataframe with fly data from both groups and group name as factor
         }
-      } else if ('fs' %in% sequence$type || 'color' %in% sequence$type) #for fs or color experiments, collect arena position data and fold them to 0..90°
+      } else if ('fs' %in% sequence$type || 'color' %in% sequence$type) #for fs or color experiments, collect arena position data and fold them to 0..90Â°
       {
         if(x==1){
           histo1 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
           histo1$v2 = groupnames[x]
           colnames(histo1)=c("a_pos","group")
-          histo1$a_pos = abs(histo1$a_pos)/10    #fold position data over to look at 180° equivalent fixation and bring into degree range
-          histo1$a_pos[histo1$a_pos>90] = -histo1$a_pos[histo1$a_pos>90]+180 #fold anything larger than 90° to 0..90°
+          histo1$a_pos = abs(histo1$a_pos)/10    #fold position data over to look at 180Â° equivalent fixation and bring into degree range
+          histo1$a_pos[histo1$a_pos>90] = -histo1$a_pos[histo1$a_pos>90]+180 #fold anything larger than 90Â° to 0..90Â°
         } else {
           histo2 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
           histo2$v2 = groupnames[x]
           colnames(histo2)=c("a_pos","group")
-          histo2$a_pos = abs(histo2$a_pos)/10  #fold position data over to look at 180° equivalent fixation and bring into degree range
-          histo2$a_pos[histo2$a_pos>90] = -histo2$a_pos[histo2$a_pos>90]+180 #fold anything larger than 90° to 0..90°
+          histo2$a_pos = abs(histo2$a_pos)/10  #fold position data over to look at 180Â° equivalent fixation and bring into degree range
+          histo2$a_pos[histo2$a_pos>90] = -histo2$a_pos[histo2$a_pos>90]+180 #fold anything larger than 90Â° to 0..90Â°
           supHistos <- rbind(histo1,histo2)  #make dataframe with position data from both groups and group name as factor
         }
       }  
@@ -313,6 +316,11 @@ poshistos <- list() #empty list of position histograms
 colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods) #make colnames in PIprofile
 grouped.PIprofiles[[x]] = PIprofile #add PIprofile to list of grouped PIs
 PIprofile <- PIprofile[0,] #empty PIprofile
+
+#Categorical colors
+colnames(PIcombined) <- sprintf("PI%d", 1:NofPeriods)
+grouped.PIcombined[[x]] = PIcombined
+PIcombined <- PIcombined[0,] 
 
 #Power spectra
 spectemp <- do.call(cbind, speclist) #combine all power spectra

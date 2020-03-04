@@ -369,6 +369,7 @@ for(x in 1:NofGroups)
   {
     PIprofile <- grouped.PIprofiles[[x]]
     PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
+    
       # compute summary statistics
       error <- data.frame(period=integer(ncol(PIprofile)), mean=numeric(ncol(PIprofile)), sem=numeric(ncol(PIprofile)))
       for(e in 1:ncol(PIprofile))
@@ -376,6 +377,7 @@ for(x in 1:NofGroups)
         error$period[e]=e
         error$mean[e]=mean(PIprofile[,e])
         error$sem[e]=sd(PIprofile[,e]/sqrt(nrow(PIprofile)))
+        error$color[e] = PIcombined
       }
       # plot graph
      PIplots[[x]] <- ggplot(error, aes(x=period, y=mean)) + 
@@ -405,10 +407,14 @@ for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
   PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
+  PIcombined <- grouped.PIcombined[[x]]
+  PIcombined <- PIcombined[colSums(!is.na(PIcombined)) > 0]
+  PIcombined = tidyr::gather(key = "variable", value = "value", PIcombined) #melt data frames
+  PIcombined["data"] = melt(PIprofile)$value
     PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+              geom_jitter(data = PIcombined, aes(variable, data, fill=value), position=position_jitter(0.3), shape=21, size=3) +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
@@ -416,8 +422,15 @@ for(x in 1:NofGroups)
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
-              theme(aspect.ratio=aspect_ratio)
-  }  
+              theme(aspect.ratio=0.8*aspect_ratio) +
+              scale_fill_discrete(name = "Punishment") #changes the title of the legend. Can be set to anything but in this case I went with "Punishment" 
+if(any(grepl("yt| fs | color", sequence$type)==TRUE))
+{
+  PIplots[[x]] = PIplots[[x]] + geom_jitter(data = melted, aes(x=variable, y=value, fill=color), position=position_jitter(0.3), shape=21, size=3, colour="black")
+} else {
+  PIplots[[x]] = PIplots[[x]] + geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4)
+}
+    }  
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
@@ -429,10 +442,14 @@ for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
   PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
+  PIcombined <- grouped.PIcombined[[x]]
+  PIcombined <- PIcombined[colSums(!is.na(PIcombined)) > 0]
+  PIcombined = tidyr::gather(key = "variable", value = "value", PIcombined) #melt data frames
+  PIcombined["data"] = melt(PIprofile)$value
     PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+              geom_jitter(data = PIcombined, aes(variable, data, fill=value), position=position_jitter(0.3), shape=21, size=3) +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
@@ -440,7 +457,13 @@ for(x in 1:NofGroups)
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ xlab("Experiment Sequence") + 
               theme(aspect.ratio=aspect_ratio)
-  }      
+if(any(grepl("yt| fs | color", sequence$type)==TRUE))
+{
+  PIplots[[x]] = PIplots[[x]] + geom_jitter(data = melted, aes(x=variable, y=value, fill=color), position=position_jitter(0.3), shape=21, size=3, colour="black")
+} else {
+  PIplots[[x]] = PIplots[[x]] + geom_jitter(data = melt(PIprofile), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4)
+}
+    }        
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
@@ -452,6 +475,7 @@ for(x in 1:NofGroups)
   {
   PIprofile <- grouped.PIprofiles[[x]]
   PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
+  
     PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_violin(width = 1.1) +
@@ -485,7 +509,10 @@ if(!om){samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x)))
 
 ```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Learning Score Statistics\n## Statistical tests of single groups against zero\n")
-
+  # grouped.color = melt(grouped.color)
+  # if(!exists("PIstatmelt")){PIstatmelt <- list()}
+  # PIstatmelt = melt(PIstat)
+  # PIstatmelt["color"]= grouped.color$value 
   wilcoxon<-numeric()  
   for(x in 1:NofGroups){wilcoxon[x] = signif(wilcox.test(PIstat[[x]])$p.value, 3)} #test all groups against zero
   #compute Bayes Factor for single group 
@@ -506,13 +533,19 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
   plots.singles<-list(ggplot(melt(PIstat), aes(variable, value)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
     geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-    geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
     ggtitle("Wilcoxon") +
     scale_y_continuous(breaks = seq(-1, 1, .2)) +
     theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
     theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
     samplesizes.annotate(boxes, samplesizes) +
     wilcox.annotate(boxes, wilcoxon))
+  
+if(any(grepl("yt| fs | color", sequence$type)==TRUE)){
+  plots.singles[[1]] = plots.singles[[1]] + geom_jitter(data = PIstatmelt, aes(x=variable, y=value, fill=color), position=position_jitter(0.3), shape=21, size=3, colour="black") + theme(
+  legend.position = c(1.6, 1.00), legend.justification = c("right", "top")) + guides(fill=guide_legend(title="Punished side"))
+} else {
+  plots.singles = plots.singles + geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4)
+}
   
 #add table with results and plot
     plots.singles[[2]]<-tableGrob(results.bayes)
@@ -567,7 +600,6 @@ cat("\n## Statistical tests between two groups\n")
   plots.2test<-list(ggplot(melt(PIstat), aes(variable, value)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
       ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -576,6 +608,13 @@ cat("\n## Statistical tests between two groups\n")
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=8, vjust=0.5) +
       samplesizes.annotate(boxes, samplesizes))
+  
+if(any(grepl("yt| fs | color", sequence$type)==TRUE)){
+  plots.2test[[1]] = plots.2test[[1]] + geom_jitter(data = PIstatmelt, aes(x=variable, y=value, fill=color), position=position_jitter(0.3), shape=21, size=3, colour="black") + theme(
+    legend.position = c(1.6, 1.05), legend.justification = c("right", "top")) + guides(fill=guide_legend(title="Punished side"))
+} else {
+  plots.2test = plots.2test + geom_jitter(data = melt(PIstat), aes(variable, value), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4)
+}
 
   #add table with results and plot
   plots.2test[[2]]<-tableGrob(results.utest)
