@@ -11,9 +11,8 @@ flyDataImport <- function(xml_name) {
   flyData <- xmlParse(xml_name)
   flyDataXMLtop = xmlRoot(flyData)
   
-   ##parse the metadata
+  ##parse the metadata
     URIs <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/URIs"))
-    
     experimenter <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experimenter"))
     fly <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/fly"))
     experiment <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experiment"))
@@ -40,9 +39,9 @@ flyDataImport <- function(xml_name) {
       rawdata$torque = rawdata$torque*100
     }
      
-  ##change j_pos data from float to integer and shift to make approx. zero symmetric (needs work!)
+  ##change j_pos data from float to integer in Joystick experiments
     if(exists("j_pos", rawdata)){
-      rawdata$j_pos = round(rawdata$j_pos*1000)+1100
+      rawdata$j_pos = round(rawdata$j_pos*1000)
     }
   ##change a_pos data from float to integer in Joystick experiments
     if(experiment$meter_type=="Joystick"){
@@ -59,11 +58,9 @@ flyDataImport <- function(xml_name) {
   ##calculate actual sampling rate and downsample if necessary
     real_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
     traces <- rawdata
-    if (round(real_sample_rate) > 65) {
-      rawdata <- weightedDownsample20Hz(rawdata, sequence, experiment, NofPeriods)
-      down_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
-    } else if (round(real_sample_rate) > 20){
-    rawdata <- downsampleapprox(rawdata, sequence, experiment, NofPeriods)
+    NofDatapoints = as.numeric(as.character(experiment$duration))*20 #find the number of data points we should be having at 20Hz
+    if (nrow(rawdata) != NofDatapoints) {
+    rawdata <- downsampleapprox(rawdata, sequence, experiment, NofPeriods, NofDatapoints)
     down_sample_rate = nrow(rawdata)/(rawdata$time[nrow(rawdata)]/1000)
     } else {
       real_sample_rate = experiment$sample_rate
@@ -179,17 +176,15 @@ collect.metadata <-function(singleflydata)
 }
 
 ### Downsample the rawdata using approx function (for data with period/time jitter)
-downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
+downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods, NofDatapoints) {
 
-  NofDatapoints = as.numeric(as.character(experiment$duration))*20 #find the number of data points we should be having at 20Hz
-
-  # create the vectors in which to save the downsampled data
+  # create vectors for fly behavior and arena position
   a_posDownsampled <- vector(mode = "numeric")
   flyDownsampled <- vector(mode = "numeric")
-  periodDownsampled <- vector(mode = "numeric", length = NofDatapoints)
   
   # create new time and period values
   timeDownsampled = seq(0, (as.numeric(as.character(experiment$duration))*1000)-50, 50)
+  periodDownsampled <- vector(mode = "numeric", length = NofDatapoints)
   p=1
   t=0
   for (index in 1:NofDatapoints){
@@ -202,12 +197,18 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods) {
   }
 
   
-  # downsample fly behavior and a_pos (stil nees work on a_pos due to +/-180°)
+  # downsample fly behavior and a_pos
   for (index in 1:NofPeriods){
-    f=approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])$y
-    flyDownsampled=c(flyDownsampled, round(f))
-    p=approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])$y
-    a_posDownsampled=c(a_posDownsampled, round(p))
+    f=round(approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])$y)
+    flyDownsampled=c(flyDownsampled, f)
+    p=round(approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])$y)
+    #create a position trace where the +/-180° point is shifted by 90°
+    p_s=rawdata$a_pos+900 #make a copy of position trace and shift the values by 90°
+    p_s[p_s>1796] = p_s[p_s>1796]-3600 #wrap the shifted 90° back around to -90°..-180°
+    p_s=round(approx(subset(p_s, rawdata$period==index), n=table(periodDownsampled)[index])$y)
+    p[p_s %in% -1000:-800] <- p_s[p_s %in% -1000:-800]-900 #replace values with shifted values
+    p[p < -1800]=p[p < -1800] + 3600 #wrap the too small values around
+    a_posDownsampled=c(a_posDownsampled, p)
   }
   
   
@@ -248,7 +249,7 @@ weightedDownsample20Hz <- function(rawdata, sequence, experiment, NofPeriods) {
        if(any(abs(as.numeric(difference$deviation))>1)) stop("Number of data points does not match expectations. Check DTS Rawdata!") #check if there is more than one missing/additional data point
        
        diff_periods = rownames(difference)[difference$deviation!=0] #find periods with differing numbers of data points
-       #mark the last data pont of each offending period (assuming we're only one data point off!)
+       #mark the last data point of each offending period (assuming we're only one data point off!)
        if (length(diff_periods)!=0){
          rawdataDown$last = NA
          rawdataDown$last = with(rawdataDown, ave(last, match(rawdataDown$period, diff_periods), FUN = function(x) ifelse(seq_along(x) == length(x), 1, x))) # "1" marking the last data püoint in an offending period

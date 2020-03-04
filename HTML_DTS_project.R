@@ -2,6 +2,9 @@
 ################## R-script to read YAML DTS project files, visualize and statistically evaluate data. Reports in HTML ##############
 #####################################################################################################################################
 
+rm(list=ls()) #clean memory
+gc()          #collect garbage
+
 library(ggplot2)
 library(tidyr)
 library(dygraphs)
@@ -24,7 +27,6 @@ library(knitr)
 library(dabestr)
 library(zoo)
 library(tidyverse)
-library(wesanderson)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -42,8 +44,14 @@ evaluation.path = paste(project.path,"evaluations", sep = "/")
 dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)
 
-#how many experimental groups will need to be evaluated
-NofGroups = lengths(project.data["resources"])
+#collecting essential data for statistics and plots
+NofGroups = lengths(project.data["resources"])                                   #get number of experimental groups
+signif = project.data[["statistics"]][["significance-levels"]]                   #get significance levels
+groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
+priorval = project.data[["statistics"]][["priors"]]                              #get priors for FPR calculation
+twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1       #etermine if statistics for two groups are required
+wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1              #determine if we need to do single tests
+learningscore = project.data[["statistics"]][["learning-score"]][["data"]]       #get the PI that is going to be tested
 
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
@@ -57,20 +65,27 @@ grouped.spectra <- list()     #Power spectra in a list of length NofGroups
 grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of length NofPeriods
 grouped.PIcombined <- list()  #For categorical color coding
 
-exp_groups <- list()    #Individual fly names in each group for display in project evaluation
-grouped.OMdata <-list() #Averaged optomotor data traces for each group
-grouped.OMparams <-list() #Extracted optomotor parameters for each group
+exp_groups <- list()              #Individual fly names in each group for display in project evaluation
+grouped.OMdata <-list()           #Averaged optomotor data traces for each group
+grouped.OMparams <-list()         #Extracted optomotor parameters for each group
+grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group at start of experiment
+grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
+grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
+grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
+
+
 
 for(x in 1:NofGroups)
 {
   grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
   grp_description = project.data[["resources"]][[x]][["description"]] #collect description of the group
   xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
+  if(!exists("samplesizes")) {samplesizes = length(project.data[["resources"]][[x]][["data"]])} else samplesizes[x] = length(project.data[["resources"]][[x]][["data"]]) #get samplesizes
 
 #create/empty lists for collecting all single fly data by period
 period.data <- list()     #data grouped by period
 grouped.data <- list()    #total data grouped
-speclist <- list()
+speclist <- list()        #spectograms
 
 #start evaluating
 if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group have the identical experimental design
@@ -130,14 +145,41 @@ if(MultiFlyDataVerification(xml_list)==TRUE) # make sure all flies in a group ha
   
   # derive means and SDs for optomotor data in the group and collect extracted OM parameters
 if(any(grepl("optomotor", sequence$type)==TRUE)){
-  OMdata$means=rowMeans(OMdata[-1])
-  OMdata$sd=rowSds(OMdata[-1])
-  OMdata$group=project.data[["resources"]][[x]][["name"]]
-  grouped.OMdata[[x]] <- OMdata #save optomotor data to groupwise list
-  rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group
-  OMparams$group=project.data[["resources"]][[x]][["name"]]
-  grouped.OMparams[[x]] <- OMparams #save extracted optomotor parameters to groupwise list
-  rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
+}
+  
+ if(any(grepl("optomotor", sequence$type)==TRUE)){    ###determine if there are optomotor periods
+  if (any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-optomotor periods...
+    if (grepl("optomotor", sequence$type[1]) & grepl("optomotor", tail(sequence$type, 1))){ ###...and the opto periods are in the beginning and the end
+      ##then we have before/after optomotor data
+      #before
+      OMdataBefore$means=rowMeans(OMdataBefore[-1])
+      OMdataBefore$sd=rowSds(OMdataBefore[-1])
+      OMdataBefore$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMdataBefore[[x]] <- OMdataBefore #save optomotor data to groupwise list
+      rm(OMdataBefore) #remove the optomotor data frame so it can be generated again for the next group
+      OMparamsBefore$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMparamsBefore[[x]] <- OMparamsBefore #save extracted optomotor parameters to groupwise list
+      rm(OMparamsBefore) #remove the optomotor parameters dataframe so it can be generated again for the next group
+      #after
+      OMdataAfter$means=rowMeans(OMdataAfter[-1])
+      OMdataAfter$sd=rowSds(OMdataAfter[-1])
+      OMdataAfter$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMdataAfter[[x]] <- OMdataAfter #save optomotor data to groupwise list
+      rm(OMdataAfter) #remove the optomotor data frame so it can be generated again for the next group
+      OMparamsAfter$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMparamsAfter[[x]] <- OMparamsAfter #save extracted optomotor parameters to groupwise list
+      rm(OMparamsAfter) #remove the optomotor parameters dataframe so it can be generated again for the next group
+    }
+  } else {
+    OMdata$means=rowMeans(OMdata[-1])
+    OMdata$sd=rowSds(OMdata[-1])
+    OMdata$group=project.data[["resources"]][[x]][["name"]]
+    grouped.OMdata[[x]] <- OMdata #save optomotor data to groupwise list
+    rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group
+    OMparams$group=project.data[["resources"]][[x]][["name"]]
+    grouped.OMparams[[x]] <- OMparams #save extracted optomotor parameters to groupwise list
+    rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
+  }
 }
   
 
@@ -165,18 +207,33 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     
     #fly
     flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
+      geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+      geom_vline(xintercept=0, linetype="dotted") +
       geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
       labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
       xlim(maxfly) +
+      theme_light() +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank()) +
+      scale_x_continuous(expand = c(0,0)) +
+      scale_y_continuous(expand = c(0,0)) +
       ggtitle(paste("Period", i))
     
     #position
     if(sequence$type[i]=="fs" || sequence$type[i]=="color")
     {
       poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
+        geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
         geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
         labs(x="arena position [arb units]", y="frequency") +
-        xlim(-1800,1800) +
+        theme_light() +
+        theme(panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank()) +
+        scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), expand = c(0,0)) +
+        scale_y_continuous(expand = c(0,0)) +
         ggtitle(paste("Period", i))
     }
   }
@@ -196,13 +253,49 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     ggtitle("Pooled Behavior Histogram")
   
   #position (if there are fs periods)
-  if ('fs' %in% sequence$type) {
+  if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
   poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
     geom_histogram(binwidth=10) +
     labs(x="position [arb units]", y="frequency") + 
     xlim(-1800,1800) +
     ggtitle("Pooled Position Histogram")
   }
+
+  ## if we have two groups, collect data for superimposed histograms for either fly behavior or position
+  if (NofGroups==2){
+      if('yt' %in% sequence$type || 'sw' %in% sequence$type) #for yt or sw experiments, collect fly data
+      {
+        if(x==1){
+          histo1 <- data.frame(pooled.data[[learningscore]][["fly"]])
+          histo1$v2 = groupnames[x]
+          colnames(histo1)=c("fly","group")
+        } else {
+          histo2 <- data.frame(pooled.data[[learningscore]][["fly"]])
+          histo2$v2 = groupnames[x]
+          colnames(histo2)=c("fly","group")
+          supHistos <- rbind(histo1,histo2) #make dataframe with fly data from both groups and group name as factor
+        }
+      } else if ('fs' %in% sequence$type || 'color' %in% sequence$type) #for fs or color experiments, collect arena position data and fold them to 0..90°
+      {
+        if(x==1){
+          histo1 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
+          histo1$v2 = groupnames[x]
+          colnames(histo1)=c("a_pos","group")
+          histo1$a_pos = abs(histo1$a_pos)/10    #fold position data over to look at 180° equivalent fixation and bring into degree range
+          histo1$a_pos[histo1$a_pos>90] = -histo1$a_pos[histo1$a_pos>90]+180 #fold anything larger than 90° to 0..90°
+        } else {
+          histo2 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
+          histo2$v2 = groupnames[x]
+          colnames(histo2)=c("a_pos","group")
+          histo2$a_pos = abs(histo2$a_pos)/10  #fold position data over to look at 180° equivalent fixation and bring into degree range
+          histo2$a_pos[histo2$a_pos>90] = -histo2$a_pos[histo2$a_pos>90]+180 #fold anything larger than 90° to 0..90°
+          supHistos <- rbind(histo1,histo2)  #make dataframe with position data from both groups and group name as factor
+        }
+      }  
+    
+  }
+  
+  ## collect data for superimposed position histograms from two groups
 
 } else stop("You have selected files with differing metadata. Please check your DTS files for consistency!")
 
