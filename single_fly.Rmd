@@ -390,174 +390,46 @@ cat("\n# Learning and avoidance scores\n")
             col = as.vector(na.omit(sequence$color)))
 ```
 # Dwelling time distribution
-## punished
 
-```{r dwellingpunished, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
-
-
+```{r dwellingtime, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
+y = c("punished", "unpunished")
 for(i in 1:NofPeriods){
   temp  <- rawdata[rawdata$period == i, ]
-  dwell = temp[temp["fly"] < 0, ] # sort negative data
-  dwell <- melt(table(lengths(split(dwell$time, cumsum(c(TRUE, diff(dwell$time) != 50)))))) #finds cumulative data and adds it to a melted table
-  #sum = sum(dwell$value)
-  dwell$perctest = 100-(cumsum(dwell$value/(sum(dwell$value)))*100) # subtracts the cumulative
-  dwell$Var1 = (dwell$Var1 * 0.05)
-  dwell <- na.omit(transform(dwell, perctest = c(NA, perctest[-nrow(dwell)]))) # shifting the data downwards
-  insert <- c(0,(max(dwell$value)),100)
-  dwell = rbind(dwell, insert)
-  mediandwell[[i]] = median(dwell$Var1)
-  medianmelt = melt(mediandwell)
-  
-  ##plot command can be put into a function in DTS_plotfunctions.R
-  dwellingtime[[i]] <- ggplot(data=dwell, aes(x=Var1, y=perctest)) +
-    geom_line(color="red")+
-    geom_point()+
+  temp <- temp[c("time","fly")]
+  if(!exists("dwell")){dwell <- NA}
+  if(!exists("scattertotal")){scattertotal <- list()}
+  dwell$punished = temp[temp["fly"] < 0, ] # sort negative data
+  dwell$unpunished = temp[temp["fly"] >= 0, ] # sort positive data
+  scatter = dwell
+  for(t in 1:length(y)){
+    scatterperiod[[t]] <- reshape2::melt(lengths(split(scatter[[t]][[1]], cumsum(c(TRUE, diff(scatter[[t]][[1]]) != 50))))) #finds cumulative data 
+    scatterperiod[[t]]$period = i
+    scatterperiod[[t]]$punishment = y[[t]]
+    scatterperiod[[t]][[1]] <- (scatterperiod[[t]][[1]])*0.05
+    scattertemp = do.call(rbind, scatterperiod)
+    dwell[[t]] = reshape2::melt(table(scatterperiod[[t]]$value)) #count the occurences of each of the different dwelling times and add them to a table
+    dwell[[t]][[2]] <- 100-(cumsum(dwell[[t]][[2]]/(sum(dwell[[t]][[2]])))*100) #subtracts the cumulative percentage
+    dwell[[t]] <- transform(dwell[[t]], value = c(100, value[-nrow(dwell[[t]])])) #shift data down
+    dwelltemp <- ldply (dwell, data.frame)
+  }
+  scattertotal[[i]] = scattertemp
+  dwelltotal[[i]] = dwelltemp
+  dwellingtime[[i]] = ggplot() +
+    geom_line(data = dwelltemp, aes(x = Var1, y = value, color = .id))+
+    geom_point(data = dwelltemp, aes(x = Var1, y = value, color = .id))+
     scale_y_log10( breaks=c(0,10,100))+
     scale_x_log10() +
-    ggtitle(paste(flyname, "Period", i, "Punished"))+
+    ggtitle(paste(flyname, "Period", i)) +
     theme_light() +
     labs(x="time [sec]", y="% events") +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
     theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))
 }
 
-dwellingtime[[NofPeriods+1]] <- ggplot(medianmelt, aes(L1)) + 
-  geom_bar(aes(weight = value)) +
-  ggtitle(paste("Punished median dwelling time", flyname)) +
-  theme_light() +
-  labs(x="period", y="median dwelling time [sec]") +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5)) +
-  scale_x_continuous(breaks = seq(len = 100))
-
+scattertemp = do.call(rbind, scattertotal)
+dwellingtime[[NofPeriods+1]] <- ggplot(scattertemp, aes(x = factor(period), y = value, fill = punishment)) +
+  geom_boxplot() +
+  scale_y_log10( breaks=c(0,10,100))
 multiplot(plotlist = dwellingtime, cols=2)
 
-```
-
-```{r unpunished, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
-      cat("\n## Unpunished Dwelling time\n")
-
-for(i in 1:NofPeriods){
-  temp  <- rawdata[rawdata$period == i, ]
-  dwell = temp[temp["fly"]  >= 0, ] # sort negative data
-  dwell <- melt(table(lengths(split(dwell$time, cumsum(c(TRUE, diff(dwell$time) != 50)))))) #finds cumulative data and adds it to a melted table
-  dwell = dwell[-1,]
-  sum = sum(dwell$value)
-  dwell$perctest = 100-(cumsum(dwell$value/sum)*100) # subtracts the cumulative
-  dwell$Var1 = (dwell$Var1 * 0.05)
-  dwell <- na.omit(transform(dwell, perctest = c(NA, perctest[-nrow(dwell)]))) # shifting the data downwards
-  insert <- c(0,(min(dwell$value)),100)
-  dwell = rbind(dwell, insert)
-
-  mediandwell[[i]] = median(dwell$Var1)
-  medianmelt = melt(mediandwell)
-  dwellingtime[[i]] <- ggplot(data=dwell, aes(x=Var1, y=perctest)) +
-    geom_line(color="red")+
-    geom_point()+
-    scale_y_log10( breaks=c(0,10,100))+
-    scale_x_log10() +
-    ggtitle(paste(flyname, "Period", i, "Unpunished"))+
-    theme_light() +
-    labs(x="time [sec]", y="% events") +
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-    theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))
-
-}
-dwellingtime[[NofPeriods+1]] <- ggplot(medianmelt, aes(L1)) + 
-  geom_bar(aes(weight = value)) +
-  ggtitle(paste("median dwelling time", flyname)) +
-  theme_light() +
-  labs(x="period", y="Unpunished median dwelling time [sec]") +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5)) +
-  scale_x_continuous(breaks = seq(len = 100))
-sumpos = dwell$Var1*dwell$value
-sumpos = sum(sumpos)
-
-multiplot(plotlist = dwellingtime, cols=2)
-
-
-```
-
-```{r scatterpunished, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
-      cat("\n## Scatter Dwelling time\n")
-
-dwellscatter = list()
-for(i in 1:NofPeriods){
-  temp  <- rawdata[rawdata$period == i, ]
-  dwell = temp[temp["fly"] < 0, ] # sort negative data
-  dwell <- lengths(split(dwell$time, cumsum(c(TRUE, diff(dwell$time) != 50))))
-  dwell = melt(dwell)
-  dwell = (dwell * 0.05)
-  dwell = melt(dwell)
-  dwell["period"] <- i
-  dwellscatter[[i]] <- dwell
-}
- dwell_data = do.call(rbind, dwellscatter)
-max = max(dwell_data$value)
-ggerrorplot(dwell_data, x = "period", y = "value", 
-            desc_stat = "mean_sd", color = "black",
-            ylim = c(0, max),
-            add = "jitter", add.params = list(color = "darkgray")) +
-        theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))+
-  labs(x="Period", y="Dwelling time [sec]")+
-  ggtitle(paste("Punished dwelling time", flyname)) 
-  
-```
-
-```{r scatterunpunished, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
-      cat("\n## Scatter Dwelling time\n")
-
-dwellscatter = list()
-for(i in 1:NofPeriods){
-  temp  <- rawdata[rawdata$period == i, ]
-  dwell = temp[temp["fly"] >= 0, ] # sort negative data
-  dwell <- lengths(split(dwell$time, cumsum(c(TRUE, diff(dwell$time) != 50))))
-  dwell = melt(dwell)
- # dwell = dwell[dwell[,ncol(dwell)]>1,]
-  dwell = (dwell * 0.05)
-  dwell = melt(dwell)
-  dwell["period"] <- i
-  dwellscatter[[i]] <- dwell
-}
-
- dwell_data = do.call(rbind, dwellscatter)
-
-ggerrorplot(dwell_data, x = "period", y = "value", 
-            desc_stat = "mean_sd", color = "black",fill = as.vector(na.omit(sequence$color)),
-            add = "jitter", add.params = list(color = "gray")) +
-        theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))+
-  labs(x="Period", y="Dwelling time [sec]")+
-  ggtitle(paste("Unpunished dwelling time", flyname)) 
-  
-```
-
-```{r totaldwelling, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 5}
-cat("\n## Dwelling time per period\n")
-
-sumcom = list()
-for(i in 1:NofPeriods){
-  temp  <- rawdata[rawdata$period == i, ]
-  dwellpos = temp[temp["fly"]  >= 0, ] # sort negative data
-  dwellpos <- melt(table(lengths(split(dwellpos$time, cumsum(c(TRUE, diff(dwellpos$time) != 50)))))) #finds cumulative data and adds it to a melted table
-  dwellpos$Var1 = (dwellpos$Var1 * 0.05)
-  sumpos = sum(dwellpos$Var1*dwellpos$value)
-  
-  dwellneg = temp[temp["fly"]  < 0, ] # sort negative data
-  dwellneg <- melt(table(lengths(split(dwellneg$time, cumsum(c(TRUE, diff(dwellneg$time) != 50)))))) #finds cumulative data and adds it to a melted table
-  dwellneg$Var1 = (dwellneg$Var1 * 0.05)
-  sumcom[[i]] = sum(dwellneg$Var1*dwellneg$value)+sumpos
-
-}
-sumcom = melt(sumcom)
-sumcom = rbind(sumcom, (c(format(round((mean(sumcom$value)), 2), nsmall = 2),"Average")))
-sumcom = sumcom %>% 
-  rename(
-    Time = value,
-    "Period/Average" = L1
-    )
-table <- ggtexttable((sumcom), rows = NULL, 
-                        theme = ttheme("mBlue"))
-table
-```
 ```
