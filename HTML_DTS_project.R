@@ -82,7 +82,8 @@ grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group
 grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
-
+grouped.cont <- NA
+cont.all = list()
 
 
 for(x in 1:NofGroups)
@@ -148,7 +149,7 @@ for (l in 1:length(xml_list))
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
-
+    grouped.cont[[l]] <- contingency #adds the contingency for one fly to the entire group
   } #for number of flies in xml_list
 
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
@@ -328,9 +329,10 @@ grouped.PIprofiles[[x]] = PIprofile #add PIprofile to list of grouped PIs
 PIprofile <- PIprofile[0,] #empty PIprofile
 
 #Categorical colors
-colnames(PIcombined) <- sprintf("PI%d", 1:NofPeriods)
-grouped.PIcombined[[x]] = PIcombined
-PIcombined <- PIcombined[0,] 
+colnames(PIcombined) <- sprintf("PI%d", 1:NofPeriods) #make colnames in PIcombined
+grouped.PIcombined[[x]] = PIcombined  #add PIcombined to list of grouped PIs
+PIcombined <- PIcombined[0,] #empty PIcobmined
+cont.all[[x]] = grouped.cont #merge the grouped.cont for all groups
 
 #Power spectra
 spectemp <- do.call(cbind, speclist) #combine all power spectra

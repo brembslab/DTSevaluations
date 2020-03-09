@@ -246,7 +246,7 @@ for(i in 1:NofPeriods){
 
       }
     } #for Number of Periods
-    
+contingency = as.vector(unique(melt(sequence$contingency)[!apply(melt(sequence$contingency) == "", 1, all),])) #Gets the contingency value from melted sequence. This line of code melts the sequence dataframe, removes all the empty rows and gets the unique value of the remaining rows.  
 ```
 
 # Histograms
