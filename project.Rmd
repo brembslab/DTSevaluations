@@ -367,33 +367,20 @@ cat("\n# Performance Indices\n \n## Performance Index bar plot with SEM:\n")
 PIplots <- list()
 for(x in 1:NofGroups)
   {
-    PIprofile <- grouped.PIprofiles[[x]]
-    PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
-    
-      # compute summary statistics
-      error <- data.frame(period=integer(ncol(PIprofile)), mean=numeric(ncol(PIprofile)), sem=numeric(ncol(PIprofile)))
-      for(e in 1:ncol(PIprofile))
-      {
-        error$period[e]=e
-        error$mean[e]=mean(PIprofile[,e])
-        error$sem[e]=sd(PIprofile[,e]/sqrt(nrow(PIprofile)))
-        error$color[e] = PIcombined
-      }
-      # plot graph
-     PIplots[[x]] <- ggplot(error, aes(x=period, y=mean)) + 
+    PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+
+    # plot graph
+     PIplots[[x]] <- ggplot(PIprofile, aes(x=period, y=PIs)) + 
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_bar(fill = as.vector(na.omit(sequence$color)), position=position_dodge(), stat="identity", colour="black") +
-              geom_errorbar(aes(ymin=mean-sem, ymax=mean+sem),
-                            width=0,
-                            size=1.5,
-                            position=position_dodge(.9)) +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
-              scale_x_continuous(breaks = seq(1, NofPeriods, 1)) +
+              stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
+              stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .2)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]") + 
+              xlab("Experiment Sequence") +
               theme(aspect.ratio=aspect_ratio)
   }
 grid.arrange(grobs = PIplots, nrow=NofGroups)
@@ -405,15 +392,14 @@ cat("\n## Performance Index box&dotplot with notches:\n")
 
 for(x in 1:NofGroups)
   {
-  PIcombined <- grouped.PIcombined[[x]]
-  PIcombined <- PIcombined[colSums(!is.na(PIcombined)) > 0]
-  PIcombined = tidyr::gather(key = "variable", value = "combined", PIcombined) #melt data frames
-  PIcombined["data"] = melt(PIprofile)$value
-    PIplots[[x]] <- ggplot(PIcombined, aes(variable, data)) +
+    PIprofile <- grouped.PIcombined[[x]] #get PIs with categories
+
+    #plot graph
+    PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = PIcombined, aes(variable, data, fill=combined), position=position_jitter(0.3), shape=21, size=3) +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
+              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -421,7 +407,7 @@ for(x in 1:NofGroups)
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
               theme(aspect.ratio=0.8*aspect_ratio) +
-              scale_fill_discrete(name = "Punishment") #changes the title of the legend. Can be set to anything but in this case I went with "Punishment" 
+              scale_fill_discrete(name = "Categories") #legend title for categories 
 
     }  
 grid.arrange(grobs = PIplots, nrow=NofGroups)
@@ -433,18 +419,22 @@ cat("\n## Performance Index box&dotplot without notches:\n")
 
 for(x in 1:NofGroups)
   {
+    PIprofile <- grouped.PIcombined[[x]] #get PIs with categories
 
-    PIplots[[x]] <- ggplot(PIcombined, aes(variable, data)) +
+    #plot graph
+    PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = PIcombined, aes(variable, data, fill=combined), position=position_jitter(0.3), shape=21, size=3) +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
+              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ 
-              ylab("PI [rel. units]")+ xlab("Experiment Sequence") + 
-              theme(aspect.ratio=aspect_ratio)
+              ylab("PI [rel. units]")+ 
+              xlab("Experiment Sequence") + 
+              theme(aspect.ratio=0.8*aspect_ratio) +
+              scale_fill_discrete(name = "Categories") #legend title for categories 
 
     }        
 grid.arrange(grobs = PIplots, nrow=NofGroups)
@@ -456,14 +446,13 @@ cat("\n## Performance Index Violin Plot:\n")
 
 for(x in 1:NofGroups)
   {
-  PIprofile <- grouped.PIprofiles[[x]]
-  PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
-  
-    PIplots[[x]] <- ggplot(melt(PIprofile), aes(variable, value)) +
+  PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+
+    PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_violin(width = 1.1) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), width = 0.1, outlier.color="darkred") +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",nrow(PIprofile))) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -484,8 +473,8 @@ for(x in 1:NofGroups){PIstat[[x]] <- grouped.PIprofiles[[x]][[learningscore]]}
 PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind)))                          #convert PI list to data.frame
 colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name'))    #add group names as column names to PIstat
 cont.all =  as.data.frame(t(plyr::ldply(cont.all, rbind)))                      #convert PI list to data.frame
-colnames(cont.all) <- unlist(sapply(project.data[["resources"]], '[', 'name'))    #add group names as column names to PIstat
-cont.all = tidyr::gather(key = "variable", value = "value", cont.all)               #melt the dataframe
+colnames(cont.all) <- unlist(sapply(project.data[["resources"]], '[', 'name'))  #add group names as column names to PIstat
+cont.all = tidyr::gather(key = "variable", value = "value", cont.all)           #melt the dataframe
 cont.all["data"] = melt(PIstat)$value
 
 #compute standard deviations
