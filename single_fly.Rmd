@@ -224,7 +224,7 @@ for(i in 1:NofPeriods){
       
       
       ##calculate PIs and 
-      ##create data.frame for adding PIs if it doesn't eist, yet
+      ##create data.frame for adding PIs if it doesn't exist, yet
       if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))}
       if(sequence$type[i]=="fs"||sequence$type[i]=="color") #for arena position
       {
@@ -247,7 +247,6 @@ for(i in 1:NofPeriods){
       if(l==1){Categories[1,i]=sequence$category[i]} #...add category variable to dataframe
       
     } #for Number of Periods
-contingency = as.vector(unique(melt(sequence$contingency)[!apply(melt(sequence$contingency) == "", 1, all),])) #Gets the contingency value from melted sequence. This line of code melts the sequence dataframe, removes all the empty rows and gets the unique value of the remaining rows.  
 ```
 
 # Histograms

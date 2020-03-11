@@ -356,11 +356,6 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
 ```
 
 
-```{r PIpresent, echo=FALSE}
-PIs <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
-```
-
-
 ```{r PIbar, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Performance Indices\n \n## Performance Index bar plot with SEM:\n")
 
@@ -465,25 +460,6 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 
-```{r StatSetup, echo=FALSE, error=FALSE, message=FALSE,}
-#create new dataframe with only the chosen PI values
-if(PIs){
-PIstat <- list()
-for(x in 1:NofGroups){PIstat[[x]] <- grouped.PIprofiles[[x]][[learningscore]]}
-PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind)))                          #convert PI list to data.frame
-colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name'))    #add group names as column names to PIstat
-cont.all =  as.data.frame(t(plyr::ldply(cont.all, rbind)))                      #convert PI list to data.frame
-colnames(cont.all) <- unlist(sapply(project.data[["resources"]], '[', 'name'))  #add group names as column names to PIstat
-cont.all = tidyr::gather(key = "variable", value = "value", cont.all)           #melt the dataframe
-cont.all["data"] = melt(PIstat)$value
-
-#compute standard deviations
-SDs<-as.numeric(apply(PIstat, 2, function(x) sd(na.omit(x))))
-if(!om){samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))}
-}
-```
-
-
 ```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Learning Score Statistics\n## Statistical tests of single groups against zero\n")
   
@@ -504,11 +480,11 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
           results.bayes <- signif(results.bayes, digits=3) # reduce results to 3 significant digits
     }
 # plot PI box plot test against zero
-  plots.singles<-list(ggplot(melt(PIstat), aes(variable, value)) +
+  plots.singles<-list(ggplot(PIstatCombined, aes(group, PIs)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
     geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
     ggtitle("Wilcoxon") +
-    geom_jitter(data = cont.all, aes(variable, data, fill=value), position=position_jitter(0.3), shape=21, size=3) +
+    geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
     scale_y_continuous(breaks = seq(-1, 1, .2)) +
     theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
     theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
@@ -566,10 +542,10 @@ cat("\n## Statistical tests between two groups\n")
                                "Likelihood Ratio")
     
 # plot two PIs with asterisks
-  plots.2test<-list(ggplot(melt(PIstat), aes(variable, value)) +
+  plots.2test<-list(ggplot(PIstatCombined, aes(group, PIs)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data = cont.all, aes(variable, data, fill=value), position=position_jitter(0.3), shape=21, size=3) +
+      geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
       ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -589,8 +565,7 @@ cat("\n## Statistical tests between two groups\n")
 ```{r estimationstats, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Estimation statistics\n")
 
-PIest=na.omit(melt(PIstat)) #create a dataframe that fits estimation stat requirements and remove missing PIs
-unpaired_median_diff <- dabest(PIest, variable, value, idx = groupnames, paired = FALSE, func = median) #create estimation results list
+unpaired_median_diff <- dabest(PIstatCombined, group, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
 print(plot(unpaired_median_diff)) #plot results
 
 ```
@@ -598,7 +573,7 @@ print(plot(unpaired_median_diff)) #plot results
 ```{r splitviolins, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Split Violin Plot\n")
 
-PIest$learningscore=project.data$statistics$`learning-score`$title #reuse estimation stat dataframe and add x-axis value for split violin plots
-print(ggplot(PIest, aes(learningscore, value, fill = variable)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
+PIstatCombined$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
+print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```

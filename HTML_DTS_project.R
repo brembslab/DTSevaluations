@@ -83,8 +83,6 @@ grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group
 grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
-grouped.cont <- NA
-cont.all = list()
 
 
 for(x in 1:NofGroups)
@@ -150,7 +148,6 @@ for (l in 1:length(xml_list))
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
-    grouped.cont[[l]] <- contingency #adds the contingency for one fly to the entire group
   } #for number of flies in xml_list - from here on group evaluations
 
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
@@ -308,44 +305,45 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
   }
   
 
-###Collect the data from each group in their respective lists and empty the variables
+  ########### Collect the data from each group in their respective lists and empty the variables ######################
 
-#Period sequence design meta-data
+###Period sequence design meta-data
 grouped.periods[[x]] = periods
 
-#fly Histograms
+###fly Histograms
 grouped.flyhistos[[x]] = flyhistos #add fly histograms to list of grouped histograms
 flyhistos <- list() #empty fly histograms
 
-#Position Histograms
+###Position Histograms
 grouped.poshistos[[x]] = poshistos #add position histograms to list of grouped position histograms
 poshistos <- list() #empty list of position histograms
 
 
 ###Prepare PIs for plotting and statistical analysis###
 
+PIs <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
+
 #PIprofiles for statistical analysis (PIs alone, periods as column names)
 colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)    #make colnames in PIprofile
 grouped.PIprofiles[[x]] = PIprofile                     #add PIprofile to list of grouped PIs
-PIonly <- PIprofile[colSums(!is.na(PIprofile)) > 0]     #remove empty columns for combining with categories
+PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0]  #remove empty columns for combining with categories
 
-#Categories for printing categorical colors
+#Categories for printing categorical colors (periods as column names)
 colnames(Categories) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in Categories
-Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
 grouped.Categories[[x]] = Categories                      #add Categories to list of grouped Categories
+Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
 
 #PCombine categories with PIs for plotting (melted, periods as id-variable)
-PIcombined <- melt(Categories, measure.vars = names(Categories), variable.name = "period", value.name = "category") #melt data frame to create a variable with periods as id values
-PIcombined["PIs"] = melt(PIonly)$value  #combine the categories with the PIs
-grouped.PIcombined[[x]] = PIcombined    #add PIcombined to list of grouped PIs and categories (for plotting)
-rm(PIcombined)
+if (PIs)
+    {
+    PIcombined <- melt(Categories, measure.vars = names(Categories), variable.name = "period", value.name = "category") #melt data frame to create a variable with periods as id values
+    PIcombined["PIs"] = melt(PIprofile)$value                 #combine the categories with the PIs
+    grouped.PIcombined[[x]] = PIcombined                      #add PIcombined to list of grouped PIs and categories (for plotting)
+    rm(PIcombined)                                            #delete for use in next group
+    }
 
-#Empty the dataframes for reuse in the next group
-PIprofile <- PIprofile[0,]
-Categories <- Categories[0,]
-
-cont.all[[x]] = grouped.cont #merge the grouped.cont for all groups
-
+#Remove items for reuse in the next group
+rm(PIprofile, Categories)
 
 
 #Power spectra
@@ -363,9 +361,9 @@ grouped.spectra[[x]] = spectemp #save group mean/sd
 
 } #for nofGroups
 
-####################################################
-######## plots and statistical evaluations ########
-###################################################
+###########################################################
+######## project plots and statistical evaluations ########
+###########################################################
 
 ###### Plots ######
 
@@ -373,6 +371,29 @@ grouped.spectra[[x]] = spectemp #save group mean/sd
 colorrange = project.data[["statistics"]][["color-range"]]
 boxcolors = c(colorrange[1:NofGroups])
 boxes<-c(1:NofGroups)
+
+#create new dataframes for the chosen PI learningscore values
+if(PIs & !is.null(learningscore)){
+  PIstat <- list()
+  CatStat <- list()
+  for(x in 1:NofGroups){
+    PIstat[[x]] <- grouped.PIprofiles[[x]][[learningscore]]
+    CatStat[[x]] <- grouped.Categories[[x]][[learningscore]]
+  }
+  PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind)))                            #convert PI list to data.frame
+  colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name'))      #add group names as column names to PIstat
+  CatStat <-  as.data.frame(t(plyr::ldply(CatStat, rbind)))                         #convert list of categories to data.frame
+  colnames(CatStat) <- unlist(sapply(project.data[["resources"]], '[', 'name'))     #add group names as column names to CatStat
+  
+  #compute standard deviations
+  SDs<-as.numeric(apply(PIstat, 2, function(x) sd(na.omit(x))))
+
+  #combine PIstat and CatStat for plotting learningscores
+  PIstatCombined <- melt(CatStat, measure.vars = names(CatStat), variable.name = "group", value.name = "category") #melt categories into dataframe with group as id-variable
+  PIstatCombined["PIs"] = melt(PIstat)$value                                        #combine the categories with the PIs
+  PIstatCombined = na.omit(PIstatCombined)                                          #delete NA rows
+}
+
 
 ###### if there are more than two groups, try to pool the data into 'experimental' and 'control'
 if(NofGroups>2){}

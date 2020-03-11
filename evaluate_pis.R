@@ -1,5 +1,8 @@
 ## R-Script to read ASCII performance index data and plot them
 
+rm(list=ls()) #clean memory
+gc()          #collect garbage
+
 library(ggplot2)
 library(reshape2)
 library(gridExtra)
@@ -10,8 +13,24 @@ library(BayesFactor)
 
 source("DTS_plotfunctions.R")
 
-#read data files
-NofGroups = 2 #set group number
+
+
+
+
+
+################################# user settings ###########################
+NofGroups = 2                             #set number of groups (max 2 for now)
+groupnames = c("WTB master", "WTB yoke")  #set a vector with all group names
+signif = c(0.005, 0.001, 0.0001)          #set significance levels
+learningscore=14                          #set the period number for the learning score to be evaluated
+priorval = c(0.5,0.1)                     #create the two priors for FPR calculations
+############################### no need for user edits below this line ##################################
+
+
+
+
+
+
 grouped.PIprofiles <-list()
 
 for(x in 1:NofGroups)
@@ -23,15 +42,41 @@ for(x in 1:NofGroups)
   grouped.PIprofiles[[x]]$HEAT <- NULL
 }
 
+#create a vector with colors for plotting PIs
+colors=colnames(grouped.PIprofiles[[1]]) #extract period names
+colors[grep("tr", colors)]="orange"      #set training periods to orange
+colors[grep("te", colors)]="lightyellow" #set test periods to lightyellow
+
+###### plot PI sequences #######
+
+#bar plots with SEM
+
+PIplots <- list()
+for(x in 1:NofGroups)
+{
+  PIprofile <- grouped.PIprofiles[[x]]
+  PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0] #remove empty columns
+  NofPeriods = ncol(PIprofile)
+  # plot graph
+  PIplots[[x]] <- ggplot(melt(PIprofile), aes(x=variable, y=value)) + 
+    geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+    stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=colors, colour="black", width=1) +
+    stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
+    ggtitle(paste(groupnames[x], ", N =",nrow(PIprofile))) +
+    scale_y_continuous(breaks = seq(-1, 1, .2)) +
+    theme_light(base_size = 16) + 
+    theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+    theme(axis.text.y = element_text(size=18)) + 
+    ylab("PI [rel. units]") +
+    xlab("Experiment Sequence")
+}
+grid.arrange(grobs = PIplots, nrow=NofGroups)
 
 ###### statistical evaluations ######
 
-signif = c(0.05, 0.01, 0.001) #set significance levels
-learningscore=8 #set learning score to be evaluated
-groupnames = c("radish", "Canton S")  #set a vector with all group names
-priorval = c(0.5,0.1) #create the two priors for FPR calculations
-#create new dataframe with only the chosen PI values
-PIstat <- list()
+#create new dataframe with only the chosen PI learningscores
+PIstat <- list() 
+
 for(x in 1:NofGroups)
 {
   PIstat[[x]] <- grouped.PIprofiles[[x]][[learningscore]]
@@ -56,7 +101,7 @@ samplesizes<-as.numeric(apply(PIstat, 2, function(x) length(na.omit(x))))
   #add group names as row names
   row.names(results.bayes) <- groupnames
   
-  # plot PI box plot with power analysis and asterisks for Wilcoxon test against zero
+  # plot PI box plot with post-hoc power and asterisks for Wilcoxon test against zero
   plots.singles<-list(ggplot(melt(PIstat), aes(variable, value)) +
                         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
                         geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +

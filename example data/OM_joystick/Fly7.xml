@@ -22,7 +22,7 @@
 		<description>"Optmototorics on platform (open loop)"</description>
 		<sample_rate>100</sample_rate>
 		<arena_type>motor</arena_type>
-		<meter_type />
+		<meter_type>Joystick</meter_type>
 	</experiment>
 </metadata>
 <sequence periods="20">
