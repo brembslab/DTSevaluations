@@ -55,13 +55,14 @@ dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)
 
 #collecting essential data for statistics and plots
-NofGroups = lengths(project.data["resources"])                                   #get number of experimental groups
-signif = project.data[["statistics"]][["significance-levels"]]                   #get significance levels
-groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
-priorval = project.data[["statistics"]][["priors"]]                              #get priors for FPR calculation
-twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1       #etermine if statistics for two groups are required
-wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1              #determine if we need to do single tests
-learningscore = project.data[["statistics"]][["learning-score"]][["data"]]       #get the PI that is going to be tested
+NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
+groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))               #get a vector with all group names
+groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group names
+signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
+priorval = project.data[["statistics"]][["priors"]]                                            #get priors for FPR calculation
+twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1                     #etermine if statistics for two groups are required
+wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1                            #determine if we need to do single tests
+learningscore = project.data[["statistics"]][["learning-score"]][["data"]]                     #get the PI that is going to be tested
 
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
@@ -89,7 +90,7 @@ for(x in 1:NofGroups)
 {
 #gather necessary data and variables
   grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
-  grp_description = project.data[["resources"]][[x]][["description"]] #collect description of the group
+  grp_description = groupdescriptions[x] #collect description of the group
   xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
   if(!exists("samplesizes")) {samplesizes = length(project.data[["resources"]][[x]][["data"]])} else samplesizes[x] = length(project.data[["resources"]][[x]][["data"]]) #get samplesizes
 
@@ -395,8 +396,26 @@ if(PIs & !is.null(learningscore)){
 }
 
 
-###### if there are more than two groups, try to pool the data into 'experimental' and 'control'
-if(NofGroups>2){}
+###### if there are more than two groups, try to pool some data into two groups
+PooledGroups=FALSE
+
+if(NofGroups>2 & length(unique(groupdescriptions))==2){
+  PooledGroups=TRUE #we have several groups, but only one control and one experimental group
+  
+  #find out which group belongs to which pool
+  pool1=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[1])])
+  pool2=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[2])])
+  
+  #create two new dataframe (one melted one not) with the pooled groups
+  #melted df
+  PIstatPooled=PIstatCombined #create copy of many group dataframe
+  PIstatPooled$group=gsub(x = PIstatPooled$group, pattern = paste(pool1, collapse = "|"), replacement = unique(groupdescriptions)[1]) #rename the ones from the first pool
+  PIstatPooled$group=gsub(x = PIstatPooled$group, pattern = paste(pool2, collapse = "|"), replacement = unique(groupdescriptions)[2]) #rename the ones from the second pool
+  #unmelted df
+  PIprofilePooled=dcast(PIstatPooled[c("group", "PIs")], PIs~...)[,2:3] #create new dataframe for PIs in the pooled groups this doesn't work with unequal samplesizes: as.data.frame(lapply(dcast(PIstatPooled[c("group", "PIs")], PIs~...), na.omit))
+  samplesizesPooled=colSums(!is.na(PIprofilePooled))  #find the new samplesizes for the different groups
+  
+}
 
 ###### continue for all projects with two groups
 
