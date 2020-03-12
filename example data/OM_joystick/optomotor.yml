@@ -29,7 +29,7 @@ resources:
   data:
   - Fly1.xml
   - Fly2.xml
-  - Fly3.xml
+ # - Fly3.xml duplicate of fly2
   - Fly4.xml
  # - Fly5.xml nonextistent file
   - Fly6.xml
