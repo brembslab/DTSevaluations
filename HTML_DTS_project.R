@@ -39,6 +39,9 @@ project.file <- file.choose()
 project.path = dirname(project.file)
 project.data<-yaml.load_file(project.file)
 
+#measure the runtime of the whole analysis 
+start_time <- Sys.time() #Records the system time at the start of the analysis
+
 #make sure all flies have the identical experimental design and find out which don't
 xml_list = paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/") #create list of all file names
 offending_metanames <- MultiFlyDataVerification(xml_list)
@@ -405,6 +408,7 @@ rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""),
                   output_file = paste(project.data$experiment$name,"html", sep = "."), 
                   output_dir = evaluation.path)
 #### end RMarkdown for project evaluations #################################################
-
-
+end_time <- Sys.time() #records the end of the analysis
+Runtime = round(((end_time - start_time)/length(xml_list)), 3) #Subtracts the endtime with the starttime to get the total analysis time
+print(paste0("Runtime per fly was ", ((Runtime)*60)/length(xml_list), " seconds", ", in total ", round(Runtime, 3), " minutes")) #prints the time per fly and the total time
 setwd(start.wd)
