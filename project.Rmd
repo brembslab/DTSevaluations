@@ -461,6 +461,9 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 
 
 ```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+if(NofGroups>3){
+break  
+} else {
 cat("\n# Learning Score Statistics\n## Statistical tests of single groups against zero\n")
   
   wilcoxon<-numeric()  
@@ -495,9 +498,13 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
 #add table with results and plot
     plots.singles[[2]]<-tableGrob(results.bayes)
     grid.arrange(grobs = plots.singles, ncol=2)
+}
 ```
 
 ```{r Utest, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+if(NofGroups>3){
+break  
+} else {
 cat("\n## Statistical tests between two groups\n")
 
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
@@ -559,6 +566,7 @@ cat("\n## Statistical tests between two groups\n")
   #add table with results and plot
   plots.2test[[2]]<-tableGrob(results.utest)
   grid.arrange(grobs = plots.2test, ncol=2)
+}  
 
 ```
 
