@@ -85,6 +85,17 @@ grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
 
 
+grouped.mean <- list()
+meandata = list()
+if(!exists("meandata")){meandata <- list()} #Creating an empty list to store all the mean data later
+if(!exists("scatterperiod")){scatterperiod <- list()} #Creating an empty list to store all the scatter data later
+if(!exists("scattertotal")){scattertotal <- list()} #Creating an empty list to store all the scatter data later
+if(!exists("dwellingplot")){dwellingplot <- list()} #Creating an empty list to store all the dwellingplots
+if(!exists("dwell")){dwell <- list()} #Creating an empty list to store all the mean data later
+if(!exists("scattertemp")){scattertemp <- NA} #Creating an empty list to store all the mean data later
+if(!exists("dwelltemp")){dwelltemp <- NA} #Creating an empty list to store all the mean data later
+
+
 for(x in 1:NofGroups)
 {
 #gather necessary data and variables
@@ -148,6 +159,12 @@ for (l in 1:length(xml_list))
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
+    
+    ##move all single data to one list for the entire group
+    means = do.call(rbind, means)
+    grouped.mean[[l]] <- means
+    means <- data.frame(value=rep(2, NofPeriods), period=rep(0,NofPeriods), punishment=rep(0,NofPeriods)) #empty the mean data frame
+    
   } #for number of flies in xml_list - from here on group evaluations
 
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
@@ -333,6 +350,9 @@ colnames(Categories) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in Cate
 grouped.Categories[[x]] = Categories                      #add Categories to list of grouped Categories
 Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
 
+#add the grouped mean data to a new dataframe for both groups
+meandata[[x]] = grouped.mean
+
 #PCombine categories with PIs for plotting (melted, periods as id-variable)
 if (PIs)
     {
@@ -371,6 +391,8 @@ grouped.spectra[[x]] = spectemp #save group mean/sd
 colorrange = project.data[["statistics"]][["color-range"]]
 boxcolors = c(colorrange[1:NofGroups])
 boxes<-c(1:NofGroups)
+
+means = list()
 
 #create new dataframes for the chosen PI learningscore values
 if(PIs & !is.null(learningscore)){
