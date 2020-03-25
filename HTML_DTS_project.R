@@ -208,67 +208,11 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     pooled.data[[i]] <- period.data
   } #for number of periods
   
-  ## plot pooled position and fly histograms by period ##
-  
-  for(i in 1:NofPeriods)
-  {
-    temp<-pooled.data[[i]]
-    
-    #fly
-    flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
-      geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-      geom_vline(xintercept=0, linetype="dotted") +
-      geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-      labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
-      xlim(maxfly) +
-      theme_light() +
-      theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank()) +
-      scale_x_continuous(expand = c(0,0)) +
-      scale_y_continuous(expand = c(0,0)) +
-      ggtitle(paste("Period", i))
-    
-    #position
-    if(sequence$type[i]=="fs" || sequence$type[i]=="color")
-    {
-      poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
-        geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-        geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-        geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-        geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
-        geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
-        labs(x="arena position [arb units]", y="frequency") +
-        theme_light() +
-        theme(panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank()) +
-        scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), expand = c(0,0)) +
-        scale_y_continuous(expand = c(0,0)) +
-        ggtitle(paste("Period", i))
-    }
-  }
-  
+
   ## pool all fly and position data into single data.frame
   
   all.data <- do.call(rbind, pooled.data)
   
-  
-  ## plot pooled histograms for all flies over all periods
-  
-  #fly behavior
-  flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) + 
-    geom_histogram(binwidth=3) + 
-    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") + 
-    xlim(maxfly) +
-    ggtitle("Pooled Behavior Histogram")
-  
-  #position (if there are fs periods)
-  if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
-  poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
-    geom_histogram(binwidth=10) +
-    labs(x="position [arb units]", y="frequency") + 
-    xlim(-1800,1800) +
-    ggtitle("Pooled Position Histogram")
-  }
 
   ## if we have two groups, collect data for superimposed histograms for either fly behavior or position
   if (NofGroups==2){
