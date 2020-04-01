@@ -80,8 +80,8 @@ aspect_ratio = 4/nrow(sequence %>% na.omit())
 
 **Number of experimental groups:** `r paste(NofGroups)`
 ```{r singleflydata, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
-exp_groups <- as.data.frame(t(plyr::ldply(exp_groups, rbind))) #make dataframe from list
-colnames(exp_groups) = as.character(unlist(exp_groups[1, ])) # make group names to column names
+exp_groups <- sapply(exp_groups, '[', seq(max(lengths(exp_groups)))) #make dataframe from list
+colnames(exp_groups) = as.character(exp_groups[1, ]) # make group names to column names
 #tidy the dataframe up a little
 exp_groups = exp_groups[-1, ,drop=F] #remove the first row which is now column names, without converting to a vector in case of single column
 rownames(exp_groups) <- NULL #remove the numbers
@@ -109,6 +109,66 @@ for(x in 1:NofGroups)
     cat("<center><h4>",project.data[["resources"]][[x]][["title"]],"</h4></center>")
     poshistos <- grouped.poshistos[[x]]
     multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5)) #positionhistos
+}
+
+```
+
+```{r PeriodHistogram, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}   
+## plot pooled position and fly histograms by period ##
+
+for(i in 1:NofPeriods)
+{
+  temp<-pooled.data[[i]]
+  
+  #fly
+  flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
+    geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+    geom_vline(xintercept=0, linetype="dotted") +
+    geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
+    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
+    xlim(maxfly) +
+    theme_light() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    ggtitle(paste("Period", i))
+  
+  #position
+  if(sequence$type[i]=="fs" || sequence$type[i]=="color")
+  {
+    poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
+      geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+      geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+      geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+      geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
+      geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
+      labs(x="arena position [arb units]", y="frequency") +
+      theme_light() +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank()) +
+      scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), expand = c(0,0)) +
+      scale_y_continuous(expand = c(0,0)) +
+      ggtitle(paste("Period", i))
+  }
+}
+
+## plot pooled histograms for all flies over all periods
+
+#fly behavior
+flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) + 
+  geom_histogram(binwidth=3) + 
+  labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") + 
+  xlim(maxfly) +
+  ggtitle("Pooled Behavior Histogram")
+
+#position (if there are fs periods)
+if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
+  poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
+    geom_histogram(binwidth=10) +
+    labs(x="position [arb units]", y="frequency") + 
+    xlim(-1800,1800) +
+    ggtitle("Pooled Position Histogram")
 }
 
 ```
@@ -356,6 +416,40 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
 ```
 
 
+
+# Mean dwelling times
+
+```{r Mean dwelling, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+meanplots = list() #create a list to store all the plots
+
+for(x in 1:NofGroups){
+  means[[x]] = do.call(rbind, meandata[[x]]) #load each group of data into a dataframe
+  means[[x]]$value[means[[x]]$punishment == 'punished'] <- -means[[x]]$value[means[[x]]$punishment == 'punished'] #To get the data around the zero axis, I am inverting the punished data. I am aware that this is not an accurate data representation, but it works. The axis is then set to only show absolute values
+  
+  means = as.data.frame(means[[x]]) #transform into a dataframe
+  
+  meanplots[[x]] <- ggplot(means, aes(periodtest, value, fill = punishment)) +
+    geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0), fill=("lightgrey")) +
+    stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
+    stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
+    geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
+    geom_jitter(aes(colour = punishment))+
+    ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
+    theme_light(base_size = 16) +
+    theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
+          ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
+    theme(axis.text.y = element_text(size=18))+
+    ylab("mean dwelling [sec]")+
+    labs(fill = "Outcome") +
+    xlab("Experiment Sequence")+
+    scale_y_continuous(labels=abs)+
+    guides(fill = FALSE, size = FALSE)
+}
+
+grid.arrange(grobs = meanplots)
+```
+
+
 ```{r PIbar, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Performance Indices\n \n## Performance Index bar plot with SEM:\n")
 
@@ -497,7 +591,7 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     grid.arrange(grobs = plots.singles, ncol=2)
 ```
 
-```{r Utest, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r Utest, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Statistical tests between two groups\n")
 
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
@@ -562,7 +656,7 @@ cat("\n## Statistical tests between two groups\n")
 
 ```
 
-```{r estimationstats, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r estimationstats, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Estimation statistics\n")
 
 unpaired_median_diff <- dabest(PIstatCombined, group, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
@@ -570,7 +664,7 @@ print(plot(unpaired_median_diff)) #plot results
 
 ```
 
-```{r splitviolins, eval=twogroupstats, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r splitviolins, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Split Violin Plot\n")
 
 PIstatCombined$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
@@ -578,34 +672,89 @@ print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill
 
 ```
 
-# Mean dwelling
 
-```{r Mean dwelling, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
-meanplots = list() #create a list to store all the plots
+```{r Utestpooled, eval=(twogroupstats & PooledGroups), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Statistical tests between pooled groups\n")
 
-for(x in 1:NofGroups){
-  means[[x]] = do.call(rbind, meandata[[x]]) #load each group of data into a dataframe
-  means[[x]]$value[means[[x]]$punishment == 'punished'] <- -means[[x]]$value[means[[x]]$punishment == 'punished'] #To get the data around the zero axis, I am inverting the punished data. I am aware that this is not an accurate data representation, but it works. The axis is then set to only show absolute values
+  cat("The following experimental groups were pooled into two groups:\n")
+kable(PooledGroups)
+
+    utest = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
+    w.statistic = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$statistic, 3)
+    #compute effect size Cohen's D
+    cohend = signif(cohen.d(na.omit(PIprofilePooled[,1]), na.omit(PIprofilePooled[,2]))$estimate, 3)
+    #calculate statistical power
+    alt = project.data[["statistics"]][["two.groups"]][["power"]]
+    power=signif(pwr.t2n.test(n1 = samplesizesPooled[1], n2= samplesizesPooled[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
+    #calculate Bayes Factor
+    bayesF=extractBF(ttestBF(na.omit(PIprofilePooled[[1]]), na.omit(PIprofilePooled[[2]])))
+    #calculate FPR for priors set in project file#
+    #run first prior  
+      prior=priorval[1]
+      out=calc.FPR(samplesizesPooled,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      fpz1=out[1]
+    #run second prior  
+      prior=priorval[2]
+      out=calc.FPR(samplesizesPooled,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      fpz2=out[1]
+    #Power and likelihood ratio: NB for two sided test, need 2*y0
+      LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
+
+      #make tidy table of results
+    results.utest<-data.frame(values=c(signif[1],
+                                       w.statistic,
+                                       cohend,
+                                       power,
+                                       signif(bayesF$bf, 3),
+                                       signif(bayesF$error, 3),
+                                       signif(fpz1, 3),
+                                       signif(fpz2, 3),
+                                       signif(LR, 3)))
+    rownames(results.utest)<-c("Significance level",
+                               "MW U-Test, W",
+                               "Cohen's D",
+                               "stat. Power",
+                               "Bayes Factor",
+                               "Bayes Factor error",
+                               paste("FP risk, prior ",priorval[1]),
+                               paste("FP risk, prior ",priorval[2]),
+                               "Likelihood Ratio")
+    
+# plot two PIs with asterisks
+  plots.2test<-list(ggplot(PIstatPooled, aes(group, PIs)) +
+      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+      geom_boxplot(fill = boxcolors[1:2], notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+      geom_jitter(data=PIstatPooled, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+      ggtitle(paste("U-Test, p=", utest)) +
+      scale_y_continuous(breaks = seq(-1, 1, .2)) +
+      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+      geom_signif(comparisons = list(c(colnames(PIprofilePooled[1]), colnames(PIprofilePooled[2]))), 
+                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                  textsize=8, vjust=0.5) +
+      samplesizes.annotate(boxes[1:2], samplesizesPooled))
   
-  means = as.data.frame(means[[x]]) #transform into a dataframe
-  
-  meanplots[[x]] <- ggplot(means, aes(periodtest, value, fill = punishment)) +
-    geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0), fill=("lightgrey")) +
-    stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
-    stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
-    geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
-    geom_jitter(aes(colour = punishment))+
-    ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
-    theme_light(base_size = 16) +
-    theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
-          ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
-    theme(axis.text.y = element_text(size=18))+
-    ylab("mean dwelling [sec]")+
-    labs(fill = "Outcome") +
-    xlab("Experiment Sequence")+
-    scale_y_continuous(labels=abs)+
-    guides(fill = FALSE, size = FALSE)
-}
 
-grid.arrange(grobs = meanplots)
+  #add table with results and plot
+  plots.2test[[2]]<-tableGrob(results.utest)
+  grid.arrange(grobs = plots.2test, ncol=2)
+
 ```
+
+```{r estimationstatspooled, eval=(twogroupstats & PooledGroups), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Estimation statistics for pooled groups\n")
+groupnames=unique(groupdescriptions) #rename groupnames to pooled groups specifically for dabestr
+unpaired_median_diff <- dabest(PIstatPooled, group, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
+print(plot(unpaired_median_diff)) #plot results
+
+```
+
+```{r splitviolinspooled, eval=(twogroupstats & PooledGroups), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Split Violin Plot for pooled groups\n")
+
+PIstatPooled$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
+print(ggplot(PIstatPooled, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
+
+```
+
+

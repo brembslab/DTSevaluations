@@ -39,6 +39,10 @@ project.file <- file.choose()
 project.path = dirname(project.file)
 project.data<-yaml.load_file(project.file)
 
+#measure the runtime 
+start_time <- Sys.time() #Records the system time at the start of the analysis
+totalflies <- length(paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/")) #saves the total number of flies
+
 #make sure all flies have the identical experimental design and find out which don't
 xml_list = paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/") #create list of all file names
 offending_metanames <- MultiFlyDataVerification(xml_list)
@@ -55,13 +59,14 @@ dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)
 
 #collecting essential data for statistics and plots
-NofGroups = lengths(project.data["resources"])                                   #get number of experimental groups
-signif = project.data[["statistics"]][["significance-levels"]]                   #get significance levels
-groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"])) #get a vector with all group names
-priorval = project.data[["statistics"]][["priors"]]                              #get priors for FPR calculation
-twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1       #etermine if statistics for two groups are required
-wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1              #determine if we need to do single tests
-learningscore = project.data[["statistics"]][["learning-score"]][["data"]]       #get the PI that is going to be tested
+NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
+groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))               #get a vector with all group names
+groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group names
+signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
+priorval = project.data[["statistics"]][["priors"]]                                            #get priors for FPR calculation
+twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1                     #etermine if statistics for two groups are required
+wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1                            #determine if we need to do single tests
+learningscore = project.data[["statistics"]][["learning-score"]][["data"]]                     #get the PI that is going to be tested
 
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
@@ -100,7 +105,7 @@ for(x in 1:NofGroups)
 {
 #gather necessary data and variables
   grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
-  grp_description = project.data[["resources"]][[x]][["description"]] #collect description of the group
+  grp_description = groupdescriptions[x] #collect description of the group
   xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
   if(!exists("samplesizes")) {samplesizes = length(project.data[["resources"]][[x]][["data"]])} else samplesizes[x] = length(project.data[["resources"]][[x]][["data"]]) #get samplesizes
 
@@ -225,67 +230,11 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
     pooled.data[[i]] <- period.data
   } #for number of periods
   
-  ## plot pooled position and fly histograms by period ##
-  
-  for(i in 1:NofPeriods)
-  {
-    temp<-pooled.data[[i]]
-    
-    #fly
-    flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
-      geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-      geom_vline(xintercept=0, linetype="dotted") +
-      geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-      labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
-      xlim(maxfly) +
-      theme_light() +
-      theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank()) +
-      scale_x_continuous(expand = c(0,0)) +
-      scale_y_continuous(expand = c(0,0)) +
-      ggtitle(paste("Period", i))
-    
-    #position
-    if(sequence$type[i]=="fs" || sequence$type[i]=="color")
-    {
-      poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
-        geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-        geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-        geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-        geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
-        geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
-        labs(x="arena position [arb units]", y="frequency") +
-        theme_light() +
-        theme(panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank()) +
-        scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), expand = c(0,0)) +
-        scale_y_continuous(expand = c(0,0)) +
-        ggtitle(paste("Period", i))
-    }
-  }
-  
+
   ## pool all fly and position data into single data.frame
   
   all.data <- do.call(rbind, pooled.data)
   
-  
-  ## plot pooled histograms for all flies over all periods
-  
-  #fly behavior
-  flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) + 
-    geom_histogram(binwidth=3) + 
-    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") + 
-    xlim(maxfly) +
-    ggtitle("Pooled Behavior Histogram")
-  
-  #position (if there are fs periods)
-  if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
-  poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
-    geom_histogram(binwidth=10) +
-    labs(x="position [arb units]", y="frequency") + 
-    xlim(-1800,1800) +
-    ggtitle("Pooled Position Histogram")
-  }
 
   ## if we have two groups, collect data for superimposed histograms for either fly behavior or position
   if (NofGroups==2){
@@ -417,8 +366,30 @@ if(PIs & !is.null(learningscore)){
 }
 
 
-###### if there are more than two groups, try to pool the data into 'experimental' and 'control'
-if(NofGroups>2){}
+###### if there are more than two groups, try to pool some data into two groups
+PooledGroups=FALSE
+
+if(NofGroups>2 & length(unique(groupdescriptions))==2){
+  PooledGroups=TRUE #we have several groups, but only one control and one experimental group
+  
+  #find out which group belongs to which pool
+  pool1=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[1])])
+  pool2=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[2])])
+  
+  #create two new dataframe (one melted one not) with the pooled groups
+  #melted df
+  PIstatPooled=PIstatCombined #create copy of many group dataframe
+  PIstatPooled$group=gsub(x = PIstatPooled$group, pattern = paste(pool1, collapse = "|"), replacement = unique(groupdescriptions)[1]) #rename the ones from the first pool
+  PIstatPooled$group=gsub(x = PIstatPooled$group, pattern = paste(pool2, collapse = "|"), replacement = unique(groupdescriptions)[2]) #rename the ones from the second pool
+  #unmelted df
+  PIprofilePooled=dcast(PIstatPooled[c("group", "PIs")], PIs~...)[,2:3] #create new dataframe for PIs in the pooled groups this doesn't work with unequal samplesizes: as.data.frame(lapply(dcast(PIstatPooled[c("group", "PIs")], PIs~...), na.omit))
+  samplesizesPooled=colSums(!is.na(PIprofilePooled))  #find the new samplesizes for the different groups
+  
+  #create table with pooled groups for later plotting
+  sq <- seq(max(length(pool1), length(pool2)))
+  PooledGroups <- data.frame(pool1[sq], pool2[sq])
+  colnames(PooledGroups)=unique(groupdescriptions)
+}
 
 ###### continue for all projects with two groups
 
@@ -428,5 +399,6 @@ rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""),
                   output_dir = evaluation.path)
 #### end RMarkdown for project evaluations #################################################
 
-
+Runtime = round(((Sys.time() - start_time)), 3) #Subtracts the endtime with the starttime to get the total analysis time
+print(paste("Runtime per fly was ", ((Runtime)*60)/totalflies, " seconds", ", in total ", round(Runtime, 3), " minutes")) #prints the time per fly and the total time
 setwd(start.wd)
