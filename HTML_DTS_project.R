@@ -408,7 +408,7 @@ rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""),
                   output_file = paste(project.data$experiment$name,"html", sep = "."), 
                   output_dir = evaluation.path)
 #### end RMarkdown for project evaluations #################################################
-#end_time <- Sys.time() #records the end of the analysis
+
 Runtime = round(((Sys.time() - start_time)), 3) #Subtracts the endtime with the starttime to get the total analysis time
 print(paste0("Runtime per fly was ", ((Runtime)*60)/totalflies, " seconds", ", in total ", round(Runtime, 3), " minutes")) #prints the time per fly and the total time
 setwd(start.wd)
