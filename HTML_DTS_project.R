@@ -105,7 +105,22 @@ speclist <- list()        #spectograms
 #start actually evaluating
 for (l in 1:length(xml_list)) 
   {
-    xml_name=xml_list[l]
+    xml_name=xml_list[[l]]
+    
+    #progress bar
+    if (exists("starttime")){esttime = round((Sys.time()-starttime), 2)} else esttime = 35  #calculates the iteration time
+    if (exists("xx")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end
+    progress = round(l*(100/totalflies)) #calculates the progress in percentage
+    totaltime = (Sys.time() + (esttime * (totalflies-l))) #estimated finish time, based on the last iteration and the number of flies left
+    xx = barplot(progress, 
+                 col = "grey", ylab = "% progress", 
+                 ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
+    axis(2, seq(0,100,50), las=2) #sets the axis ticks and rotates them to a horizontal position
+    axis(2, seq(0,100,25), las=2) #sets the axis ticks
+    title(xlab= paste("Iteration time: \n", esttime, "sec"), line=-8, cex.lab=1.2)
+    title((paste("Est. finish time",substring(totaltime, 12))), line = -8, cex.lab=1.2)
+    text(xx, progress+25, paste(progress, "% completed \n flies left", (totalflies-l))) #adds the percentage as text and the number of flies left
+    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 35 seconds
     
     ##### read the data with the corresponding function #######
     singleflydata <- flyDataImport(xml_name)
