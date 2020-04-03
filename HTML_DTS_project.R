@@ -117,9 +117,9 @@ for (l in 1:length(xml_list))
                  ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
     axis(2, seq(0,100,50), las=2) #sets the axis ticks and rotates them to a horizontal position
     axis(2, seq(0,100,25), las=2) #sets the axis ticks
-    title(xlab= paste("Iteration time: \n", esttime, "sec"), line=-8, cex.lab=1.2)
+    title(xlab= paste("Iteration time: \n", esttime, "sec"), line=-9, cex.lab=1.2)
     title((paste("Est. finish time",substring(totaltime, 12))), line = -8, cex.lab=1.2)
-    text(xx, progress+25, paste(progress, "% completed \n flies left", (totalflies-l))) #adds the percentage as text and the number of flies left
+    text(xx, progress+16, paste(progress, "% completed \n flies left", (totalflies-l))) #adds the percentage as text and the number of flies left
     starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 35 seconds
     
     ##### read the data with the corresponding function #######
