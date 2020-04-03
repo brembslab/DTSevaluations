@@ -41,7 +41,10 @@ project.data<-yaml.load_file(project.file)
 
 #measure the runtime of the whole analysis 
 start_time <- Sys.time() #Records the system time at the start of the analysis
+
+#progressbar
 totalflies <- length(paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/"))#gets the number of total flies
+
 #make sure all flies have the identical experimental design and find out which don't
 xml_list = paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/") #create list of all file names
 offending_metanames <- MultiFlyDataVerification(xml_list)
@@ -86,6 +89,8 @@ grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group
 grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
+flies = 0
+
 
 
 for(x in 1:NofGroups)
@@ -101,27 +106,18 @@ period.data <- list()     #data grouped by period
 grouped.data <- list()    #total data grouped
 speclist <- list()        #spectograms
 
+#progressbar
+if(x>1){
+  flies[x] = length(xml_list)
+  flies = sum(flies)
+  totalflies = totalflies - flies
+}
 
 #start actually evaluating
 for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[[l]]
-    
-    #progress bar
-    if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else esttime = 35  #calculates the iteration time
-    if (exists("xx")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end. If the plot does not exist it gives an error message, hence the 1-1
-    progress = round(l*(100/totalflies)) #calculates the progress in percentage
-    esttime = (Sys.time() + (iter_time * (totalflies-l))) #estimated finish time, based on the last iteration and the number of flies left
-    xx = barplot(progress, 
-                 col = "grey", ylab = "% progress", 
-                 ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
-    axis(2, seq(0,100,50), las=2) #sets the axis ticks and rotates them to a horizontal position
-    axis(2, seq(0,100,25), las=2) #sets the axis ticks
-    title(xlab= paste("Iteration time: \n", iter_time, "sec"), line=-9, cex.lab=1.2)
-    title((paste("Est. finish time",substring(esttime, 12))), line = -8, cex.lab=1.2)
-    text(xx, progress+16, paste(progress, "% completed \n flies left", (totalflies-l))) #adds the percentage as text and the number of flies left
-    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 35 seconds
-    
+
     ##### read the data with the corresponding function #######
     singleflydata <- flyDataImport(xml_name)
     
@@ -131,6 +127,24 @@ for (l in 1:length(xml_list))
     samplerate = as.numeric(as.character(singleflydata[[4]]$sample_rate))
     real_sample_rate = as.numeric(as.character(singleflydata[[11]]))
     down_sample_rate = as.numeric(as.character(singleflydata[[12]]))
+    
+    #progress bar
+    if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
+    if (exists("xx")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end. If the plot does not exist it gives an error message, hence the 1-1
+    progress = round(l*(100/totalflies)) #calculates the progress in percentage
+    if(x>1){
+    progress = round((l+totalflies)*(100/(totalflies+flies)))
+    }
+    esttime = (Sys.time() + (iter_time * (totalflies-l))) #estimated finish time, based on the last iteration and the number of flies left
+    xx = barplot(progress, 
+                 col = "grey", ylab = "% progress", 
+                 ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
+    axis(2, seq(0,100,50), las=2) #sets the axis ticks and rotates them to a horizontal position
+    axis(2, seq(0,100,25), las=2) #sets the axis ticks  
+    title(xlab= paste("Iteration time: \n", iter_time, "sec"), line=-9, cex.lab=1.2)
+    title((paste("Est. finish time",substring(esttime, 12))), line = -8, cex.lab=1.2)
+    text(xx,16, paste(progress, "% completed \n flies left", (1+totalflies-l))) #adds the percentage as text and the number of flies left
+    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 35 seconds
     
     ##extract fly meta-data
     fly <- singleflydata[[3]]
