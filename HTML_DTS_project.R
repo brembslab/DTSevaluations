@@ -45,6 +45,7 @@ start_time <- Sys.time() #Records the system time at the start of the analysis
 #progressbar
 totalflies <- length(paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/"))#gets the number of total flies
 flies = 0
+if(dev.cur()[[1]]>1){ dev.off()}
 
 #make sure all flies have the identical experimental design and find out which don't
 xml_list = paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/") #create list of all file names
@@ -130,13 +131,13 @@ for (l in 1:length(xml_list))
     
     #progress bar
     if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
-    if (exists("xx")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end. If the plot does not exist it gives an error message, hence the 1-1
+    if (exists("Progressbar")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end. If the plot does not exist it gives an error message, hence the 1-1
     progress = round(l*(100/(totalflies))) #calculates the progress in percentage
     if(x>1){  #uses this function to calculate the progress if we are past the first group
       progress = round((l+flies)*(100/(totalflies+flies)))
     }
     esttime = (Sys.time() + (iter_time * (totalflies-l))) #estimated finish time, based on the last iteration and the number of flies left
-    xx = barplot(progress,
+    Progressbar = barplot(progress,
                  col = "grey", ylab = "% progress",
                  ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
     axis(2, seq(0,100,50), las=2) #sets the axis ticks and rotates them to a horizontal position
@@ -144,7 +145,7 @@ for (l in 1:length(xml_list))
     mtext(paste("Iteration time: ", iter_time, "sec \n Current fly:", flyname, "\n Current group:", grp_title), side=3)
     mtext(paste("Est. finish time",substring(esttime, 12)), side = 1)
     #title((paste("Est. finish time",substring(esttime, 12))), line = -8, cex.lab=0.5)
-    text(xx,16, paste(progress, "% completed \n flies left", (totalflies-l))) #adds the percentage as text and the number of flies left
+    text(Progressbar,16, paste(progress, "% completed \n flies left", (totalflies-l))) #adds the percentage as text and the number of flies left
     starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 35 seconds
     
     ##extract sequence meta-data
@@ -444,6 +445,5 @@ rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""),
                   output_dir = evaluation.path)
 #### end RMarkdown for project evaluations #################################################
 
-Runtime = round(((Sys.time() - start_time)), 3) #Subtracts the endtime with the starttime to get the total analysis time
-print(paste0("Runtime per fly was ", ((Runtime)*60)/totalflies, " seconds", ", in total ", round(Runtime, 3), " minutes")) #prints the time per fly and the total time
+Progressbar = mtext(paste("Runtime was",(round(((Sys.time() - start_time)), 3)), " minutes in total"), side = 1, line = 1)
 setwd(start.wd)
