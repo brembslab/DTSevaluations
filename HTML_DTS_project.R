@@ -131,7 +131,7 @@ for (l in 1:length(xml_list))
     #progress bar
     if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
     if (exists("xx")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end. If the plot does not exist it gives an error message, hence the 1-1
-    progress = round(l*(100/(totalflies+1))) #calculates the progress in percentage
+    progress = round(l*(100/(totalflies))) #calculates the progress in percentage
     if(x>1){  #uses this function to calculate the progress if we are past the first group
       progress = round((l+flies)*(100/(totalflies+flies)))
     }
