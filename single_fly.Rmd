@@ -124,8 +124,8 @@ for(i in 1:NofPeriods){
   if(sequence$contingency[i]!=""){
     sequence$category[i] <- paste(sequence$pattern[i],sequence$contingency[i])
   } 
-  
-    #add training/test to the graphs
+#add training/test to the graphs
+  training = NA
   if(sequence$outcome[i]==0){
     training[i] =  "Test"
   } else {
@@ -505,11 +505,11 @@ punishment = c("punished", "unpunished")
 
 
 ##Create a dataframe to be used for the means##
-for(t in 1:length(punishment)){
-  dwellmeans[[t]] = data.frame(value=rep(2, NofPeriods), punishment=rep(0,NofPeriods)) #create an empty list at the same length as number of periods, with a set of three prenamed columns
-  dwellmeans[[t]]$punishment <-  punishment[[t]] #add punished or unpunished to the punishment column
-  dwellmeans[[t]]$period = sprintf("PI%d", 1:NofPeriods) #add periods to the data
-}
+# for(t in 1:length(punishment)){
+#   dwellmeans[[t]] = data.frame(value=rep(2, NofPeriods), punishment=rep(0,NofPeriods)) #create an empty list at the same length as number of periods, with a set of three prenamed columns
+#   dwellmeans[[t]]$punishment <-  punishment[[t]] #add punished or unpunished to the punishment column
+#   dwellmeans[[t]]$period = sprintf("PI%d", 1:NofPeriods) #add periods to the data
+# }
 
 ##read the data for each period## 
 for(i in 1:NofPeriods){
@@ -532,12 +532,13 @@ for(i in 1:NofPeriods){
      scattertemp = do.call(rbind, scatterperiod) #transform the listed scatterperiod to a nonlisted dataframe
      scattertemp$value[scattertemp$punishment == 'punished'] <- (-scattertemp$value) #Transforms the punished data to negative time values. This will be used to plot the punished/unpunished around zero rather than both of them being on the positive side 
      dwell[[t]] = reshape2::melt(table(scatterperiod[[t]]$value)) #count the occurences of each of the different dwelling times and add them to a table
-     dwell[[t]][[2]] <- 100-(cumsum(dwell[[t]][[2]]/(sum(dwell[[t]][[2]])))*100) #subtracts the cumulative percentage
+    dwell[[t]][[2]] <- 100-(cumsum(dwell[[t]][[2]]/(sum(dwell[[t]][[2]])))*100) #subtracts the cumulative percentage
      dwell[[t]] <- transform(dwell[[t]], value = c(100, value[-nrow(dwell[[t]])])) #shift data down and replaces top value with 100%
      dwelltemp <- ldply (dwell, data.frame) #transforms the listed dwell data to a dataframe
-     dwellmeans[[t]]$value[[i]] = mean(scatterperiod[[t]]$value)
+     #dwellmeans[[t]]$value[[i]] = mean(scatterperiod[[t]]$value)
 
   }
+
   scattertotal[[i]] = scattertemp #Adds the data to a continuous list
   scattertemp = do.call(rbind, scattertotal) #transforms the listed scattertotal data to a continous dataframe
 
@@ -569,14 +570,19 @@ asinh_trans <- function(){
   trans_new(name = 'asinh', transform = function(x) asinh(x), 
             inverse = function(x) sinh(x))
 }
-
+# ##Create a dataframe to be used for the means##
+# for(t in 1:length(punishment)){
+#   dwellmeans[[t]] = data.frame(value=rep(2, NofPeriods), punishment=rep(0,NofPeriods)) #create an empty list at the same length as number of periods, with a set of three prenamed columns
+#   dwellmeans[[t]]$punishment <-  punishment[[t]] #add punished or unpunished to the punishment column
+#   dwellmeans[[t]]$period = sprintf("PI%d", 1:NofPeriods) #add periods to the data
+# }
 #plot the scattered data and merge it with the dwelling time
 scatterplot <- ggplot(scattertemp, aes(x = factor(period), y = value, fill = punishment)) +
   geom_boxplot() +
   geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
   geom_point(aes(fill = punishment), size = 2, shape = 21, position = position_jitterdodge())+
   #geom_jitter(aes(fill = punishment), width = 0.2)+
-  scale_y_continuous(trans = 'asinh',breaks=c(-100,-50,-10,-1,0,1,10,50,100))+
+  #scale_y_continuous(trans = 'asinh',breaks=c(-100,-50,-10,-1,0,1,10,50,100))+
    #theme_light()+
   ggtitle(paste(flyname))+
 labs(x=("Experimental sequence"), y="dwelling time [sec]") +
@@ -592,71 +598,117 @@ print(scatterplot)
 
 ```{r dwellingpunishednew, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
 
+#library(summarytools)
 
 temp  <- rawdata #store the entire data set for the fly
-temp$sign <- ifelse(temp$fly < 0, 0, 1) #If temp$fly is equal to 0 then it adds 0 in the sign column, everything else gets a 1. It automatically sets 0 as to be punished and unpunished is set to 1.
+temp$sign <- ifelse(temp$fly > 0, 1, 0) #If temp$fly is equal to 0 then it adds 0 in the sign column, everything else gets a 1. It automatically sets 0 as to be punished and unpunished is set to 1.
 dwellperiod <- split(temp, temp$period) #splits data into periods
+dwelldata = list()
+dwellplots = list()
+dwelltimes= list()
+dwellmeans = list()
 
+dwellmeans$punished = data.frame(value=rep(2, NofPeriods), punishment=rep("punished",NofPeriods), period = sprintf("PI%d", 1:NofPeriods)) #create an empty list at the same length as number of periods, with a set of three prenamed columns
+dwellmeans$unpunished = data.frame(value=rep(2, NofPeriods), punishment=rep("unpunished",NofPeriods), period = sprintf("PI%d", 1:NofPeriods)) #create an empty list at the
 for(i in 1:NofPeriods){
   
   #set a vector to sort the punished/unpunished data
-  dwellvector = 1 #initialize the dwellvector dataframe.
-  dwellvector$Unpunished <- ifelse(dwellperiod[[i]]$sign[1] == 0, 2, 1) 
-  dwellvector$Punished <- ifelse(dwellperiod[[i]]$sign[1] == 1, 2, 1)
+  dwellvector = NA #initialize the dwellvector dataframe.
+  dwellvector$Punished <- ifelse(dwellperiod[[i]]$sign[1] == 0, 2, 1) []
+  dwellvector$Unpunished <- ifelse(dwellperiod[[i]]$sign[1] == 1, 2, 1)
   
   #if punished and unpunished data exist within the same period, i.e. the fly did not spend the entire duration in one domain
   if (length(unique(dwellperiod[[i]]$sign)) == 2) { 
-
-    dwellperiod[[i]] = rle(dwellperiod[[i]]$sign)[[1]] #counts the consecutive data
+    
+    dwellperiod[[i]] = rle(dwellperiod[[i]]$sign)[[1]] #counts the consecutive data. The [[1]] sorts out the unwanted data
     
     #To avoid using the confusion of a for loop within a for loop, the punished/unpunished data gets seperated into its own listed dataframe.
     #The two folling lines seperates punished/unpunished data and transforms the data into seconds. It also transforms the data to a melted table.
     #The dwellvector simply selects every other data point. As every other is maintained throught the entire duration of the
     #period this can be used to select outcome (datapoint 1,3,5,... = punished, 2,4,6,... = unpunished, or 1,3,5,... = unpunished, 2,4,6,... = punished). 
     #As the period does not always start with the same outcome an individual vector is created to differentiate between these two scenarios.
-    dwelldata$unpunished[[i]] <- reshape2::melt(table(dwellperiod[[i]][seq(dwellvector$Punished, length(dwellperiod[[i]]), 2)]*0.05)) 
-    dwelldata$punished[[i]]<- reshape2::melt(table(dwellperiod[[i]][seq(dwellvector$Unpunished, length(dwellperiod[[i]]), 2)]*0.05)) 
+    dwelldata$unpunished[[i]] <- (dwellperiod[[i]][seq(dwellvector$Unpunished, length(dwellperiod[[i]]), 2)]*0.05)
+    dwelldata$punished[[i]]<- (dwellperiod[[i]][seq(dwellvector$Punished, length(dwellperiod[[i]]), 2)]*0.05)
 
-    #subtracts the cumulative percentage
-    dwelldata$unpunished[[i]]$value<- 100-(cumsum(dwelldata$unpunished[[i]]$value/(sum(dwelldata$unpunished[[i]]$value)))*100)
-    dwelldata$punished[[i]]$value<- 100-(cumsum(dwelldata$punished[[i]]$value/(sum(dwelldata$punished[[i]]$value)))*100)
-    
-    #shift data down and replaces top value with 100%
-    dwelldata$unpunished[[i]] <- transform(dwelldata$unpunished[[i]], value = c(100, value[-nrow(dwelldata$unpunished[[i]])]))
-    dwelldata$punished[[i]] <- transform(dwelldata$punished[[i]], value = c(100, value[-nrow(dwelldata$punished[[i]])]))
-    
     #In the case that 100% of the dwelling time is in the punished/unpunished zone, the two following
     #if statements sets either the punished to 100%, or unpunished to 100%
     #if  only punished data exists for the particular period, punished is set to 100% and unpunished to 0%
     #This will generate two single dots on the chart, both of them at either 0% or 100%
   } else if (length(unique(dwellperiod[[i]]$sign)) == 1 && (unique(dwellperiod[[i]]$sign)) == 1) { 
-    dwelldata$unpunished[[i]] = data.frame(Var1=rep(0), value=rep(0))
-    dwelldata$punished[[i]] = data.frame(Var1=rep(120), value=rep(100))
+    dwelldata$unpunished[[i]] = as.integer(0)
+    dwelldata$punished[[i]] = as.integer(120)
+    
     
     #if  only unpunished data exists for the particular period, punished is set to 0% and unpunished to 100%
   } else if (length(unique(dwellperiod[[i]]$sign)) == 1 && (unique(dwellperiod[[i]]$sign)) == 0){
-    dwelldata$unpunished[[i]] = data.frame(Var1=rep(120), value=rep(100))
-    dwelldata$punished[[i]] = data.frame(Var1=rep(0), value=rep(0))}
+    dwelldata$unpunished[[i]] = as.integer(120)
+    dwelldata$punished[[i]] = as.integer(0)
+
+  }
+
+  dwelltimes$punished[[i]] = sort(unique(dwelldata$punished[[i]]))
+  dwelltimes$unpunished[[i]] = sort(unique(dwelldata$unpunished[[i]]))
+
+ 
+  dwellmeans$unpunished$value[[i]] = mean(dwelldata$unpunished[[i]])
+  dwellmeans$punished$value[[i]] = mean(dwelldata$punished[[i]])
+
+  dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
+  dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
+
+  dwelldata$punished[[i]]$times = dwelltimes$punished[[i]]
+  dwelldata$unpunished[[i]]$times = dwelltimes$unpunished[[i]]
 
   #plots the data
-  dwellingplot[[i]] = ggplot() +
-    geom_line(data = dwelldata$punished[[i]], aes(x = Var1, y = value, color = "blue"))+
-    geom_line(data = dwelldata$unpunished[[i]], aes(x = Var1, y = value, color = "red"))+
-    geom_point(data = dwelldata$punished[[i]], aes(x = Var1, y = value, color = "blue"))+
-    geom_point(data = dwelldata$unpunished[[i]], aes(x = Var1, y = value, color = "red"))+
-    scale_y_log10( breaks=c(0,10,100))+
-    scale_x_log10() +
-    ggtitle(paste(flyname, "Period", i)) +
-    theme_light() +
-    labs(x="time [sec]", y="% events",  color = "Outcome") +
-    annotate("text", Inf, Inf, label = training[i], hjust =1.05, vjust = 1)+ 
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-    labs(color='Outcome') +
-    scale_color_manual(values=c("red", "blue"), 
-                       name="Experimental\nCondition",
-                       labels=c("Punished", "Unpunished"))
+  dwellplots[[i]] =ggplot() +
+  geom_line(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
+  geom_point(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
+  geom_line(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
+  geom_point(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
+  scale_y_log10( breaks=c(0,10,100))+
+  scale_x_log10() +
+  ggtitle(paste(flyname, "Period", i))+
+  theme_light() +
+  labs(x="time [sec]", y="% events",  color = "Outcome") +
+  annotate("text", Inf, Inf, label = training[i], hjust =1.05, vjust = 1)+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  labs(color='Outcome') +
+  scale_color_manual(values=c("firebrick3", "steelblue4"),
+                     name="Experimental\nCondition",
+                     labels=c("Punished", "Unpunished"))+
   theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))
-  }
-  
-multiplot(plotlist = dwellingplot, cols=2)
+}
+#
+multiplot(plotlist = dwellplots, cols=2)
+
+```
+
+# Mean
+
+```{r mean, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
+
+#dwellscatter2 = dwellscatter
+
+#The function below is an inverse hyperbolic sine transformation to generate negative logarithmic data. I totally understand it and did not just copy it...
+
+# asinh_trans <- function(){
+#   trans_new(name = 'asinh', transform = function(x) asinh(x), 
+#             inverse = function(x) sinh(x))
+# }
+# scattertotal <- rbind(reshape::melt(dwellmeans$unpunished), reshape::melt(dwellmeans$punished),by=c("punishment", "value"))
+# #plot the scattered data and merge it with the dwelling time
+# scatterplot <- ggplot() +
+#   geom_boxplot(data =scattertotal, aes(x = factor(L1), y = value, fill = punishment)) +
+#   geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
+#   geom_point(data = scattertotal, aes(x = factor(L1), y = value, fill = punishment))+
+#   #geom_jitter(aes(fill = punishment), width = 0.2)+
+#   #scale_y_continuous(trans = 'asinh',breaks=c(-100,-50,-10,-1,0,1,10,50,100))+
+#    #theme_light()+
+#   ggtitle(paste(flyname))+
+# labs(x=("Experimental sequence"), y="dwelling time [sec]") +
+#                     theme_light() +
+#                     theme(panel.grid.major = element_blank(),
+#                           panel.grid.minor = element_blank()) 
+# 
+# scatterplot
 ```
