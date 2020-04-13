@@ -603,10 +603,7 @@ print(scatterplot)
 temp  <- rawdata #store the entire data set for the fly
 temp$sign <- ifelse(temp$fly > 0, 1, 0) #If temp$fly is equal to 0 then it adds 0 in the sign column, everything else gets a 1. It automatically sets 0 as to be punished and unpunished is set to 1.
 dwellperiod <- split(temp, temp$period) #splits data into periods
-dwelldata = list()
-dwellplots = list()
-dwelltimes= list()
-dwellmeans = list()
+
 
 dwellmeans$punished = data.frame(value=rep(2, NofPeriods), punishment=rep("punished",NofPeriods), period = sprintf("PI%d", 1:NofPeriods)) #create an empty list at the same length as number of periods, with a set of three prenamed columns
 dwellmeans$unpunished = data.frame(value=rep(2, NofPeriods), punishment=rep("unpunished",NofPeriods), period = sprintf("PI%d", 1:NofPeriods)) #create an empty list at the
@@ -629,7 +626,7 @@ for(i in 1:NofPeriods){
     #As the period does not always start with the same outcome an individual vector is created to differentiate between these two scenarios.
     dwelldata$unpunished[[i]] <- (dwellperiod[[i]][seq(dwellvector$Unpunished, length(dwellperiod[[i]]), 2)]*0.05)
     dwelldata$punished[[i]]<- (dwellperiod[[i]][seq(dwellvector$Punished, length(dwellperiod[[i]]), 2)]*0.05)
-
+    
     #In the case that 100% of the dwelling time is in the punished/unpunished zone, the two following
     #if statements sets either the punished to 100%, or unpunished to 100%
     #if  only punished data exists for the particular period, punished is set to 100% and unpunished to 0%
@@ -643,40 +640,40 @@ for(i in 1:NofPeriods){
   } else if (length(unique(dwellperiod[[i]]$sign)) == 1 && (unique(dwellperiod[[i]]$sign)) == 0){
     dwelldata$unpunished[[i]] = as.integer(120)
     dwelldata$punished[[i]] = as.integer(0)
-
+    
   }
-
+  
   dwelltimes$punished[[i]] = sort(unique(dwelldata$punished[[i]]))
   dwelltimes$unpunished[[i]] = sort(unique(dwelldata$unpunished[[i]]))
-
- 
+  
+  
   dwellmeans$unpunished$value[[i]] = mean(dwelldata$unpunished[[i]])
   dwellmeans$punished$value[[i]] = mean(dwelldata$punished[[i]])
-
+  
   dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
   dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
-
+  
   dwelldata$punished[[i]]$times = dwelltimes$punished[[i]]
   dwelldata$unpunished[[i]]$times = dwelltimes$unpunished[[i]]
-
+  
   #plots the data
   dwellplots[[i]] =ggplot() +
-  geom_line(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
-  geom_point(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
-  geom_line(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
-  geom_point(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
-  scale_y_log10( breaks=c(0,10,100))+
-  scale_x_log10() +
-  ggtitle(paste(flyname, "Period", i))+
-  theme_light() +
-  labs(x="time [sec]", y="% events",  color = "Outcome") +
-  annotate("text", Inf, Inf, label = training[i], hjust =1.05, vjust = 1)+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  labs(color='Outcome') +
-  scale_color_manual(values=c("firebrick3", "steelblue4"),
-                     name="Experimental\nCondition",
-                     labels=c("Punished", "Unpunished"))+
-  theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))
+    geom_line(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
+    geom_point(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
+    geom_line(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
+    geom_point(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
+    scale_y_log10( breaks=c(0,10,100))+
+    scale_x_log10() +
+    ggtitle(paste(flyname, "Period", i))+
+    theme_light() +
+    labs(x="time [sec]", y="% events",  color = "Outcome") +
+    annotate("text", Inf, Inf, label = training[i], hjust =1.05, vjust = 1)+
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+    labs(color='Outcome') +
+    scale_color_manual(values=c("firebrick3", "steelblue4"),
+                       name="Experimental\nCondition",
+                       labels=c("Punished", "Unpunished"))+
+    theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))
 }
 #
 multiplot(plotlist = dwellplots, cols=2)
