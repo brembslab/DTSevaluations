@@ -27,6 +27,8 @@ library(knitr)
 library(dabestr)
 library(zoo)
 library(tidyverse)
+library(questionr)
+library(data.table)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -92,15 +94,10 @@ grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
 
 #create dataframes for dwelling data
-dwelldata = list()
-dwellplots = list()
-dwelltimes= list()
-dwellmeans = list()
+dwelldata = dwellplots = dwelltimes = grouped.dwell = list()
+dwellvector = NA 
 
-
-flies = 0
-
-
+flies = 0 #initialize progress bar
 
 for(x in 1:NofGroups)
 {
@@ -128,21 +125,21 @@ for(x in 1:NofGroups)
   {
     #progress bar
     if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
-    if (exists("xx")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end. If the plot does not exist it gives an error message, hence the 1-1
+    if (exists("progressbar")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end. If the plot does not exist it gives an error message, hence the 1-1
     progress = round(l*(100/totalflies)) #calculates the progress in percentage
     if(x>1){  #uses this function to calculate the progress if we are past the first group
       progress = round((l+totalflies)*(100/(totalflies+flies))) 
     }
     
     esttime = (Sys.time() + (iter_time * (totalflies-l))) #estimated finish time, based on the last iteration and the number of flies left
-    xx = barplot(progress, 
+    progressbar = barplot(progress, 
                  col = "grey", ylab = "% progress", 
                  ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
     axis(2, seq(0,100,50), las=2) #sets the axis ticks and rotates them to a horizontal position
     axis(2, seq(0,100,25), las=2) #sets the axis ticks  
     title(xlab= paste("Iteration time: \n", iter_time, "sec"), line=-9, cex.lab=1.2)
     title((paste("Est. finish time",substring(esttime, 12))), line = -8, cex.lab=1.2)
-    text(xx,16, paste(progress, "% completed \n flies left", (1+totalflies-l))) #adds the percentage as text and the number of flies left
+    text(progressbar,16, paste(progress, "% completed \n flies left", (1+totalflies-l))) #adds the percentage as text and the number of flies left
     starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 35 seconds
     
     #load current fly name
@@ -178,6 +175,12 @@ for(x in 1:NofGroups)
     #create/empty plot lists
     poshistos <- list()
     flyhistos <- list()
+    
+    #create/empty the dataframe for dwellmeans
+    if(l==1){
+      dwellmeans = list()
+      dwellmeans$unpunished <- dwellmeans$punished <- data.frame(matrix(ncol = NofPeriods))}
+    
     
     #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
@@ -316,12 +319,16 @@ for(x in 1:NofGroups)
   #PIprofiles for statistical analysis (PIs alone, periods as column names)
   colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)    #make colnames in PIprofile
   grouped.PIprofiles[[x]] = PIprofile                     #add PIprofile to list of grouped PIs
+ 
   PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0]  #remove empty columns for combining with categories
   
   #Categories for printing categorical colors (periods as column names)
   colnames(Categories) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in Categories
   grouped.Categories[[x]] = Categories                      #add Categories to list of grouped Categories
   Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
+  
+  colnames(dwellmeans$punished) <- colnames(dwellmeans$unpunished) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in dwellmeans
+  grouped.dwell[[x]] = dwellmeans
   
   #PCombine categories with PIs for plotting (melted, periods as id-variable)
   if (PIs)
@@ -332,9 +339,11 @@ for(x in 1:NofGroups)
     rm(PIcombined)                                            #delete for use in next group
   }
   
-  #Remove items for reuse in the next group
-  rm(PIprofile, Categories)
+
   
+  #Remove items for reuse in the next group
+  rm(PIprofile, Categories, dwellmeans)
+
   
   #Power spectra
   spectemp <- do.call(cbind, speclist) #combine all power spectra

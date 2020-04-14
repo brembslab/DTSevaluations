@@ -582,30 +582,29 @@ print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill
 
 ```{r Mean dwelling, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 meanplots = list() #create a list to store all the plots
-
+dwellmeans = list()
 for(x in 1:NofGroups){
-  means[[x]] = do.call(rbind, meandata[[x]]) #load each group of data into a dataframe
-  means[[x]]$value[means[[x]]$punishment == 'punished'] <- -means[[x]]$value[means[[x]]$punishment == 'punished'] #To get the data around the zero axis, I am inverting the punished data. I am aware that this is not an accurate data representation, but it works. The axis is then set to only show absolute values
+  grouped.dwell[[x]]$punished = -grouped.dwell[[x]]$punished
   
-  means = as.data.frame(means[[x]]) #transform into a dataframe
-  
-  meanplots[[x]] <- ggplot(means, aes(periodtest, value, fill = punishment)) +
-    geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0), fill=("lightgrey")) +
-    stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
-    stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
-    geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
-    geom_jitter(aes(colour = punishment))+
-    ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
-    theme_light(base_size = 16) +
-    theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
-          ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
-    theme(axis.text.y = element_text(size=18))+
-    ylab("mean dwelling [sec]")+
-    labs(fill = "Outcome") +
-    xlab("Experiment Sequence")+
-    scale_y_continuous(labels=abs)+
-    guides(fill = FALSE, size = FALSE)
-}
+  dwellmeans[[x]] = reshape2::melt(grouped.dwell[[x]]) #load each group of data into a dataframe
 
-grid.arrange(grobs = meanplots)
+
+  meanplots[[x]] <- ggplot(dwellmeans[[x]], aes(variable, value, fill = L1)) +
+  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0), fill=("lightgrey")) +
+  stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
+  stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
+  geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
+  geom_jitter(aes(colour = L1))+
+  ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
+  theme_light(base_size = 16) +
+  theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
+        ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
+  theme(axis.text.y = element_text(size=18))+
+  ylab("mean dwelling [sec]")+
+  labs(fill = "Outcome") +
+  xlab("Experiment Sequence")+
+  scale_y_continuous(labels=abs)+
+  guides(fill = FALSE, size = FALSE)
+}
+ grid.arrange(grobs = meanplots)
 ```
