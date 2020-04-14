@@ -585,9 +585,7 @@ meanplots = list() #create a list to store all the plots
 dwellmeans = list()
 for(x in 1:NofGroups){
   grouped.dwell[[x]]$punished = -grouped.dwell[[x]]$punished
-  
   dwellmeans[[x]] = reshape2::melt(grouped.dwell[[x]]) #load each group of data into a dataframe
-
 
   meanplots[[x]] <- ggplot(dwellmeans[[x]], aes(variable, value, fill = L1)) +
   geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0), fill=("lightgrey")) +
