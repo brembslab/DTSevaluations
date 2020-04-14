@@ -583,33 +583,3 @@ for(i in 1:NofPeriods){
 multiplot(plotlist = dwellplots, cols=2)
 
 ```
-
-# Mean
-
-```{r mean, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
-
-#dwellscatter2 = dwellscatter
-
-#The function below is an inverse hyperbolic sine transformation to generate negative logarithmic data. I totally understand it and did not just copy it...
-
-# asinh_trans <- function(){
-#   trans_new(name = 'asinh', transform = function(x) asinh(x), 
-#             inverse = function(x) sinh(x))
-# }
-# scattertotal <- rbind(reshape::melt(dwellmeans$unpunished), reshape::melt(dwellmeans$punished),by=c("punishment", "value"))
-# #plot the scattered data and merge it with the dwelling time
-# scatterplot <- ggplot() +
-#   geom_boxplot(data =scattertotal, aes(x = factor(L1), y = value, fill = punishment)) +
-#   geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
-#   geom_point(data = scattertotal, aes(x = factor(L1), y = value, fill = punishment))+
-#   #geom_jitter(aes(fill = punishment), width = 0.2)+
-#   #scale_y_continuous(trans = 'asinh',breaks=c(-100,-50,-10,-1,0,1,10,50,100))+
-#    #theme_light()+
-#   ggtitle(paste(flyname))+
-# labs(x=("Experimental sequence"), y="dwelling time [sec]") +
-#                     theme_light() +
-#                     theme(panel.grid.major = element_blank(),
-#                           panel.grid.minor = element_blank()) 
-# 
-# scatterplot
-```
