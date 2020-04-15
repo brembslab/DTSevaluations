@@ -500,13 +500,10 @@ cat("\n# Learning and avoidance scores\n")
 
 # Alternative dwelling data analysis
 
-```{r dwellingpunishednew, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
-
-
+```{r dwellingtimes, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
 dwelltemp  <- rawdata #store the entire data set for the fly
 dwelltemp$sign <- ifelse( dwelltemp$fly > 0, 1, 0) #If temp$fly is equal to 0 then it adds 0 in the sign column, everything else gets a 1. It automatically sets 0 as to be punished and unpunished is set to 1.
 dwellperiod <- split(dwelltemp, dwelltemp$period) #splits data into periods
-
 for(i in 1:NofPeriods){
   
   if (sequence$contingency[i] == 'left_torque'){ #depending on what side was punished, the punished/unpunished side need to be sorted accordingly
@@ -549,13 +546,11 @@ for(i in 1:NofPeriods){
   dwelltimes$punished[[i]] = sort(unique(dwelldata$punished[[i]])) #calculate the dwelling times. It sorts the unique values in ascending order. 
   dwelltimes$unpunished[[i]] = sort(unique(dwelldata$unpunished[[i]])) #calculate the dwelling times
   
-  dwellmeans$unpunished[l,i]=  mean(dwelldata$unpunished[[i]])
-  dwellmeans$punished[l,i]=  mean(dwelldata$punished[[i]])
+  dwellmeans$unpunished[l,i]=  mean(dwelldata$unpunished[[i]]) #calculates the dwelling time and adds it to a growing list
+  dwellmeans$punished[l,i]=  mean(dwelldata$punished[[i]]) #calculates the dwelling time and adds it to a growing list
   
-  dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag")) #calculates the cumulative percentages and shifts the data down.
-  dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))#calculates the cumulative percentages and shifts the data down.
-  
-  
+  dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag")) #calculates the cumulative percentages and shifts the data down. Shift moves the data down by the number specified in n, fill=100 replaces the shifted value with 100, type="lag" decides in which direction to shift the data.
+  dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))#calculates the cumulative percentages and shifts the data down. Shift (from package data.tables) moves the data down by the number specified in n (in this case 1), fill=100 replaces the shifted value with 100, type="lag" decides in which direction to shift the data. (100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum` calculates the cumulative percentage (from the package questionr). 
   
   dwelldata$punished[[i]]$times = dwelltimes$punished[[i]] #add times to the dwell data
   dwelldata$unpunished[[i]]$times = dwelltimes$unpunished[[i]]  #add times to the dwell data

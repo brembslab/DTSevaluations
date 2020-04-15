@@ -29,7 +29,7 @@ library(zoo)
 library(tidyverse)
 library(questionr)
 library(data.table)
-
+library(DescTools)
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
@@ -176,10 +176,11 @@ for(x in 1:NofGroups)
     flyhistos <- list()
     
     #create/empty the dataframe for dwellmeans
-    if(l==1){
+    Dwell = unique(sequence$type %like% 'yt|color|sw') ###determine if dwell should be calculated
+    if (Dwell){if(l==1){
       dwellmeans = list()
       dwellmeans$unpunished <- dwellmeans$punished <- data.frame(matrix(ncol = NofPeriods))}
-    
+    }
     #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
                       output_file = paste(flyname,"descr_anal.html", sep="_"),            ######
@@ -313,6 +314,7 @@ for(x in 1:NofGroups)
   ###Prepare PIs for plotting and statistical analysis###
   
   PIs <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
+
   
   #PIprofiles for statistical analysis (PIs alone, periods as column names)
   colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)    #make colnames in PIprofile
@@ -325,8 +327,11 @@ for(x in 1:NofGroups)
   Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
   
   # Add column names
-  colnames(dwellmeans$punished) <- colnames(dwellmeans$unpunished) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in dwellmeans
+
+  if (Dwell)
+  {colnames(dwellmeans$punished) <- colnames(dwellmeans$unpunished) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in dwellmeans
   grouped.dwell[[x]] = dwellmeans #Merge single fly dwell data to grouped
+  }
   
   #PCombine categories with PIs for plotting (melted, periods as id-variable)
   if (PIs)
