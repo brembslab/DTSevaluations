@@ -96,7 +96,6 @@ grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group
 #create dataframes for dwelling data
 dwelldata = dwellplots = dwelltimes = grouped.dwell = list()
 dwellvector = NA 
-
 flies = 0 #initialize progress bar
 
 for(x in 1:NofGroups)
@@ -180,7 +179,6 @@ for(x in 1:NofGroups)
     if(l==1){
       dwellmeans = list()
       dwellmeans$unpunished <- dwellmeans$punished <- data.frame(matrix(ncol = NofPeriods))}
-    
     
     #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
@@ -319,7 +317,6 @@ for(x in 1:NofGroups)
   #PIprofiles for statistical analysis (PIs alone, periods as column names)
   colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)    #make colnames in PIprofile
   grouped.PIprofiles[[x]] = PIprofile                     #add PIprofile to list of grouped PIs
- 
   PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0]  #remove empty columns for combining with categories
   
   #Categories for printing categorical colors (periods as column names)
@@ -327,8 +324,9 @@ for(x in 1:NofGroups)
   grouped.Categories[[x]] = Categories                      #add Categories to list of grouped Categories
   Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
   
+  # Add column names
   colnames(dwellmeans$punished) <- colnames(dwellmeans$unpunished) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in dwellmeans
-  grouped.dwell[[x]] = dwellmeans
+  grouped.dwell[[x]] = dwellmeans #Merge single fly dwell data to grouped
   
   #PCombine categories with PIs for plotting (melted, periods as id-variable)
   if (PIs)
@@ -338,9 +336,7 @@ for(x in 1:NofGroups)
     grouped.PIcombined[[x]] = PIcombined                      #add PIcombined to list of grouped PIs and categories (for plotting)
     rm(PIcombined)                                            #delete for use in next group
   }
-  
 
-  
   #Remove items for reuse in the next group
   rm(PIprofile, Categories, dwellmeans)
 
