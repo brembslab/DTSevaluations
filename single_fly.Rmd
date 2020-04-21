@@ -492,3 +492,43 @@ cat("\n# Learning and avoidance scores\n")
             col = as.vector(na.omit(sequence$color)))
 ```
 
+
+# Performance Index {.tabset}
+
+## Not normalized Preference Index
+```{r, echo=FALSE}
+
+n = pretest = 1
+
+while (sequence$outcome[n] == 0) {
+  pretest[n] = sequence$lambda[n]
+  n = n+1
+}
+pretest = mean(pretest)
+
+sequence$normalized = sequence$lambda-pretest
+n=1
+for(n in 1:length(sequence$normalized)){
+  if (sequence$normalized[n] > 1){sequence$normalized[n] = 1}
+
+}
+
+max = round(max(sequence$lambda))
+
+      barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices (not normalized)", flyname),
+            xlab="Time [periods]",
+            ylab="PI [rel. units]",
+            space=0,
+            ylim=c(0,max),
+            col = as.vector(na.omit(sequence$color)))
+```
+
+## Normalized Preference Index
+```{r, echo=FALSE}
+      barplot(as.vector(na.omit(sequence$normalized)), main = paste("Performance Indices (normalized", flyname),
+            xlab="Time [periods]",
+            ylab="PI [rel. units]",
+            space=0,
+            ylim=c(0,max),
+            col = as.vector(na.omit(sequence$color)))
+```
