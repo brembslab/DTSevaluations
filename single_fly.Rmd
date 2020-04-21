@@ -535,20 +535,20 @@ for(i in 1:NofPeriods){
     #This will generate two single dots on the chart, both of them at either 0% or 100%
   } else if (length(unique(dwellperiod[[i]]$sign)) == 1 && (unique(dwellperiod[[i]]$sign)) == 1) { 
     dwelldata$unpunished[[i]] = as.integer(0)
-    dwelldata$punished[[i]] = as.integer(120)
+    dwelldata$punished[[i]] = as.integer(sequence$duration[i])
     
     #if  only unpunished data exists for the particular period, punished is set to 0% and unpunished to 100%
   } else if (length(unique(dwellperiod[[i]]$sign)) == 1 && (unique(dwellperiod[[i]]$sign)) == 0){
-    dwelldata$unpunished[[i]] = as.integer(120)
+    dwelldata$unpunished[[i]] = as.integer(sequence$duration[i])
     dwelldata$punished[[i]] = as.integer(0)
   }
   
-  dwelltimes$punished[[i]] = sort(unique(dwelldata$punished[[i]])) #calculate the dwelling times. It sorts the unique values in ascending order. 
+  dwelltimes$punished[[i]] = sort(unique(dwelldata$punished[[i]])) #calculate the dwelling times. It sorts the unique values in ascending order.
   dwelltimes$unpunished[[i]] = sort(unique(dwelldata$unpunished[[i]])) #calculate the dwelling times
-  
+
   dwellmeans$unpunished[l,i]=  mean(dwelldata$unpunished[[i]]) #calculates the dwelling time and adds it to a growing list
   dwellmeans$punished[l,i]=  mean(dwelldata$punished[[i]]) #calculates the dwelling time and adds it to a growing list
-  
+
   dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag")) #calculates the cumulative percentages and shifts the data down. Shift moves the data down by the number specified in n, fill=100 replaces the shifted value with 100, type="lag" decides in which direction to shift the data.
   dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))#calculates the cumulative percentages and shifts the data down. Shift (from package data.tables) moves the data down by the number specified in n (in this case 1), fill=100 replaces the shifted value with 100, type="lag" decides in which direction to shift the data. (100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum` calculates the cumulative percentage (from the package questionr). 
   
