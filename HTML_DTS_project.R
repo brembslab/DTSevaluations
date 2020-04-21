@@ -27,7 +27,7 @@ library(knitr)
 library(dabestr)
 library(zoo)
 library(tidyverse)
-
+library(shiny)
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
