@@ -92,6 +92,8 @@ grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group
 grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
+flies = 0
+
 
 #create dataframes for dwelling data
 dwelldata = dwellplots = dwelltimes = grouped.dwell = list()
@@ -143,7 +145,7 @@ for(x in 1:NofGroups)
     
     #load current fly name
     xml_name=xml_list[[l]]
-    
+
     ##### read the data with the corresponding function #######
     singleflydata <- flyDataImport(xml_name)
     
