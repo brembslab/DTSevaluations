@@ -498,7 +498,7 @@ cat("\n# Learning and avoidance scores\n")
             col = as.vector(na.omit(sequence$color)))
 ```
 
-# Alternative dwelling data analysis
+# Dwelling time
 
 ```{r dwellingtimes, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
 dwelltemp  <- rawdata #store the entire data set for the fly
