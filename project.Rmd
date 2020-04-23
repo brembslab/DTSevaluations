@@ -568,7 +568,11 @@ cat("\n## Statistical tests between two groups\n")
     PIv = c(na.omit(PIstat[[1]]), na.omit(PIstat[[2]]))                 #combine the two PI samples into one value vector to test for homogeneity of variance
     if(fligner.test(PIv,PIg)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
     if(equalN & hv){hedges=FALSE}else{hedges=TRUE}                      #test if we need to apply Hedge's correction
-    cohend = signif(cohen.d(PIv, PIg, hedges.correction = hedges)$estimate, 3)
+    ih(hedges){
+      cohend = signif(cohen.d(PIv, PIg, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
+    }else{
+      cohend = (mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2) #use simple formula if varances and sample sizes are identical
+    }
     #calculate statistical power
     alt = project.data[["statistics"]][["two.groups"]][["power"]]
     power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
