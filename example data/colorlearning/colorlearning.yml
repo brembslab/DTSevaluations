@@ -92,7 +92,7 @@ statistics:
   two.groups:
     title: several two-sided tests
     description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
-    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    power: greater #first group is tested for being lower than second group (alternatives: greater, two.sided)
     data: 1 #yes
 mediatype: text/csv/xml
 epid: 245

@@ -442,7 +442,7 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 
-```{r BoxWithNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+```{r BoxWithNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 10, comment=NA, results='asis'}
 cat("\n## Performance Index box&dotplot with notches:\n")
 
 for(x in 1:NofGroups)
@@ -453,7 +453,7 @@ for(x in 1:NofGroups)
     PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
@@ -461,7 +461,7 @@ for(x in 1:NofGroups)
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
-              theme(aspect.ratio=0.8*aspect_ratio) +
+              theme(aspect.ratio=aspect_ratio) +
               scale_fill_discrete(name = "Categories") #legend title for categories 
 
     }  
@@ -469,7 +469,7 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 
-```{r BoxNoNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+```{r BoxNoNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 10, comment=NA, results='asis'}
 cat("\n## Performance Index box&dotplot without notches:\n")
 
 for(x in 1:NofGroups)
@@ -480,7 +480,7 @@ for(x in 1:NofGroups)
     PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
@@ -488,7 +488,7 @@ for(x in 1:NofGroups)
               theme(axis.text.y = element_text(size=18))+ 
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
-              theme(aspect.ratio=0.8*aspect_ratio) +
+              theme(aspect.ratio=aspect_ratio) +
               scale_fill_discrete(name = "Categories") #legend title for categories 
 
     }        
@@ -520,7 +520,7 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 
-```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
 cat("\n# Learning Score Statistics\n## Statistical tests of single groups against zero\n")
   
   wilcoxon<-numeric()  
@@ -544,10 +544,10 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
     geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
     ggtitle("Wilcoxon") +
-    geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+    geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
     scale_y_continuous(breaks = seq(-1, 1, .2)) +
     theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-    theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+    theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=4/NofGroups)+
     samplesizes.annotate(boxes, samplesizes) +
     wilcox.annotate(boxes, wilcoxon))
   
@@ -557,7 +557,7 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     grid.arrange(grobs = plots.singles, ncol=2)
 ```
 
-```{r Utest, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r Utest, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
 cat("\n## Statistical tests between two groups\n")
 
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
@@ -612,11 +612,11 @@ cat("\n## Statistical tests between two groups\n")
   plots.2test<-list(ggplot(PIstatCombined, aes(group, PIs)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+      geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
       ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=4/NofGroups)+
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=8, vjust=0.5) +
@@ -654,7 +654,14 @@ kable(PooledGroups)
     utest = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
     w.statistic = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$statistic, 3)
     #compute effect size Cohen's D
-    cohend = signif(cohen.d(na.omit(PIprofilePooled[,1]), na.omit(PIprofilePooled[,2]))$estimate, 3)
+    if(samplesizes[1]==samplesizes[2]){equalN=TRUE}else{equalN=FALSE}   #deterine if the samplesizes are identical
+    if(fligner.test(PIstatCombined$PIs,PIstatCombined$group)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
+    if(equalN & hv){hedges=FALSE}else{hedges=TRUE}                      #test if we need to apply Hedge's correction
+    if(hedges){
+      cohend = signif(cohen.d(PIstatCombined$PIs, PIstatCombined$group, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
+    }else{
+      cohend = signif((mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
+    }
     #calculate statistical power
     alt = project.data[["statistics"]][["two.groups"]][["power"]]
     power=signif(pwr.t2n.test(n1 = samplesizesPooled[1], n2= samplesizesPooled[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
