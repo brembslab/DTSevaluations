@@ -714,8 +714,6 @@ for (t in 1:2) {
   Control[[t]] <- Control[[t]][ , !(names(Control[[t]]) %in% "desc")]
 }
 
-class(PIstat[[1]])
-class(Control[[1]])
 #groupe 3 (experimental) vs the other two groups
 utest1 = signif(wilcox.test(Exp,Control[[1]])$p.value, 3)
 utest2 = signif(wilcox.test(Exp,Control[[2]])$p.value, 3)#compare the two groups with a U-test and collect p-value
