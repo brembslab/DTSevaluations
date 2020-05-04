@@ -178,10 +178,10 @@ for(x in 1:NofGroups)
     flyhistos <- list()
     
     #create/empty the dataframe for dwellmeans
-    Dwell = unique(sequence$type %like% 'yt|color|sw') ###determine if dwell should be calculated
-    if (Dwell){if(l==1){
+    Dwell = unique(sequence$type %like% 'yt|color|sw|fs') ###determine if dwell should be calculated
+    if (Dwell & l==1){
       dwellmeans = list()
-      dwellmeans$unpunished <- dwellmeans$punished <- data.frame(matrix(ncol = NofPeriods))}
+      dwellmeans$unpunished <- dwellmeans$punished <- data.frame(matrix(ncol = NofPeriods))
     }
     #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
@@ -203,9 +203,6 @@ for(x in 1:NofGroups)
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
   
   # derive means and SDs for optomotor data in the group and collect extracted OM parameters
-  if(any(grepl("optomotor", sequence$type)==TRUE)){
-  }
-  
   if(any(grepl("optomotor", sequence$type)==TRUE)){    ###determine if there are optomotor periods
     if (any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-optomotor periods...
       if (grepl("optomotor", sequence$type[1]) & grepl("optomotor", tail(sequence$type, 1))){ ###...and the opto periods are in the beginning and the end
@@ -299,25 +296,29 @@ for(x in 1:NofGroups)
   }
   
   
-  ########### Collect the data from each group in their respective lists and empty the variables ######################
+  ########### Collect data from each group in their respective lists and empty the variables ######################
   
-  ###Period sequence design meta-data
+  #### -- Period sequence design meta-data -- ####
   grouped.periods[[x]] = periods
   
-  ###fly Histograms
+  #### --Fly Histograms -- ####
   grouped.flyhistos[[x]] = flyhistos #add fly histograms to list of grouped histograms
   flyhistos <- list() #empty fly histograms
   
-  ###Position Histograms
+  #### -- Position Histograms -- ####
   grouped.poshistos[[x]] = poshistos #add position histograms to list of grouped position histograms
   poshistos <- list() #empty list of position histograms
+
+  #### -- Dwelling times -- ####
+  if (Dwell){
+    colnames(dwellmeans$punished) <- colnames(dwellmeans$unpunished) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in dwellmeans
+    grouped.dwell[[x]] = dwellmeans #Merge single fly dwell data to grouped
+  }
   
-  
-  ###Prepare PIs for plotting and statistical analysis###
+  #### -- Performance Indices -- ####
   
   PIs <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
 
-  
   #PIprofiles for statistical analysis (PIs alone, periods as column names)
   colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)    #make colnames in PIprofile
   grouped.PIprofiles[[x]] = PIprofile                     #add PIprofile to list of grouped PIs
@@ -328,27 +329,19 @@ for(x in 1:NofGroups)
   grouped.Categories[[x]] = Categories                      #add Categories to list of grouped Categories
   Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
   
-  # Add column names
-
-  if (Dwell)
-  {colnames(dwellmeans$punished) <- colnames(dwellmeans$unpunished) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in dwellmeans
-  grouped.dwell[[x]] = dwellmeans #Merge single fly dwell data to grouped
-  }
-  
   #PCombine categories with PIs for plotting (melted, periods as id-variable)
   if (PIs)
   {
     PIcombined <- melt(Categories, measure.vars = names(Categories), variable.name = "period", value.name = "category") #melt data frame to create a variable with periods as id values
     PIcombined["PIs"] = melt(PIprofile)$value                 #combine the categories with the PIs
     grouped.PIcombined[[x]] = PIcombined                      #add PIcombined to list of grouped PIs and categories (for plotting)
-    rm(PIcombined)                                            #delete for use in next group
   }
 
-  #Remove items for reuse in the next group
-  rm(PIprofile, Categories, dwellmeans)
+  #Remove some items for reuse in the next group
+  rm(PIprofile, PIcombined, Categories, dwellmeans)
 
   
-  #Power spectra
+  #### -- Power spectra -- ####
   spectemp <- do.call(cbind, speclist) #combine all power spectra
   colnames(spectemp)[1]<-"freq" #label the first x-axis as frequency
   spectemp$freq <- spectemp$freq*1000 #convert kHz to Hz

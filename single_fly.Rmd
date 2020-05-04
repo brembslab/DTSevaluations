@@ -488,19 +488,10 @@ if(!exists("OMparamsAfter"))
 ```
 
 
-```{r PIs, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
-cat("\n# Learning and avoidance scores\n")
-
-      barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
-            xlab="Time [periods]",
-            ylab="PI [rel. units]",
-            space=0,
-            col = as.vector(na.omit(sequence$color)))
-```
-
-# Dwelling time
-
 ```{r dwellingtimes, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
+
+cat("\n# Dwelling Times\n")
+
 dwelltemp  <- rawdata #store the entire data set for the fly
 dwelltemp$sign <- ifelse( dwelltemp$fly > 0, 1, 0) #If temp$fly is equal to 0 then it adds 0 in the sign column, everything else gets a 1. It automatically sets 0 as to be punished and unpunished is set to 1.
 dwellperiod <- split(dwelltemp, dwelltemp$period) #splits data into periods
@@ -577,4 +568,14 @@ for(i in 1:NofPeriods){
 #
 multiplot(plotlist = dwellplots, cols=2)
 
+```
+
+```{r PIs, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n# Learning and avoidance scores\n")
+
+      barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
+            xlab="Time [periods]",
+            ylab="PI [rel. units]",
+            space=0,
+            col = as.vector(na.omit(sequence$color)))
 ```
