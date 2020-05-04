@@ -47,7 +47,6 @@ resources:
   description: test
   data:
   - Exp_1.xml
-  - Exp_2.xml
   - Exp_3.xml
   #- Exp_5.xml #fliege tot
   - Exp_9.xml
@@ -88,11 +87,11 @@ statistics:
     title: several two-sided tests
     description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
     power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
-    data: 0 #no
+    data: 1 #no
   three.groups:
     title: two-sided tests
     description: Wilcoxon rank sum test with continuity correction (U-Test)
-    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    power: two.side #first group is tested for being lower than second group (alternatives: greater, two.sided)
     data: 1 #yes
 mediatype: text/csv/xml
 epid: 245

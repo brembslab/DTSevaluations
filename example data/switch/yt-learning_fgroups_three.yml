@@ -1,36 +1,46 @@
 ---
 experiment:
-    type: Torquemeter
+    type: torquemeter
     id: SCR_017276
-    name: wtb-t-learning-fgroups
-    title: Wild Type Berlin T-Pattern Learning
-    description: Standard T-Pattern learning for the Drosophila Neurogenetics course
+    name: wtb-yt-learning-fgroups
+    title: Wild Type Berlin yaw torque learning - two fake groups
+    description: Standard yaw torque learning by Anders
 licenses:
     name: ODC-PDDL-1.0
     uri: http://opendatacommons.org/licenses/pddl
 author:
-    name: bjoern-brembs
-    description: Björn Brembs
-    firstName: Björn
-    lastName: Brembs
-    id: 0000-0001-7824-7650
+    name: anders-eriksson
+    description: Anders Eriksson
+    firstName: Anders
+    lastName: Eriksson
+    id: 0000-0000-0000-0000
 resources:
 - name: WTB1
-  title: wild type Berlin
-  description: experimental
+  title: wild type B1
+  description: group1
   data:
-  - wtb-01.xml
-  #- wtb-02.xml #low data sampling
-  - wtb-03.xml
-  - wtb-04.xml
-- name: WTB2
-  title: wildtype B.
-  description: control
-  data:
-  - wtb-05.xml #missed flight pause
-  #- wtb-06.xml #forgot IR filter first training; low data sampling
-  - wtb-07.xml #many flight pauses
+  - values1.xml
+  - values2.xml
+  - values3.xml
+  - values4.xml
+  - values5.xml
 
+- name: WTB2
+  title: wt Berlin2
+  description: group2
+  data:
+  - values56.xml
+  - values62.xml
+  - values67.xml
+  - values71.xml
+  - values72.xml
+  
+- name: WTB3
+  title: wild type B1.1
+  description: group3
+  data:  
+  - values6.xml
+  - values7.xml
 statistics:
   significance-levels:
     - 0.005
@@ -49,7 +59,7 @@ statistics:
   learning-score:
     title: PI8
     description: First test after last training
-    data: 12
+    data: 11
   single.groups:
     title: several single group tests against zero
     description: one sided Wilcoxon-Tests and Bayes Factors
@@ -57,12 +67,11 @@ statistics:
   two.groups:
     title: several two-sided tests
     description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
-    power: two.sided #less, greater, two.sided
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
     data: 1 #yes
   three.groups:
     title: two-sided tests
     description: Wilcoxon rank sum test with continuity correction (U-Test)
     power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
-    data: 0 #yes       
+    data: 1 #yes
 mediatype: text/csv/xml
-epid: 245
