@@ -97,7 +97,6 @@ flies = 0
 
 #create dataframes for dwelling data
 dwelldata = dwellplots = dwelltimes = grouped.dwell = list()
-dwellvector = NA 
 flies = 0 #initialize progress bar
 
 for(x in 1:NofGroups)
@@ -155,9 +154,7 @@ for(x in 1:NofGroups)
     samplerate = as.numeric(as.character(singleflydata[[4]]$sample_rate))
     real_sample_rate = as.numeric(as.character(singleflydata[[11]]))
     down_sample_rate = as.numeric(as.character(singleflydata[[12]]))
-    
-    
-    
+
     ##extract fly meta-data
     fly <- singleflydata[[3]]
     flyname = fly$name[1]
@@ -178,15 +175,15 @@ for(x in 1:NofGroups)
     flyhistos <- list()
     
     #create/empty the dataframe for dwellmeans
-    Dwell = unique(sequence$type %like% 'yt|color|sw|fs') ###determine if dwell should be calculated
+    Dwell = unique(sequence$type %like% 'yt|color|sw|fs') ###determine if dwelling times should be calculated
     if (Dwell & l==1){
       dwellmeans = list()
       dwellmeans$unpunished <- dwellmeans$punished <- data.frame(matrix(ncol = NofPeriods))
     }
     #### call RMarkdown for single fly evaluations ###############################################
-    rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
-                      output_file = paste(flyname,"descr_anal.html", sep="_"),            ######
-                      output_dir = evaluation.path)                                      ######
+    rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                            ######
+                      output_file = paste(flyname,"descr_anal.html", sep="_"),              ######
+                      output_dir = evaluation.path)                                         ######
     #### end RMarkdown for single fly evaluations ################################################
     
     ##move PIs and categories to multi-experiment data.frames
@@ -417,11 +414,11 @@ if(NofGroups>2 & length(unique(groupdescriptions))==2){
 
 ###### continue for all projects with two groups
 
-#### call RMarkdown for project evaluations ################################################
-rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""), 
-                  output_file = paste(project.data$experiment$name,"html", sep = "."), 
-                  output_dir = evaluation.path)
-#### end RMarkdown for project evaluations #################################################
+#### ----- call RMarkdown for project evaluations ----- ################################################
+rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""),                                          #####
+                  output_file = paste(project.data$experiment$name,"html", sep = "."),             #####
+                  output_dir = evaluation.path)                                                    #####
+#### ----- end RMarkdown for project evaluations ----- #################################################
 
 Runtime = round(((Sys.time() - start_time)), 3) #Subtracts the endtime with the starttime to get the total analysis time
 print(paste0("Runtime per fly was ", ((Runtime)*60)/totalflies, " seconds", ", in total ", round(Runtime, 3), " minutes")) #prints the time per fly and the total time
