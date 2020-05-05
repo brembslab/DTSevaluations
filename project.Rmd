@@ -415,7 +415,7 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
         theme(axis.text.y = element_text(size=12))+ ylab("mean rel. Power") + xlab("Frequency [Hz]"))
 ```
 
-<!-- Computing optomotor data if they are present -->
+<!-- Compute dwelling times -->
 
 ```{r Mean dwelling, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 
@@ -432,7 +432,7 @@ for(x in 1:NofGroups){
   stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
   stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
   geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
-  geom_jitter(aes(colour = Outcome), colour="black",pch=21, size=3)+
+  geom_jitter(aes(colour = Outcome), colour="black",pch=21, size=3, alpha=0.5)+
   ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
   theme_light(base_size = 16) +
   theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
@@ -442,6 +442,7 @@ for(x in 1:NofGroups){
   labs(fill = "Outcome") +
   xlab("Experiment Sequence")+
   scale_y_continuous(labels=abs)+
+  ylim(dwellrange) +
   guides(fill = FALSE, size = FALSE)
 }
  grid.arrange(grobs = dwellmeanplots)

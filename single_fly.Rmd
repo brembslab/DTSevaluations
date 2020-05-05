@@ -256,7 +256,7 @@ for(i in 1:NofPeriods){
       if(sequence$contingency[i] == 'left_torque'){rawdata$punished <- ifelse(rawdata$fly < 0, 1, 0)              #negative torque becomes marked 1 if punished
       }else if(sequence$contingency[i] == 'right_torque') {rawdata$punished <- ifelse(rawdata$fly >= 0, 1, 0)     #positive torque becomes marked 1 if punished
       }else if(sequence$contingency[i] == '2_4_Q'){rawdata$punished <- ifelse(abs(rawdata$a_pos) >= 450 & abs(rawdata$a_pos) <= 1350, 1, 0)#mark 2_4_Q data with 1 if punished
-      }else if(sequence$contingency[i] == '1_3_Q'){rawdata$punished <- ifelse(abs(rawdata$a_pos) < 450 & abs(rawdata$a_pos) > 1350, 1, 0)} #mark 1_3_Q with 1 if punished
+      }else if(sequence$contingency[i] == '1_3_Q'){rawdata$punished <- ifelse(abs(rawdata$a_pos) < 450 | abs(rawdata$a_pos) > 1350, 1, 0)} #mark 1_3_Q with 1 if punished
   } #for Number of Periods
 ```
 
@@ -493,32 +493,34 @@ if(!exists("OMparamsAfter"))
 ```
 
 
-```{r dwellingtimes, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
+```{r dwellingtimes, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}
 
 cat("\n# Dwelling Times\n")
 
-#split the data into periods
+#split the punishment data into periods
 dwellperiod <- split(rawdata$punished, rawdata$period) #split the punished/unpunished datapoints by period
 
-for (i in NofPeriods) {
+for (i in 1:NofPeriods) {
     dwellperiod[[i]] = rle(dwellperiod[[i]])                                                    #run length encode the punished and unpunished data points
     dwellperiod[[i]][[1]] = dwellperiod[[i]][[1]]*0.05                                          #convert run lenghts into seconds. Now we have the raw dwelling times.
-    dwelldata$unpunished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["0"]) #unpunished dwelling times
-    dwelldata$punished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["1"])   #punished dwelling times
-    if(is.null(dwelldata$unpunished[[i]])){dwelldata$unpunished[[i]]=as.integer(0)}             #if no data points, set to zero seconds
-    if(is.null(dwelldata$punished[[i]])){dwelldata$punished[[i]]=as.integer(0)}                 #if no data points, set to zero seconds
+    
+    if(is.null(unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["0"]))){dwelldata$unpunished[[i]]=as.integer(0) #if no data points, set to zero seconds
+    }else{dwelldata$unpunished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["0"])} #unpunished dwelling times
+      
+    if(is.null(unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["1"]))){dwelldata$punished[[i]]=as.integer(0) #if no data points, set to zero seconds
+    } else{dwelldata$punished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["1"])}  #punished dwelling times
 
-#calculate mean dwelling times and add them to the list used in prject evaluations    
+#calculate mean dwelling times and add them to the list used in project evaluations    
     dwellmeans$unpunished[l,i] =  mean(dwelldata$unpunished[[i]])
     dwellmeans$punished[l,i] =  mean(dwelldata$punished[[i]])
 
 #Prepare data for plotting cumulative percentages
-#calculate the cumulative percentages and shift the data down. Shift moves the data down by the number specified in n, fill=100 replaces the shifted value with 100, type="lag" decides in which direction to shift the data.
-    dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag")) 
-    dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
 #calculate x-axis for cumulative distributions    
     dwelltimes$punished[[i]] = sort(unique(dwelldata$punished[[i]])) #calculate the dwelling times. It sorts the unique values in ascending order.
     dwelltimes$unpunished[[i]] = sort(unique(dwelldata$unpunished[[i]])) #calculate the dwelling times
+#calculate the cumulative percentages and shift the data down. Shift moves the data down by the number specified in n, fill=100 replaces the shifted value with 100, type="lag" decides in which direction to shift the data.
+    dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag")) 
+    dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
 #move x-axes to dwelldata dataframe
     dwelldata$punished[[i]]$times = dwelltimes$punished[[i]]
     dwelldata$unpunished[[i]]$times = dwelltimes$unpunished[[i]]
@@ -532,7 +534,7 @@ for (i in NofPeriods) {
     scale_y_log10( breaks=c(0,10,100))+
     scale_x_log10() +
     ggtitle(paste(flyname, "Period", i))+
-    teme_light() +
+    theme_light() +
     labs(x="time [sec]", y="% events",  color = "Outcome") +
     annotate("text", Inf, Inf, label = training[i], hjust =1.05, vjust = 1)+
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+

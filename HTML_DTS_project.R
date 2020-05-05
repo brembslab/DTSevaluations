@@ -310,6 +310,8 @@ for(x in 1:NofGroups)
   if (Dwell){
     colnames(dwellmeans$punished) <- colnames(dwellmeans$unpunished) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in dwellmeans
     grouped.dwell[[x]] = dwellmeans #Merge single fly dwell data to grouped
+    if(!exists("dwellrange")){dwellrange=NA} #create vector to collect largest mean dwelling times per period for y-axis range
+    dwellrange[x] = max(colMeans(dwellmeans$unpunished)) #store the largest value
   }
   
   #### -- Performance Indices -- ####
@@ -335,7 +337,7 @@ for(x in 1:NofGroups)
   }
 
   #Remove some items for reuse in the next group
-  rm(PIprofile, PIcombined, Categories, dwellmeans)
+  rm(PIprofile, PIcombined, Categories)
 
   
   #### -- Power spectra -- ####
@@ -363,6 +365,8 @@ for(x in 1:NofGroups)
 colorrange = project.data[["statistics"]][["color-range"]]
 boxcolors = c(colorrange[1:NofGroups])
 boxes<-c(1:NofGroups)
+dwellrange=-round(1.5*max(dwellrange))
+dwellrange[2]=-dwellrange
 
 #create new dataframes for the chosen PI learningscore values
 if(PIs & !is.null(learningscore)){
