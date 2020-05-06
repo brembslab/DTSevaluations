@@ -44,8 +44,8 @@ start_time <- Sys.time() #Records the system time at the start of the analysis
 
 #progressbar
 totalflies <- length(paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/"))#gets the number of total flies
-flies = 0
-if(dev.cur()[[1]]>1){ dev.off()}
+flycount = 1
+
 
 #make sure all flies have the identical experimental design and find out which don't
 xml_list = paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/") #create list of all file names
@@ -91,7 +91,6 @@ grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group
 grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
-flies = 0
 
 
 
@@ -108,13 +107,7 @@ period.data <- list()     #data grouped by period
 grouped.data <- list()    #total data grouped
 speclist <- list()        #spectograms
 
-##progressbar
-#if we are done with the first group, the totalflies get recalculated by subtracting the number of flies in the first group(s). 
-if(x>1){
-  flies[x] = length(paste(project.path, project.data[["resources"]][[x-1]][["data"]], sep = "/"))
-  flies = sum(flies)
-  totalflies = totalflies - flies
-}
+
 
 #start actually evaluating
 for (l in 1:length(xml_list)) 
@@ -131,22 +124,18 @@ for (l in 1:length(xml_list))
     
     #progress bar
     if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
-    if (exists("Progressbar")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end. If the plot does not exist it gives an error message, hence the 1-1
-    progress = round(l*(100/(totalflies))) #calculates the progress in percentage
-    if(x>1){  #uses this function to calculate the progress if we are past the first group
-      progress = round((l+flies)*(100/(totalflies+flies)))
-    }
-    esttime = (Sys.time() + (iter_time * (totalflies-l))) #estimated finish time, based on the last iteration and the number of flies left
+    if (exists("Progressbar")){dev.off()} #deletes the previous plot. If not, this will generate an ever increasing number of plots in the end.
+    progress = round(flycount*(100/(totalflies))) #calculates the progress in percentage
+    esttime = (Sys.time() + (iter_time * (totalflies-flycount))) #estimated finish time, based on the last iteration and the number of flies left
     Progressbar = barplot(progress,
                  col = "grey", ylab = "% progress",
                  ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
-    axis(2, seq(0,100,50), las=2) #sets the axis ticks and rotates them to a horizontal position
     axis(2, seq(0,100,25), las=2) #sets the axis ticks
     mtext(paste("Iteration time: ", iter_time, "sec \n Current fly:", flyname, "\n Current group:", grp_title), side=3)
     mtext(paste("Est. finish time",substring(esttime, 12)), side = 1)
-    #title((paste("Est. finish time",substring(esttime, 12))), line = -8, cex.lab=0.5)
-    text(Progressbar,16, paste(progress, "% completed \n flies left", (totalflies-l))) #adds the percentage as text and the number of flies left
-    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 35 seconds
+    text(Progressbar,16, paste(progress, "% completed \n Flies left:", (totalflies-flycount))) #adds the percentage as text and the number of flies left
+    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 20 seconds
+    flycount = flycount+1
     
     ##extract sequence meta-data
     NofPeriods = singleflydata[[5]]
