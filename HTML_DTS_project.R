@@ -2,8 +2,9 @@
 ################## R-script to read YAML DTS project files, visualize and statistically evaluate data. Reports in HTML ##############
 #####################################################################################################################################
 
-rm(list=ls()) #clean memory
-gc()          #collect garbage
+rm(list=ls())                      #clean memory
+gc()                               #collect garbage
+if(!is.null(dev.list())) dev.off() #clear plots
 
 library(ggplot2)
 library(tidyr)
@@ -27,6 +28,7 @@ library(knitr)
 library(dabestr)
 library(zoo)
 library(tidyverse)
+library(magick)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -38,6 +40,10 @@ start.wd = getwd()
 project.file <- file.choose()
 project.path = dirname(project.file)
 project.data<-yaml.load_file(project.file)
+
+#start busy animation
+busy <- image_read("dataintegrity.gif")
+print(busy)
 
 #measure the runtime of the whole analysis 
 start_time <- Sys.time() #Records the system time at the start of the analysis
@@ -126,8 +132,10 @@ for (l in 1:length(xml_list))
     #progress bar
     if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
     if (exists("Progressbar")){dev.off()} #deletes the previous plot. If not, this will generate an ever increasing number of plots in the end.
+    while (!is.null(dev.list()))  dev.off()
     progress = round(flycount*(100/(totalflies))) #calculates the progress in percentage
     esttime = (Sys.time() + (iter_time * (totalflies-flycount))) #estimated finish time, based on the last iteration and the number of flies left
+    rstudioapi::executeCommand("activatePlots") #switch focus from busy animation in viewer to progress bar in plots
     Progressbar = barplot(progress,
                  col = "grey", ylab = "% progress",
                  ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
@@ -241,6 +249,63 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){
   ## pool all fly and position data into single data.frame
   
   all.data <- do.call(rbind, pooled.data)
+  
+  ## generate pooled position and fly histograms by period and add them to the list
+  
+  for(i in 1:NofPeriods)
+  {
+    temp<-pooled.data[[i]]
+    
+    #fly
+    flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
+      geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+      geom_vline(xintercept=0, linetype="dotted") +
+      geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
+      labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
+      xlim(maxfly) +
+      theme_light() +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank()) +
+      scale_x_continuous(expand = c(0,0)) +
+      scale_y_continuous(expand = c(0,0)) +
+      ggtitle(paste("Period", i))
+    
+    #position
+    if(sequence$type[i]=="fs" || sequence$type[i]=="color")
+    {
+      poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
+        geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
+        geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
+        labs(x="arena position [arb units]", y="frequency") +
+        theme_light() +
+        theme(panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank()) +
+        scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), expand = c(0,0)) +
+        scale_y_continuous(expand = c(0,0)) +
+        ggtitle(paste("Period", i))
+    }
+  }
+  
+  ## generate pooled histograms for all flies over all periods and add them to the list
+  
+  #fly behavior
+  flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) + 
+    geom_histogram(binwidth=3) + 
+    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") + 
+    xlim(maxfly) +
+    ggtitle("Pooled Behavior Histogram")
+  
+  #position (if there are fs periods)
+  if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
+    poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) + 
+      geom_histogram(binwidth=10) +
+      labs(x="position [arb units]", y="frequency") + 
+      xlim(-1800,1800) +
+      ggtitle("Pooled Position Histogram")
+  }
   
 
   ## if we have two groups, collect data for superimposed histograms for either fly behavior or position
