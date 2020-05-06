@@ -230,8 +230,7 @@ for(i in 1:NofPeriods){
       
       
       ##calculate PIs and 
-      ##create data.frame for adding PIs if it doesn't exist, yet
-      if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))}
+      if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))} ##create data.frame for adding PIs if it doesn't exist, yet
       if(sequence$type[i]=="fs"||sequence$type[i]=="color") #for arena position
       {
         t1 = sum(abs(temp$a_pos) >= 450 & abs(temp$a_pos) <= 1350)
@@ -252,11 +251,11 @@ for(i in 1:NofPeriods){
       if(!exists("Categories")){Categories <- data.frame(matrix(ncol = NofPeriods))} #create it, if it doesn't exist, yet and...
       if(l==1){Categories[1,i]=sequence$category[i]} #...add category variable to dataframe
       
-      ##add column that indicates if the fly was punished or not
-      if(sequence$contingency[i] == 'left_torque'){rawdata$punished <- ifelse(rawdata$fly < 0, 1, 0)              #negative torque becomes marked 1 if punished
-      }else if(sequence$contingency[i] == 'right_torque') {rawdata$punished <- ifelse(rawdata$fly >= 0, 1, 0)     #positive torque becomes marked 1 if punished
-      }else if(sequence$contingency[i] == '2_4_Q'){rawdata$punished <- ifelse(abs(rawdata$a_pos) >= 450 & abs(rawdata$a_pos) <= 1350, 1, 0)#mark 2_4_Q data with 1 if punished
-      }else if(sequence$contingency[i] == '1_3_Q'){rawdata$punished <- ifelse(abs(rawdata$a_pos) < 450 | abs(rawdata$a_pos) > 1350, 1, 0)} #mark 1_3_Q with 1 if punished
+      ##add column to rawdata that indicates if the fly was punished or not
+      if(sequence$contingency[i] == 'left_torque'){rawdata$punished[rawdata$period[i]] <- ifelse(rawdata$fly[rawdata$period[i]] < 0, 1, 0) 
+      }else if(sequence$contingency[i] == 'right_torque') {rawdata$punished[rawdata$period[i]] <- ifelse(rawdata$fly[rawdata$period[i]] >= 0, 1, 0) 
+      }else if(sequence$contingency[i] == '2_4_Q'){rawdata$punished[rawdata$period[i]] <- ifelse(abs(rawdata$a_pos[rawdata$period[i]]) >= 450 & abs(rawdata$a_pos[rawdata$period[i]]) <= 1350, 1, 0)
+      }else if(sequence$contingency[i] == '1_3_Q'){rawdata$punished[rawdata$period[i]] <- ifelse(abs(rawdata$a_pos[rawdata$period[i]]) < 450 | abs(rawdata$a_pos[rawdata$period[i]]) > 1350, 1, 0)}
   } #for Number of Periods
 ```
 
