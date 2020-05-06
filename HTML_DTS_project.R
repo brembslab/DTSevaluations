@@ -175,7 +175,7 @@ for(x in 1:NofGroups)
     flyhistos <- list()
     
     #create/empty the dataframe for dwellmeans
-    Dwell = unique(sequence$type %like% 'yt|color|sw|fs') ###determine if dwelling times should be calculated
+    Dwell = any(c("yt","color","sw","fs") %in% sequence$type) ###determine if dwelling times should be calculated
     if (Dwell & l==1){
       dwellmeans = list()
       dwellmeans$unpunished <- dwellmeans$punished <- data.frame(matrix(ncol = NofPeriods))
