@@ -148,10 +148,9 @@ for(i in 1:NofPeriods){
         period.data[[i]] <- temp_shifted[keeps] #list only arena position and fly behavior data by period
       } else period.data[[i]] <- temp[keeps] #keep only arena position and fly behavior data by period
       
-      if(sequence$type[i]=="fs"||sequence$type[i]=="yt"||sequence$type[i]=="color"||sequence$type[i]=="optomotorR"||sequence$type[i]=="optomotorL")
+      if(any(c("yt","color","sw","fs","optomotorR","optomotorL") %in% sequence$type[i]))
       {
-        ## plot the fly behavior and arena position time traces
-        fly_pos_traces(temp)
+        fly_pos_traces(temp) #plot the fly behavior and arena position time traces
       }
 
       ####Calculate period histograms####
@@ -251,11 +250,11 @@ for(i in 1:NofPeriods){
       if(!exists("Categories")){Categories <- data.frame(matrix(ncol = NofPeriods))} #create it, if it doesn't exist, yet and...
       if(l==1){Categories[1,i]=sequence$category[i]} #...add category variable to dataframe
       
-      ##add column to rawdata that indicates if the fly was punished or not
-      if(sequence$contingency[i] == 'left_torque'){rawdata$punished[rawdata$period[i]] <- ifelse(rawdata$fly[rawdata$period[i]] < 0, 1, 0) 
-      }else if(sequence$contingency[i] == 'right_torque') {rawdata$punished[rawdata$period[i]] <- ifelse(rawdata$fly[rawdata$period[i]] >= 0, 1, 0) 
-      }else if(sequence$contingency[i] == '2_4_Q'){rawdata$punished[rawdata$period[i]] <- ifelse(abs(rawdata$a_pos[rawdata$period[i]]) >= 450 & abs(rawdata$a_pos[rawdata$period[i]]) <= 1350, 1, 0)
-      }else if(sequence$contingency[i] == '1_3_Q'){rawdata$punished[rawdata$period[i]] <- ifelse(abs(rawdata$a_pos[rawdata$period[i]]) < 450 | abs(rawdata$a_pos[rawdata$period[i]]) > 1350, 1, 0)}
+      ##add column to rawdata that indicates if the fly was punished or not, leaving out all periods without specified contingency
+      if(sequence$contingency[i] == 'left_torque'){rawdata$punished[rawdata$period==i] <- ifelse(rawdata$fly[rawdata$period==i] < 0, 1, 0) 
+      }else if(sequence$contingency[i] == 'right_torque') {rawdata$punished[rawdata$period==i] <- ifelse(rawdata$fly[rawdata$period==i] >= 0, 1, 0) 
+      }else if(sequence$contingency[i] == '2_4_Q'){rawdata$punished[rawdata$period==i] <- ifelse(abs(rawdata$a_pos[rawdata$period==i]) >= 450 & abs(rawdata$a_pos[rawdata$period==i]) <= 1350, 1, 0)
+      }else if(sequence$contingency[i] == '1_3_Q'){rawdata$punished[rawdata$period==i] <- ifelse(abs(rawdata$a_pos[rawdata$period==i]) < 450 | abs(rawdata$a_pos[rawdata$period==i]) > 1350, 1, 0)}
   } #for Number of Periods
 ```
 
@@ -498,10 +497,12 @@ cat("\n# Dwelling Times\n")
 
 #split the punishment data into periods
 dwellperiod <- split(rawdata$punished, rawdata$period) #split the punished/unpunished datapoints by period
+c=0 #counter to arrange figures
 
-for (i in 1:NofPeriods) {
-    dwellperiod[[i]] = rle(dwellperiod[[i]])                                                    #run length encode the punished and unpunished data points
-    dwellperiod[[i]][[1]] = dwellperiod[[i]][[1]]*0.05                                          #convert run lenghts into seconds. Now we have the raw dwelling times.
+for (i in nonOMperiods) {
+    c=c+1 #increment counter
+    dwellperiod[[i]] = rle(dwellperiod[[i]])            #run length encode the punished and unpunished data points
+    dwellperiod[[i]][[1]] = dwellperiod[[i]][[1]]*0.05  #convert run lenghts into seconds. Now we have the raw dwelling times.
     
     if(is.null(unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["0"]))){dwelldata$unpunished[[i]]=as.integer(0) #if no data points, set to zero seconds
     }else{dwelldata$unpunished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["0"])} #unpunished dwelling times
@@ -525,7 +526,7 @@ for (i in 1:NofPeriods) {
     dwelldata$unpunished[[i]]$times = dwelltimes$unpunished[[i]]
   
 #plots the cumulative percentage data
-  dwellplots[[i]] =ggplot() +
+  dwellplots[[c]] =ggplot() +
     geom_line(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
     geom_point(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
     geom_line(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
@@ -542,7 +543,7 @@ for (i in 1:NofPeriods) {
                        name="Experimental\nCondition",
                        labels=c("Punished", "Unpunished"))+
     theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))
-} #...for NofPeriods
+}
 multiplot(plotlist = dwellplots, cols=2)
 
 ```

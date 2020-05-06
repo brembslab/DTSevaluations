@@ -130,7 +130,6 @@ for(x in 1:NofGroups)
     if(x>1){  #uses this function to calculate the progress if we are past the first group
       progress = round((l+totalflies)*(100/(totalflies+flies))) 
     }
-    
     esttime = (Sys.time() + (iter_time * (totalflies-l))) #estimated finish time, based on the last iteration and the number of flies left
     progressbar = barplot(progress, 
                  col = "grey", ylab = "% progress", 
@@ -180,6 +179,9 @@ for(x in 1:NofGroups)
       dwellmeans = list()
       dwellmeans$unpunished <- dwellmeans$punished <- data.frame(matrix(ncol = NofPeriods))
     }
+    
+    nonOMperiods=which(!grepl("optomotor", sequence$type)==TRUE) #vector containing period numbers for non-optomotor periods
+    
     #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                            ######
                       output_file = paste(flyname,"descr_anal.html", sep="_"),              ######
@@ -308,7 +310,9 @@ for(x in 1:NofGroups)
 
   #### -- Dwelling times -- ####
   if (Dwell){
-    colnames(dwellmeans$punished) <- colnames(dwellmeans$unpunished) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in dwellmeans
+    dwellmeans$unpunished = dwellmeans$unpunished[nonOMperiods] #remove columns without data
+    dwellmeans$punished = dwellmeans$punished[nonOMperiods]     #remove columns without data
+    colnames(dwellmeans$punished) <- colnames(dwellmeans$unpunished) <- sprintf("PI%d", nonOMperiods)  #make colnames in dwellmeans
     grouped.dwell[[x]] = dwellmeans #Merge single fly dwell data to grouped
     if(!exists("dwellrange")){dwellrange=NA} #create vector to collect largest mean dwelling times per period for y-axis range
     dwellrange[x] = max(colMeans(dwellmeans$unpunished)) #store the largest value
