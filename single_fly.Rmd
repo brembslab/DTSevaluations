@@ -98,7 +98,7 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
 #add columns for PIs and categories to sequence data
 sequence$lambda <- NA
 sequence$category <- NA
-
+training = NA
 for(i in 1:NofPeriods){
   
   #save colors for later plotting
@@ -125,7 +125,7 @@ for(i in 1:NofPeriods){
     sequence$category[i] <- paste(sequence$pattern[i],sequence$contingency[i])
   } 
 #add training/test to the graphs
-  training = NA
+
   if(sequence$outcome[i]==0){
     training[i] =  "Test"
   } else {
