@@ -625,13 +625,14 @@ cat("\n## Statistical tests between two groups\n")
 
 ```
 
-```{r UtestG3, eval=(threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
+```{r UtestG3, eval=(threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n## Statistical tests between three groups\n")
 #creating a list with PIs and condition in on list
 PItype <- list() 
 for (x in 1:NofGroups){
   PItype[[x]] = melt(PIstat[[x]])
   PItype[[x]]$desc = project.data$resources[[x]]$description
+  PItype[[x]]$name = project.data$resources[[x]]$name
 }
 #groupe in experimental and driver groupe
 Count=1
@@ -645,8 +646,9 @@ for (t in 1:NofGroups) {
     Count=Count+1
   }
 }
+PIname<-c(unique(Exp$name), unique(Control[[1]]$name),unique(Control[[2]]$name)) #getting names for labeling
 #drop second column
-Exp<-Exp[ , !(names(Exp) %in% "desc")]
+Exp<-Exp[ , (names(Exp) %in% "value")]
 Control<-lapply(Control, "[[", "value")
 
 #groupe 3 (experimental) vs the other two groups
@@ -705,9 +707,11 @@ results.utest<-(cbind(TestxCont1=c(utest1,
                                    signif(fpz3, 3),
                                    signif(fpz4, 3),
                                    signif(LR2, 3))))
-    
+colnames(results.utest) = c(paste(PIname[1], PIname[2]),paste(PIname[1], PIname[3]))  
                                
-    rownames(results.utest)<-c("Utest", 
+    
+
+rownames(results.utest)<-c("Utest", 
                                "Significance level",
                                "MW U-Test, W",
                                "Cohen's D",

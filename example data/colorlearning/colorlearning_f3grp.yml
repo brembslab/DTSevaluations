@@ -17,7 +17,7 @@ author:
 resources:
 - name: WTB1
   title: wild type Berlin first
-  description: control
+  description: control 1 
   data:
   - wtb_color_01.xml
   - wtb_color_02.xml
@@ -36,7 +36,7 @@ resources:
   - wtb_color_15.xml
 - name: WTB2
   title: wild type Berlin second
-  description: control
+  description: control 2
   data:  
   - wtb_color_16.xml
   - wtb_color_17.xml #optomotor shift - drifting?
@@ -102,7 +102,7 @@ statistics:
     title: two-sided tests
     description: Wilcoxon rank sum test with continuity correction (U-Test)
     power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
-    data: 0 #yes       
+    data: 1 #yes       
       
 mediatype: text/csv/xml
 epid: 245
