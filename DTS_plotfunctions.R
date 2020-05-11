@@ -189,6 +189,65 @@ plotrawOMtraces <- function(OMdata, omtitle){
   return(OMtraces)
 }
 
+
+##########plot Violin plot of group performance indices######################
+Violin <- function(y_axis_var){
+  Violinplot <- ggplot(PIprofile, aes_string(period, y_axis_var)) + 
+      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+      geom_violin(width = 1.1) +
+      geom_boxplot(fill = as.vector(na.omit(sequence$color)), width = 0.1, outlier.color="darkred") +
+      ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+      scale_y_continuous(breaks = seq(-1, 1, .4)) +
+      theme_light(base_size = 16) + 
+      theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+      theme(axis.text.y = element_text(size=18))+ 
+      ylab("PI [rel. units]")+ 
+      xlab("Experiment Sequence") + 
+      theme(aspect.ratio=aspect_ratio)
+  return(Violinplot)
+}
+
+
+
+##########plot Boxplot of group performance indices######################
+
+Boxnotch <- function(y_axis_var, notch){
+  Boxwithnotch <- ggplot(PIprofile, aes_string(period, y_axis_var)) + 
+  geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+  geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = notch, outlier.color=NA, width=0.8, size=0.6) +
+  geom_jitter(data = PIprofile, aes(period, norm, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+  ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+  scale_y_continuous(breaks = seq(-1, 1, .4)) +
+  theme_light(base_size = 16) + 
+  theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+  theme(axis.text.y = element_text(size=18))+ 
+  ylab("PI [rel. units]")+ 
+  xlab("Experiment Sequence") +
+  scale_fill_discrete(name = "Categories")+ #legend title for categories  
+  theme(aspect.ratio=aspect_ratio)
+return(Boxwithnotch)
+}
+
+
+##########plot Barplot of group performance indices######################
+BarplotPI <- function(y_axis_var){
+  Barplot <- ggplot(PIprofile, aes_string(period, y_axis_var)) +
+  geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+  stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
+  stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
+  geom_jitter(data = PIprofile, aes(period, norm, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+  ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+  scale_y_continuous(breaks = seq(-1, 1, .2)) +
+  theme_light(base_size = 16) + 
+  theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+  theme(axis.text.y = element_text(size=18))+ 
+  ylab("PI [rel. units]") + 
+    theme(aspect.ratio=aspect_ratio) +
+  xlab("Experiment Sequence")
+return(Barplot)
+}
+
+
 #########plot averaged optomotor traces of a single fly##################
 plotaveOMtraces <- function(OMdata){
   OMtraces <- ggplot(data=OMdata, aes(x=OMdata$time/1000, y=OMdata[[as.character(flyname)]])) + 

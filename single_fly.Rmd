@@ -226,6 +226,7 @@ for(i in 1:NofPeriods){
       ##calculate PIs and 
       ##create data.frame for adding PIs if it doesn't exist, yet
       if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))}
+      #if(!exists("PInorm")){PInorm <- data.frame)}
       if(sequence$type[i]=="fs"||sequence$type[i]=="color") #for arena position
       {
         t1 = sum(abs(temp$a_pos) >= 450 & abs(temp$a_pos) <= 1350)
@@ -240,13 +241,23 @@ for(i in 1:NofPeriods){
         sequence$lambda[i] = (t1-t2)/(t1+t2)
         if (sequence$contingency[i] == 'right_torque'){sequence$lambda[i]=-sequence$lambda[i]}
         if(l==1){PIprofile[1,i]=sequence$lambda[i]}
-      }
-      
+        }
+      sequence$norm[i] = sequence$lambda[i]
       ##add categories to separate dataframe
       if(!exists("Categories")){Categories <- data.frame(matrix(ncol = NofPeriods))} #create it, if it doesn't exist, yet and...
       if(l==1){Categories[1,i]=sequence$category[i]} #...add category variable to dataframe
-      
-    } #for Number of Periods
+      n = 1
+      pretestfly = 1
+    while (sequence$outcome[n] == 0) {
+  pretestfly[n] = sequence$lambda[n]
+  if (sequence$outcome[n] == 1)
+    break;
+  
+  n = n+1}
+pretest = mean(pretestfly)
+sequence$norm = sequence$lambda - pretest
+    }
+
 ```
 
 # Histograms
@@ -481,10 +492,11 @@ if(!exists("OMparamsAfter"))
     speclist[[l]] = as.data.frame(meanspec(rawdata$fly, f = down_sample_rate, wl = 600, plot = FALSE)) #collect each spectrum for later averaging
 ```
 
+# Performance Index {.tabset .tabset-fade}
+
+## Preference Indices
 
 ```{r PIs, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
-cat("\n# Learning and avoidance scores\n")
-
       barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
             xlab="Time [periods]",
             ylab="PI [rel. units]",
@@ -492,43 +504,12 @@ cat("\n# Learning and avoidance scores\n")
             col = as.vector(na.omit(sequence$color)))
 ```
 
+## Preference Indices Normalized
 
-# Performance Index {.tabset}
-
-## Not normalized Preference Index
-```{r, echo=FALSE}
-
-n = pretest = 1
-
-while (sequence$outcome[n] == 0) {
-  pretest[n] = sequence$lambda[n]
-  n = n+1
-}
-pretest = mean(pretest)
-
-sequence$normalized = sequence$lambda-pretest
-n=1
-for(n in 1:length(sequence$normalized)){
-  if (sequence$normalized[n] > 1){sequence$normalized[n] = 1}
-
-}
-
-max = round(max(sequence$lambda))
-
-      barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices (not normalized)", flyname),
+```{r PIsnorm, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+      barplot(as.vector(na.omit(sequence$norm)), main = paste("Performance Indices (normalized)", flyname),
             xlab="Time [periods]",
             ylab="PI [rel. units]",
             space=0,
-            ylim=c(0,max),
-            col = as.vector(na.omit(sequence$color)))
-```
-
-## Normalized Preference Index
-```{r, echo=FALSE}
-      barplot(as.vector(na.omit(sequence$normalized)), main = paste("Performance Indices (normalized", flyname),
-            xlab="Time [periods]",
-            ylab="PI [rel. units]",
-            space=0,
-            ylim=c(0,max),
             col = as.vector(na.omit(sequence$color)))
 ```

@@ -416,109 +416,131 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
 ```
 
 
-```{r PIbar, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
-cat("\n# Performance Indices\n \n## Performance Index bar plot with SEM:\n")
 
-PIplots <- list()
-for(x in 1:NofGroups)
-  {
-    PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+# Performance Index
 
-    # plot graph
-     PIplots[[x]] <- ggplot(PIprofile, aes(x=period, y=PIs)) + 
-              geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
-              stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
-              scale_y_continuous(breaks = seq(-1, 1, .2)) +
-              theme_light(base_size = 16) + 
-              theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ 
-              ylab("PI [rel. units]") + 
-              xlab("Experiment Sequence") +
-              theme(aspect.ratio=aspect_ratio)
+## Performance Index barplot {.tabset .tabset-fade}
+
+
+### Barplot 
+
+```{r PIBarplot, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+
+period = "period"
+PIplots = list()
+for(x in 1:NofGroups){
+  PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+  y_axis_var = "PIs"
+  PIbarplot = BarplotPI(y_axis_var)
+  PIplots[[x]] = PIbarplot
   }
+
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
+### Barplot Normalized
+
+```{r PIBarplotNorm, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+for(x in 1:NofGroups){
+  PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+  y_axis_var = "norm"
+  PIbarplot = BarplotPI(y_axis_var)
+  PIplots[[x]] = PIbarplot
+  }
+
+grid.arrange(grobs = PIplots, nrow=NofGroups)
+```
+
+## Performance Index box&dotplot with and without notches{.tabset .tabset-fade}
+
+### BoxWithNotch 
 
 ```{r BoxWithNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
-cat("\n## Performance Index box&dotplot with notches:\n")
+for(x in 1:NofGroups){
+  PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+  y_axis_var = "PIs"
+  Boxplot = Boxnotch(y_axis_var, notch = TRUE)
+  PIplots[[x]] = Boxplot
+  }
 
-for(x in 1:NofGroups)
-  {
-    PIprofile <- grouped.PIcombined[[x]] #get PIs with categories
-
-    #plot graph
-    PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
-              geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
-              scale_y_continuous(breaks = seq(-1, 1, .4)) +
-              theme_light(base_size = 16) + 
-              theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ 
-              ylab("PI [rel. units]")+ 
-              xlab("Experiment Sequence") + 
-              theme(aspect.ratio=0.8*aspect_ratio) +
-              scale_fill_discrete(name = "Categories") #legend title for categories 
-
-    }  
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 
-```{r BoxNoNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
-cat("\n## Performance Index box&dotplot without notches:\n")
+### BoxWithNotch  Normalized
 
-for(x in 1:NofGroups)
-  {
-    PIprofile <- grouped.PIcombined[[x]] #get PIs with categories
 
-    #plot graph
-    PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
-              geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
-              scale_y_continuous(breaks = seq(-1, 1, .4)) +
-              theme_light(base_size = 16) + 
-              theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ 
-              ylab("PI [rel. units]")+ 
-              xlab("Experiment Sequence") + 
-              theme(aspect.ratio=0.8*aspect_ratio) +
-              scale_fill_discrete(name = "Categories") #legend title for categories 
 
-    }        
+```{r BoxWithNotchnorm, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+
+
+for(x in 1:NofGroups){
+  PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+  y_axis_var = "norm"
+  Boxplot = Boxnotch(y_axis_var, notch = TRUE)
+  PIplots[[x]] = Boxplot
+  }
+
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
+### BoxWithoutNotch 
+
+```{r BoxWithoutNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+for(x in 1:NofGroups){
+  PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+  y_axis_var = "PIs"
+  Boxplot = Boxnotch(y_axis_var, notch = FALSE)
+  PIplots[[x]] = Boxplot
+  }
+
+grid.arrange(grobs = PIplots, nrow=NofGroups)
+```
+
+
+### BoxWithoutNotch  Normalized
+
+
+```{r BoxWithoutNotchnorm, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+
+
+for(x in 1:NofGroups){
+  PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+  y_axis_var = "norm"
+  Boxplot = Boxnotch(y_axis_var, notch = FALSE)
+  PIplots[[x]] = Boxplot
+  }
+
+grid.arrange(grobs = PIplots, nrow=NofGroups)
+```
+
+##  Performance Index Violin Plot {.tabset .tabset-fade}
+
+### Violin 
 
 ```{r Violin, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
-cat("\n## Performance Index Violin Plot:\n")
-
-for(x in 1:NofGroups)
-  {
+for(x in 1:NofGroups){
   PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
-
-    PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
-              geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_violin(width = 1.1) +
-              geom_boxplot(fill = as.vector(na.omit(sequence$color)), width = 0.1, outlier.color="darkred") +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
-              scale_y_continuous(breaks = seq(-1, 1, .4)) +
-              theme_light(base_size = 16) + 
-              theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ 
-              ylab("PI [rel. units]")+ 
-              xlab("Experiment Sequence") + 
-              theme(aspect.ratio=aspect_ratio)
+  y_axis_var = "PIs"
+  Violinplot = Violin(y_axis_var)
+  PIplots[[x]] = Violinplot
   }
+
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
+### Violin Normalized 
+
+```{r Violinnorm, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+for(x in 1:NofGroups){
+  PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+  y_axis_var = "norm"
+  Violinplot = Violin(y_axis_var)
+  PIplots[[x]] = Violinplot
+  }
+
+grid.arrange(grobs = PIplots, nrow=NofGroups)
+```
 
 ```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Learning Score Statistics\n## Statistical tests of single groups against zero\n")

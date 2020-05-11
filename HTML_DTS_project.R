@@ -91,9 +91,10 @@ grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
 flies = 0
+pretest = list()
+PInorm = data.frame()
 
-
-
+rm(xx)
 for(x in 1:NofGroups)
 {
 #gather necessary data and variables
@@ -132,7 +133,7 @@ for (l in 1:length(xml_list))
                  ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
     axis(2, seq(0,100,50), las=2) #sets the axis ticks and rotates them to a horizontal position
     axis(2, seq(0,100,25), las=2) #sets the axis ticks  
-    title(xlab= paste("Iteration time: \n", iter_time, "sec"), line=-9, cex.lab=1.2)
+    #title(xlab= paste("Iteration time: \n", pretest[l], "\n", pretestfly), line=-9, cex.lab=1.2)
     title((paste("Est. finish time",substring(esttime, 12))), line = -8, cex.lab=1.2)
     text(xx,16, paste(progress, "% completed \n flies left", (1+totalflies-l))) #adds the percentage as text and the number of flies left
     starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 35 seconds
@@ -171,6 +172,7 @@ for (l in 1:length(xml_list))
     poshistos <- list()
     flyhistos <- list()
 
+
 #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                         ######
                       output_file = paste(flyname,"descr_anal.html", sep="_"),            ######
@@ -185,6 +187,7 @@ for (l in 1:length(xml_list))
     
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
+    PInorm[x,l] = pretest
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
   } #for number of flies in xml_list - from here on group evaluations
 
@@ -325,7 +328,7 @@ if (PIs)
     }
 
 #Remove items for reuse in the next group
-rm(PIprofile, Categories)
+rm(PIprofile,Categories)
 
 
 #Power spectra
@@ -340,7 +343,10 @@ spectemp$group <- as.factor(rep(paste(project.data[["resources"]][[x]][["name"]]
 colnames(spectemp)[2] <- "mean"
 colnames(spectemp)[3] <- "sd"
 grouped.spectra[[x]] = spectemp #save group mean/sd
-
+#normalized
+pre = PInorm[x,][!is.na(PInorm[x,])] #remove potential NA
+grouped.PIcombined[[x]]$pretest = rep(pre,length.out=nrow(grouped.PIcombined[[x]])) #create a column with the pretest for each fly
+grouped.PIcombined[[x]]$norm = grouped.PIcombined[[x]]$PIs-grouped.PIcombined[[x]]$pretest #subtract the pretest from the PIs
 } #for nofGroups
 
 ###########################################################
@@ -361,7 +367,9 @@ if(PIs & !is.null(learningscore)){
   for(x in 1:NofGroups){
     PIstat[[x]] <- grouped.PIprofiles[[x]][[learningscore]]
     CatStat[[x]] <- grouped.Categories[[x]][[learningscore]]
-  }
+    
+    #normalized PIs
+ }
   PIstat <- as.data.frame(t(plyr::ldply(PIstat, rbind)))                            #convert PI list to data.frame
   colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name'))      #add group names as column names to PIstat
   CatStat <-  as.data.frame(t(plyr::ldply(CatStat, rbind)))                         #convert list of categories to data.frame
