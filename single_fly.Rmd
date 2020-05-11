@@ -98,7 +98,7 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
 #add columns for PIs and categories to sequence data
 sequence$lambda <- NA
 sequence$category <- NA
-training = NA
+  training = NA
 for(i in 1:NofPeriods){
   
   #save colors for later plotting
@@ -527,8 +527,8 @@ for (i in nonOMperiods) {
   
 #plots the cumulative percentage data
   dwellplots[[c]] =ggplot() +
-    geom_line(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
-    geom_point(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="goldenrod"))+
+    geom_line(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="red"))+
+    geom_point(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="red"))+
     geom_line(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
     geom_point(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
     scale_y_log10( breaks=c(0,10,100))+
