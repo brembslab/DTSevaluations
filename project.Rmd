@@ -724,12 +724,12 @@ kable(PooledGroups)
     w.statistic = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$statistic, 3)
     #compute effect size Cohen's D
     if(samplesizes[1]==samplesizes[2]){equalN=TRUE}else{equalN=FALSE}   #deterine if the samplesizes are identical
-    if(fligner.test(PIstatCombined$PIs,PIstatCombined$group)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
+    if(fligner.test(PIstatPooled$PIs,PIstatPooled$group)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
     if(equalN & hv){hedges=FALSE}else{hedges=TRUE}                      #test if we need to apply Hedge's correction
     if(hedges){
-      cohend = signif(cohen.d(PIstatCombined$PIs, PIstatCombined$group, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
+      cohend = signif(cohen.d(PIstatPooled$PIs, PIstatPooled$group, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
     }else{
-      cohend = signif((mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
+      cohend = signif((mean(na.omit(PIprofilePooled[[1]]))-mean(na.omit(PIprofilePooled[[2]])))/sqrt((sd(na.omit(PIprofilePooled[[1]]))^2+sd(na.omit(PIprofilePooled[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
     }
     #calculate statistical power
     alt = project.data[["statistics"]][["two.groups"]][["power"]]

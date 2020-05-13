@@ -68,14 +68,14 @@ evaluation.path = paste(project.path,"evaluations", sep = "/")
 dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)
 
-#collecting essential data for statistics and plots
+#collecting essential data from the project file for statistics and plots
 NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
 groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))               #get a vector with all group names
-groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group names
+groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group descriptions
 signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
 priorval = project.data[["statistics"]][["priors"]]                                            #get priors for FPR calculation
-twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1                     #etermine if statistics for two groups are required
-threegroupstats <- project.data[["statistics"]][["three.groups"]][["data"]]==1
+twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1                     #determine if statistics for two groups are required
+threegroupstats <- project.data[["statistics"]][["three.groups"]][["data"]]==1                 #determine if statistics for three groups are required
 wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1                            #determine if we need to do single tests
 learningscore = project.data[["statistics"]][["learning-score"]][["data"]]                     #get the PI that is going to be tested
 
