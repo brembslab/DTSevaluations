@@ -427,13 +427,13 @@ for(x in 1:NofGroups){
   grouped.dwell[[x]]$punished = -grouped.dwell[[x]]$punished #invert the punished values to make the bars go downwards
   dwellmeans[[x]] = reshape2::melt(grouped.dwell[[x]])       #load each group of data into a dataframe
   colnames(dwellmeans[[x]])=c("period","value","Outcome")
-  dwelljitter = split(dwellmeans[[x]], dwellmeans[[x]]$Outcome)
+
   
   dwellmeanplots[[x]] <-   ggplot(dwellmeans[[x]], aes(as.factor(period), value, fill = Outcome)) +
   stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
   stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
   geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
-  geom_jitter(data= (reshape2::melt(dwelljitter)), aes(x = period, y=value, colour = Outcome), size=2)+
+  geom_jitter(aes(colour = Outcome), size=2)+
   ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
   theme_light(base_size = 16) +
   theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
