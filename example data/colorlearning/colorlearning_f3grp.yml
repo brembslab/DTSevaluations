@@ -17,7 +17,7 @@ author:
 resources:
 - name: WTB1
   title: wild type Berlin first
-  description: control 1 
+  description: control
   data:
   - wtb_color_01.xml
   - wtb_color_02.xml
@@ -36,7 +36,7 @@ resources:
   - wtb_color_15.xml
 - name: WTB2
   title: wild type Berlin second
-  description: control 2
+  description: control
   data:  
   - wtb_color_16.xml
   - wtb_color_17.xml #optomotor shift - drifting?

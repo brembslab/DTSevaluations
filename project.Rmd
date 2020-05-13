@@ -625,6 +625,20 @@ cat("\n## Statistical tests between two groups\n")
 
 ```
 
+```{r estimationstats, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Estimation statistics\n")
+unpaired_median_diff <- dabest(PIstatCombined, group, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
+print(plot(unpaired_median_diff)) #plot results
+```
+
+```{r splitviolins, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Split Violin Plot\n")
+
+PIstatCombined$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
+print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
+
+```
+
 ```{r UtestG3, eval=(threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n## Statistical tests between three groups\n")
 #creating a list with PIs and condition in on list
@@ -750,14 +764,6 @@ plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
   grid.arrange(plots.2test,plots.2utest, nrow = 1)
   #ggarrange(plots.2test, plots.2utest, ncol = 2)
   
-
-```
-
-```{r splitviolins, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
-cat("\n## Split Violin Plot\n")
-
-PIstatCombined$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
-print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
 
