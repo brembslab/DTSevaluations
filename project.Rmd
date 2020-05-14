@@ -445,7 +445,7 @@ for(x in 1:NofGroups){
   theme(panel.grid.major = element_line(colour = "#808080")) + 
   annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0, 
            alpha = .3)+
-  ylim(dwellrang) +
+  ylim(dwellrange) +
   guides(fill = FALSE, size = FALSE)
 }
  grid.arrange(grobs = dwellmeanplots)
