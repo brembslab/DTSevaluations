@@ -98,7 +98,7 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
 #add columns for PIs and categories to sequence data
 sequence$lambda <- NA
 sequence$category <- NA
-
+  training = NA
 for(i in 1:NofPeriods){
   
   #save colors for later plotting
@@ -123,8 +123,14 @@ for(i in 1:NofPeriods){
  }
   if(sequence$contingency[i]!=""){
     sequence$category[i] <- paste(sequence$pattern[i],sequence$contingency[i])
-    } 
-  
+  } 
+#add training/test to the graphs
+
+  if(sequence$outcome[i]==0){
+    training[i] =  "Test"
+  } else {
+    training[i] =  "Training"
+  }
   ###divide raw data into period chunks and prepare period data for later use in group evaluations
       temp  <- rawdata[rawdata$period == i, ]
       keeps = c("a_pos","fly")
@@ -142,10 +148,9 @@ for(i in 1:NofPeriods){
         period.data[[i]] <- temp_shifted[keeps] #list only arena position and fly behavior data by period
       } else period.data[[i]] <- temp[keeps] #keep only arena position and fly behavior data by period
       
-      if(sequence$type[i]=="fs"||sequence$type[i]=="yt"||sequence$type[i]=="color"||sequence$type[i]=="optomotorR"||sequence$type[i]=="optomotorL")
+      if(any(c("yt","color","sw","fs","optomotorR","optomotorL") %in% sequence$type[i]))
       {
-        ## plot the fly behavior and arena position time traces
-        fly_pos_traces(temp)
+        fly_pos_traces(temp) #plot the fly behavior and arena position time traces
       }
 
       ####Calculate period histograms####
@@ -224,8 +229,7 @@ for(i in 1:NofPeriods){
       
       
       ##calculate PIs and 
-      ##create data.frame for adding PIs if it doesn't exist, yet
-      if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))}
+      if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))} ##create data.frame for adding PIs if it doesn't exist, yet
       if(sequence$type[i]=="fs"||sequence$type[i]=="color") #for arena position
       {
         t1 = sum(abs(temp$a_pos) >= 450 & abs(temp$a_pos) <= 1350)
@@ -246,7 +250,12 @@ for(i in 1:NofPeriods){
       if(!exists("Categories")){Categories <- data.frame(matrix(ncol = NofPeriods))} #create it, if it doesn't exist, yet and...
       if(l==1){Categories[1,i]=sequence$category[i]} #...add category variable to dataframe
       
-    } #for Number of Periods
+      ##add column to rawdata that indicates if the fly was punished or not, leaving out all periods without specified contingency
+      if(sequence$contingency[i] == 'left_torque'){rawdata$punished[rawdata$period==i] <- ifelse(rawdata$fly[rawdata$period==i] < 0, 1, 0) 
+      }else if(sequence$contingency[i] == 'right_torque') {rawdata$punished[rawdata$period==i] <- ifelse(rawdata$fly[rawdata$period==i] >= 0, 1, 0) 
+      }else if(sequence$contingency[i] == '2_4_Q'){rawdata$punished[rawdata$period==i] <- ifelse(abs(rawdata$a_pos[rawdata$period==i]) >= 450 & abs(rawdata$a_pos[rawdata$period==i]) <= 1350, 1, 0)
+      }else if(sequence$contingency[i] == '1_3_Q'){rawdata$punished[rawdata$period==i] <- ifelse(abs(rawdata$a_pos[rawdata$period==i]) < 450 | abs(rawdata$a_pos[rawdata$period==i]) > 1350, 1, 0)}
+  } #for Number of Periods
 ```
 
 # Histograms
@@ -482,6 +491,63 @@ if(!exists("OMparamsAfter"))
 ```
 
 
+```{r dwellingtimes, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}
+
+cat("\n# Dwelling Times\n")
+
+#split the punishment data into periods
+dwellperiod <- split(rawdata$punished, rawdata$period) #split the punished/unpunished datapoints by period
+c=0 #counter to arrange figures
+
+for (i in nonOMperiods) {
+    c=c+1 #increment counter
+    dwellperiod[[i]] = rle(dwellperiod[[i]])            #run length encode the punished and unpunished data points
+    dwellperiod[[i]][[1]] = dwellperiod[[i]][[1]]*0.05  #convert run lenghts into seconds. Now we have the raw dwelling times.
+    
+    if(is.null(unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["0"]))){dwelldata$unpunished[[i]]=as.integer(0) #if no data points, set to zero seconds
+    }else{dwelldata$unpunished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["0"])} #unpunished dwelling times
+      
+    if(is.null(unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["1"]))){dwelldata$punished[[i]]=as.integer(0) #if no data points, set to zero seconds
+    } else{dwelldata$punished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["1"])}  #punished dwelling times
+
+#calculate mean dwelling times and add them to the list used in project evaluations    
+    dwellmeans$unpunished[l,i] =  mean(dwelldata$unpunished[[i]])
+    dwellmeans$punished[l,i] =  mean(dwelldata$punished[[i]])
+
+#Prepare data for plotting cumulative percentages
+#calculate x-axis for cumulative distributions    
+    dwelltimes$punished[[i]] = sort(unique(dwelldata$punished[[i]])) #calculate the dwelling times. It sorts the unique values in ascending order.
+    dwelltimes$unpunished[[i]] = sort(unique(dwelldata$unpunished[[i]])) #calculate the dwelling times
+#calculate the cumulative percentages and shift the data down. Shift moves the data down by the number specified in n, fill=100 replaces the shifted value with 100, type="lag" decides in which direction to shift the data.
+    dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag")) 
+    dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
+#move x-axes to dwelldata dataframe
+    dwelldata$punished[[i]]$times = dwelltimes$punished[[i]]
+    dwelldata$unpunished[[i]]$times = dwelltimes$unpunished[[i]]
+  
+#plots the cumulative percentage data
+  dwellplots[[c]] =ggplot() +
+    geom_line(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="red"))+
+    geom_point(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="red"))+
+    geom_line(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
+    geom_point(data= dwelldata$punished[[i]], aes(x=times, y=value,color="blue"))+
+    scale_y_log10( breaks=c(0,10,100))+
+    scale_x_log10() +
+    ggtitle(paste(flyname, "Period", i))+
+    theme_light() +
+    labs(x="time [sec]", y="% events",  color = "Outcome") +
+    annotate("text", Inf, Inf, label = training[i], hjust =1.05, vjust = 1)+
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+    labs(color='Outcome') +
+    scale_color_manual(values=c("firebrick3", "steelblue4"),
+                       name="Experimental\nCondition",
+                       labels=c("Punished", "Unpunished"))+
+    theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))
+}
+multiplot(plotlist = dwellplots, cols=2)
+
+```
+
 ```{r PIs, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Learning and avoidance scores\n")
 
@@ -491,4 +557,3 @@ cat("\n# Learning and avoidance scores\n")
             space=0,
             col = as.vector(na.omit(sequence$color)))
 ```
-
