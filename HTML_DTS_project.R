@@ -2,8 +2,9 @@
 ################## R-script to read YAML DTS project files, visualize and statistically evaluate data. Reports in HTML ##############
 #####################################################################################################################################
 
-rm(list=ls()) #clean memory
-gc()          #collect garbage
+rm(list=ls())                      #clean memory
+gc()                               #collect garbage
+if(!is.null(dev.list())) dev.off() #clear plots
 
 library(ggplot2)
 library(tidyr)
@@ -30,6 +31,8 @@ library(tidyverse)
 library(questionr)
 library(data.table)
 library(DescTools)
+library(magick)
+
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
@@ -41,16 +44,22 @@ project.file <- file.choose()
 project.path = dirname(project.file)
 project.data<-yaml.load_file(project.file)
 
-#measure the runtime of the whole analysis 
+#start busy animation
+busy <- image_read("dataintegrity.gif")
+print(busy)
+
+#measure the runtime of the whole analysis
 start_time <- Sys.time() #Records the system time at the start of the analysis
 
 #progressbar
 totalflies <- length(paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/"))#gets the number of total flies
+flycount = 1
+
 
 #make sure all flies have the identical experimental design and find out which don't
 xml_list = paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/") #create list of all file names
 offending_metanames <- MultiFlyDataVerification(xml_list)
-if(!is_null(offending_metanames)) stop("You have selected files with non-equal metadata. Please check the file(s) above for consistency!", cat("Error! File(s) with differing metadata: ", offending_metanames, sep = "\n")) 
+if(!is_null(offending_metanames)) stop("You have selected files with non-equal metadata. Please check the file(s) above for consistency!", cat("Error! File(s) with differing metadata: ", offending_metanames, sep = "\n"))
 
 #check for duplicates in the raw data and report any occurrences
 offending_behavnames <- MultiFlyDuplicateCheck(xml_list)
@@ -62,13 +71,14 @@ evaluation.path = paste(project.path,"evaluations", sep = "/")
 dir.create(evaluation.path, showWarnings = FALSE)
 setwd(evaluation.path)
 
-#collecting essential data for statistics and plots
+#collecting essential data from the project file for statistics and plots
 NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
 groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))               #get a vector with all group names
-groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group names
+groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group descriptions
 signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
 priorval = project.data[["statistics"]][["priors"]]                                            #get priors for FPR calculation
-twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1                     #etermine if statistics for two groups are required
+twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1                     #determine if statistics for two groups are required
+threegroupstats <- project.data[["statistics"]][["three.groups"]][["data"]]==1                 #determine if statistics for three groups are required
 wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1                            #determine if we need to do single tests
 learningscore = project.data[["statistics"]][["learning-score"]][["data"]]                     #get the PI that is going to be tested
 
@@ -92,7 +102,6 @@ grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group
 grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
-flies = 0
 
 
 #create dataframes for dwelling data
@@ -106,47 +115,44 @@ for(x in 1:NofGroups)
   grp_description = groupdescriptions[x] #collect description of the group
   xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
   if(!exists("samplesizes")) {samplesizes = length(project.data[["resources"]][[x]][["data"]])} else samplesizes[x] = length(project.data[["resources"]][[x]][["data"]]) #get samplesizes
-  
-  #create/empty lists for collecting all single fly data by period
-  period.data <- list()     #data grouped by period
-  grouped.data <- list()    #total data grouped
-  speclist <- list()        #spectograms
-  
-  ##progressbar
-  #if we are done with the first group, the totalflies get recalculated by subtracting the number of flies in the first group(s). 
-  if(x>1){
-    flies[x] = length(xml_list)
-    flies = sum(flies)
-    totalflies = totalflies - flies
-  }
-  
-  #start actually evaluating
-  for (l in 1:length(xml_list)) 
+
+#create/empty lists for collecting all single fly data by period
+period.data <- list()     #data grouped by period
+grouped.data <- list()    #total data grouped
+speclist <- list()        #spectograms
+
+
+
+#start actually evaluating
+for (l in 1:length(xml_list))
   {
-    #progress bar
-    if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
-    if (exists("progressbar")){dev.off()} else 1-1 #deletes the previous plot. If not, this will generate [l] number of plots in the end. If the plot does not exist it gives an error message, hence the 1-1
-    progress = round(l*(100/totalflies)) #calculates the progress in percentage
-    if(x>1){  #uses this function to calculate the progress if we are past the first group
-      progress = round((l+totalflies)*(100/(totalflies+flies))) 
-    }
-    esttime = (Sys.time() + (iter_time * (totalflies-l))) #estimated finish time, based on the last iteration and the number of flies left
-    progressbar = barplot(progress, 
-                 col = "grey", ylab = "% progress", 
-                 ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
-    axis(2, seq(0,100,50), las=2) #sets the axis ticks and rotates them to a horizontal position
-    axis(2, seq(0,100,25), las=2) #sets the axis ticks  
-    title(xlab= paste("Iteration time: \n", iter_time, "sec"), line=-9, cex.lab=1.2)
-    title((paste("Est. finish time",substring(esttime, 12))), line = -8, cex.lab=1.2)
-    text(progressbar,16, paste(progress, "% completed \n flies left", (1+totalflies-l))) #adds the percentage as text and the number of flies left
-    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 35 seconds
-    
     #load current fly name
     xml_name=xml_list[[l]]
 
     ##### read the data with the corresponding function #######
     singleflydata <- flyDataImport(xml_name)
-    
+
+    ##extract fly meta-data
+    fly <- singleflydata[[3]]
+    flyname = fly$name[1]
+
+    #progress bar
+    if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
+    if (exists("Progressbar")){dev.off()} #deletes the previous plot. If not, this will generate an ever increasing number of plots in the end.
+    while (!is.null(dev.list()))  dev.off()
+    progress = round(flycount*(100/(totalflies))) #calculates the progress in percentage
+    esttime = (Sys.time() + (iter_time * (totalflies-flycount))) #estimated finish time, based on the last iteration and the number of flies left
+    rstudioapi::executeCommand("activatePlots") #switch focus from busy animation in viewer to progress bar in plots
+    Progressbar = barplot(progress,
+                 col = "grey", ylab = "% progress",
+                 ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
+    axis(2, seq(0,100,25), las=2) #sets the axis ticks
+    mtext(paste("Iteration time: ", iter_time, "sec \n Current fly:", flyname, "\n Current group:", grp_title), side=3)
+    mtext(paste("Est. finish time",substring(esttime, 12)), side = 1)
+    text(Progressbar,16, paste(progress, "% completed \n Flies left:", (totalflies-flycount))) #adds the percentage as text and the number of flies left
+    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 20 seconds
+    flycount = flycount+1
+
     ##extract sequence meta-data
     NofPeriods = singleflydata[[5]]
     sequence <- singleflydata[[6]]
@@ -154,53 +160,51 @@ for(x in 1:NofGroups)
     real_sample_rate = as.numeric(as.character(singleflydata[[11]]))
     down_sample_rate = as.numeric(as.character(singleflydata[[12]]))
 
-    ##extract fly meta-data
-    fly <- singleflydata[[3]]
-    flyname = fly$name[1]
-    
+
+
     ##extract experiment meta-data
     experimenter <- singleflydata[[2]]
     experiment <- singleflydata[[4]]
-    
+
     ##extract the rawdata
     rawdata <- singleflydata[[9]]
     flyrange = singleflydata[[10]]
     traces <- singleflydata[[13]]
-    #calculate max fly values for axes when plotting 
+    #calculate max fly values for axes when plotting
     maxfly = c(-round_any(max(abs(flyrange)), 100, f=ceiling),round_any(max(abs(flyrange)), 100, f=ceiling))
-    
+
     #create/empty plot lists
     poshistos <- list()
     flyhistos <- list()
-    
+
     #create/empty the dataframe for dwellmeans
     Dwell = any(c("yt","color","sw","fs") %in% sequence$type) ###determine if dwelling times should be calculated
     if (Dwell & l==1){
       dwellmeans = list()
       dwellmeans$unpunished <- dwellmeans$punished <- data.frame(matrix(ncol = NofPeriods))
     }
-    
+
     nonOMperiods=which(!grepl("optomotor", sequence$type)==TRUE) #vector containing period numbers for non-optomotor periods
-    
+
     #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                            ######
                       output_file = paste(flyname,"descr_anal.html", sep="_"),              ######
                       output_dir = evaluation.path)                                         ######
     #### end RMarkdown for single fly evaluations ################################################
-    
+
     ##move PIs and categories to multi-experiment data.frames
     if(l>1){
       PIprofile <- rbind2(PIprofile, as.vector(t(sequence$lambda)))      #PIs in one dataframe
       Categories <- rbind2(Categories, as.vector(t(sequence$category)))  #and the categories in another dataframe
     }
-    
+
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
   } #for number of flies in xml_list - from here on group evaluations
-  
+
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
-  
+
   # derive means and SDs for optomotor data in the group and collect extracted OM parameters
   if(any(grepl("optomotor", sequence$type)==TRUE)){    ###determine if there are optomotor periods
     if (any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-optomotor periods...
@@ -236,30 +240,87 @@ for(x in 1:NofGroups)
       rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
     }
   }
-  
-  
+
+
   ########### plot rawdata graphs for all experiments #####################
-  
+
   ##pool all data by period
-  
+
   pooled.data<-list()
-  
+
   for(i in 1:NofPeriods)
   {
     period.data<-data.frame()
-    for (l in 1:length(xml_list)) 
+    for (l in 1:length(xml_list))
     {
       period.data <- rbind(period.data, grouped.data[[l]][[i]])
     }
     pooled.data[[i]] <- period.data
   } #for number of periods
-  
-  
+
+
   ## pool all fly and position data into single data.frame
-  
+
   all.data <- do.call(rbind, pooled.data)
-  
-  
+
+  ## generate pooled position and fly histograms by period and add them to the list
+
+  for(i in 1:NofPeriods)
+  {
+    temp<-pooled.data[[i]]
+
+    #fly
+    flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
+      geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+      geom_vline(xintercept=0, linetype="dotted") +
+      geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
+      labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
+      xlim(maxfly) +
+      theme_light() +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank()) +
+      scale_x_continuous(expand = c(0,0)) +
+      scale_y_continuous(expand = c(0,0)) +
+      ggtitle(paste("Period", i))
+
+    #position
+    if(sequence$type[i]=="fs" || sequence$type[i]=="color")
+    {
+      poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
+        geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
+        geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
+        geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
+        labs(x="arena position [arb units]", y="frequency") +
+        theme_light() +
+        theme(panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank()) +
+        scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), expand = c(0,0)) +
+        scale_y_continuous(expand = c(0,0)) +
+        ggtitle(paste("Period", i))
+    }
+  }
+
+  ## generate pooled histograms for all flies over all periods and add them to the list
+
+  #fly behavior
+  flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) +
+    geom_histogram(binwidth=3) +
+    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
+    xlim(maxfly) +
+    ggtitle("Pooled Behavior Histogram")
+
+  #position (if there are fs periods)
+  if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
+    poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) +
+      geom_histogram(binwidth=10) +
+      labs(x="position [arb units]", y="frequency") +
+      xlim(-1800,1800) +
+      ggtitle("Pooled Position Histogram")
+  }
+
+
   ## if we have two groups, collect data for superimposed histograms for either fly behavior or position
   if (NofGroups==2){
     if('yt' %in% sequence$type || 'sw' %in% sequence$type) #for yt or sw experiments, collect fly data
@@ -290,20 +351,20 @@ for(x in 1:NofGroups)
         histo2$a_pos[histo2$a_pos>90] = -histo2$a_pos[histo2$a_pos>90]+180 #fold anything larger than 90° to 0..90°
         supHistos <- rbind(histo1,histo2)  #make dataframe with position data from both groups and group name as factor
       }
-    }  
-    
+    }
+
   }
-  
-  
+
+
   ########### Collect data from each group in their respective lists and empty the variables ######################
-  
+
   #### -- Period sequence design meta-data -- ####
   grouped.periods[[x]] = periods
-  
+
   #### --Fly Histograms -- ####
   grouped.flyhistos[[x]] = flyhistos #add fly histograms to list of grouped histograms
   flyhistos <- list() #empty fly histograms
-  
+
   #### -- Position Histograms -- ####
   grouped.poshistos[[x]] = poshistos #add position histograms to list of grouped position histograms
   poshistos <- list() #empty list of position histograms
@@ -317,21 +378,21 @@ for(x in 1:NofGroups)
     if(!exists("dwellrange")){dwellrange=NA} #create vector to collect largest mean dwelling times per period for y-axis range
     dwellrange[x] = max(colMeans(dwellmeans$unpunished)) #store the largest value
   }
-  
+
   #### -- Performance Indices -- ####
-  
+
   PIs <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
 
   #PIprofiles for statistical analysis (PIs alone, periods as column names)
   colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)    #make colnames in PIprofile
   grouped.PIprofiles[[x]] = PIprofile                     #add PIprofile to list of grouped PIs
   PIprofile <- PIprofile[colSums(!is.na(PIprofile)) > 0]  #remove empty columns for combining with categories
-  
+
   #Categories for printing categorical colors (periods as column names)
   colnames(Categories) <- sprintf("PI%d", 1:NofPeriods)     #make colnames in Categories
   grouped.Categories[[x]] = Categories                      #add Categories to list of grouped Categories
   Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
-  
+
   #PCombine categories with PIs for plotting (melted, periods as id-variable)
   if (PIs)
   {
@@ -343,7 +404,7 @@ for(x in 1:NofGroups)
   #Remove some items for reuse in the next group
   rm(PIprofile, PIcombined, Categories)
 
-  
+
   #### -- Power spectra -- ####
   spectemp <- do.call(cbind, speclist) #combine all power spectra
   colnames(spectemp)[1]<-"freq" #label the first x-axis as frequency
@@ -356,7 +417,7 @@ for(x in 1:NofGroups)
   colnames(spectemp)[2] <- "mean"
   colnames(spectemp)[3] <- "sd"
   grouped.spectra[[x]] = spectemp #save group mean/sd
-  
+
 } #for nofGroups
 
 ###########################################################
@@ -384,10 +445,10 @@ if(PIs & !is.null(learningscore)){
   colnames(PIstat) <- unlist(sapply(project.data[["resources"]], '[', 'name'))      #add group names as column names to PIstat
   CatStat <-  as.data.frame(t(plyr::ldply(CatStat, rbind)))                         #convert list of categories to data.frame
   colnames(CatStat) <- unlist(sapply(project.data[["resources"]], '[', 'name'))     #add group names as column names to CatStat
-  
+
   #compute standard deviations
   SDs<-as.numeric(apply(PIstat, 2, function(x) sd(na.omit(x))))
-  
+
   #combine PIstat and CatStat for plotting learningscores
   PIstatCombined <- melt(CatStat, measure.vars = names(CatStat), variable.name = "group", value.name = "category") #melt categories into dataframe with group as id-variable
   PIstatCombined["PIs"] = melt(PIstat)$value                                        #combine the categories with the PIs
@@ -400,11 +461,11 @@ PooledGroups=FALSE
 
 if(NofGroups>2 & length(unique(groupdescriptions))==2){
   PooledGroups=TRUE #we have several groups, but only one control and one experimental group
-  
+
   #find out which group belongs to which pool
   pool1=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[1])])
   pool2=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[2])])
-  
+
   #create two new dataframe (one melted one not) with the pooled groups
   #melted df
   PIstatPooled=PIstatCombined #create copy of many group dataframe
@@ -413,7 +474,7 @@ if(NofGroups>2 & length(unique(groupdescriptions))==2){
   #unmelted df
   PIprofilePooled=dcast(PIstatPooled[c("group", "PIs")], PIs~...)[,2:3] #create new dataframe for PIs in the pooled groups this doesn't work with unequal samplesizes: as.data.frame(lapply(dcast(PIstatPooled[c("group", "PIs")], PIs~...), na.omit))
   samplesizesPooled=colSums(!is.na(PIprofilePooled))  #find the new samplesizes for the different groups
-  
+
   #create table with pooled groups for later plotting
   sq <- seq(max(length(pool1), length(pool2)))
   PooledGroups <- data.frame(pool1[sq], pool2[sq])
@@ -428,6 +489,5 @@ rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""),                       
                   output_dir = evaluation.path)                                                    #####
 #### ----- end RMarkdown for project evaluations ----- #################################################
 
-Runtime = round(((Sys.time() - start_time)), 3) #Subtracts the endtime with the starttime to get the total analysis time
-print(paste0("Runtime per fly was ", ((Runtime)*60)/totalflies, " seconds", ", in total ", round(Runtime, 3), " minutes")) #prints the time per fly and the total time
+Progressbar = mtext(paste("Runtime was",(round(((Sys.time() - start_time)), 3)), " minutes in total"), side = 1, line = 1)
 setwd(start.wd)
