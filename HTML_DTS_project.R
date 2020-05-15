@@ -217,12 +217,14 @@ for (l in 1:length(xml_list))
         grouped.OMdataBefore[[x]] <- OMdataBefore #save optomotor data to groupwise list
         rm(OMdataBefore) #remove the optomotor data frame so it can be generated again for the next group
         OMparamsBefore$group=project.data[["resources"]][[x]][["name"]]
+        OMparamsBefore$desc=project.data[["resources"]][[x]][["description"]]
         grouped.OMparamsBefore[[x]] <- OMparamsBefore #save extracted optomotor parameters to groupwise list
         rm(OMparamsBefore) #remove the optomotor parameters dataframe so it can be generated again for the next group
         #after
         OMdataAfter$means=rowMeans(OMdataAfter[-1])
         OMdataAfter$sd=rowSds(OMdataAfter[-1])
         OMdataAfter$group=project.data[["resources"]][[x]][["name"]]
+        OMparamsAfter$desc=project.data[["resources"]][[x]][["description"]]
         grouped.OMdataAfter[[x]] <- OMdataAfter #save optomotor data to groupwise list
         rm(OMdataAfter) #remove the optomotor data frame so it can be generated again for the next group
         OMparamsAfter$group=project.data[["resources"]][[x]][["name"]]
