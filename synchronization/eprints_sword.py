@@ -555,7 +555,7 @@ for root, dirs, files in os.walk(htmlpath):
         headers={}
         filename, extension = os.path.splitext(htmlfile)
             
-        if extension==".html":
+        if extension in [".html",".xml",".yml"]:
             if verbose:
                 print("Uploading: " + filename + extension)
             
