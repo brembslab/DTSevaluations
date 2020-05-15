@@ -340,7 +340,7 @@ home = expanduser("~")
 
 try:
     net = netrc.netrc()
-except FileNotFoundError:
+except (FileNotFoundError, OSError):
     #windows workaround because developer of netrc couldn't be bothered to take it into account
     try:           
         net = netrc.netrc(os.path.join(home, "_netrc"))
