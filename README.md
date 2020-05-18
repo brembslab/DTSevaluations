@@ -4,9 +4,9 @@
 ## Contents
 
 - [About](#about)
-- [Required files](#required)
+- [Required files](#Required files)
 - [Usage](#usage)
-- [Troubleshooting](#troubleshooting)
+- [Troubleshooting](#Troubleshooting)
 - [Bugs](#bugs)
 
 
@@ -16,7 +16,7 @@
 
 ## About
 R-Code to evaluate Drosophila Time Series data.
-DTSevaluation is an evaluation R-code to analyze, visualize and statistically evaluate  **D**rosophila **T**ime **S**eries data
+DTSevaluation is an evaluation R-code to analyze, visualize and statistically evaluate  **D**rosophila **T**ime **S**eries data.
 For a comprehensive description of the The Drosophila Time Series (DTS) Data Model you can access it from this [here](https://docs.google.com/document/d/1AN1AaDx_QCwTGT3eXNvgVLIGefST_Jaa31iktVDaSc0/edit)
 
 ## Required files
@@ -61,7 +61,7 @@ In addition to this, the names for all the data files for each group is added wi
 
 - The working directory need to be manually set to the source file location.
 
-- Select the entire block of code within the HTML_DTS_project.R and click either "Run" or simply use Ctrl+Enter. A user input will ask for the Example_project_file.yml. While the code is running, the progress will be printed in the plots window. Upon completion, an evaluation folder will store all the output files.  
+- Select the entire block of code within the HTML_DTS_project.R and click either "Run" or simply use Ctrl+Enter. A user input will ask for the Example_project_file.yml. While the code is running, the progress will be printed in the plots window. Upon completion, an evaluation folder will be saved in a evaluation folder in the same location as the data folder.  
 
 ## Troubleshooting
 General tips:
@@ -79,7 +79,7 @@ General tips:
   cannot open file 'readXMLdatafile.R': No such file or directory"** or similar
 - Make sure the right working directory is selected
 
-No group comparison HTML outputs:
+**No group comparison HTML outputs**
 - Check that the data heading in single/two/three.groups is set to 1.
 
 **"Quitting from lines 860-985 (project.Rmd) 
@@ -95,6 +95,6 @@ Error in grouped.flyhistos[[x]] : subscript out of bounds"**
 Error in png(..., res = dpi, units = "in") : unable to start png() device"**
 - Non permitted use of characters in the title name
 
-## Submit bugs
+## Submit issues or bugs
 
 Please open a [new issue](https://github.com/brembslab/DTSevaluations/issues/new). Describe the issue or the bug and include a reproducible example and error message if possible.
