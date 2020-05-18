@@ -69,7 +69,7 @@ grid.table(periods)
 if(lengths(project.data["resources"]) == 1){
 len = as.integer(5)
 } else {
-len = as.integer(8)
+len = as.integer(lengths(project.data["resources"])*5)
 }
 aspect_ratio = 4/nrow(sequence %>% na.omit())
 
