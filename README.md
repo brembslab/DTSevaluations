@@ -4,7 +4,7 @@
 ## Contents
 
 - [About](#about)
-- [Required files](#Required files)
+- [Required files](#Required-files)
 - [Usage](#usage)
 - [Troubleshooting](#Troubleshooting)
 - [Bugs](#bugs)
