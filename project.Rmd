@@ -863,6 +863,7 @@ PItype <- list()
 for (x in 1:NofGroups){
   PItype[[x]] = melt(PIstat[[x]])
   PItype[[x]]$desc = project.data$resources[[x]]$description
+  PItype[[x]]$name = project.data$resources[[x]]$name
 }
 #groupe in experimental and driver groupe
 Count=1
@@ -876,6 +877,7 @@ for (t in 1:NofGroups) {
     Count=Count+1
   }
 }
+PIname<-c(unique(Exp$name), unique(Control[[1]]$name),unique(Control[[2]]$name))
 #drop second column
 Exp<-Exp[ , (names(Exp) %in% "value")]
 Control<-lapply(Control, "[[", "value")
