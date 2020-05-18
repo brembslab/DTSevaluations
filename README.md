@@ -67,35 +67,34 @@ In addition to this, the names for all the data files for each group is added wi
 General tips:
 - Make sure your packages are installed and updated
 
-"Error: You have selected files with non-equal metadata. Please check the file(s) above for consistency!"
+**Error: You have selected files with non-equal metadata. Please check the file(s) above for consistency!"**
 - The HTML_DTS_project.R checks for matching metadata between the data files. In case of mismatching metadata an error message will display which ones are differing. The code will still proceed but it will include the differing metadata.
 
-"Error: XML-content does not seem to be XML":
-Possible solutions: - Make sure all xml files exist in the data folder
+**"Error: XML-content does not seem to be XML"**
+- Make sure all xml files exist in the data folder
 - Check for spelling errors when entering the file names
 - Make sure the .xml file extension is added
 
-"In file(filename, "r", encoding = encoding) :
-  cannot open file 'readXMLdatafile.R': No such file or directory"
+**"In file(filename, "r", encoding = encoding) :
+  cannot open file 'readXMLdatafile.R': No such file or directory"** or similar
 - Make sure the right working directory is selected
 
 No group comparison HTML outputs:
 - Check that the data heading in single/two/three.groups is set to 1.
 
-"Quitting from lines 860-985 (project.Rmd) 
+**"Quitting from lines 860-985 (project.Rmd) 
 Error in Exp[, (names(Exp) %in% "value")] : 
-  incorrect number of dimensions"
+  incorrect number of dimensions"**
 - Check that the descriptions for the groups are any of the ones permitted (Ctrl/Control, Experimental/Test/Exp)
 
-"Quitting from lines 95-102 (project.Rmd) 
-Error in grouped.flyhistos[[x]] : subscript out of bounds"
+**"Quitting from lines 95-102 (project.Rmd) 
+Error in grouped.flyhistos[[x]] : subscript out of bounds"**
 - Most likely no data was added to one of the groups
 
-"Quitting from lines 61-66 (project.Rmd) 
-Error in png(..., res = dpi, units = "in") : unable to start png() device"
+**"Quitting from lines 61-66 (project.Rmd) 
+Error in png(..., res = dpi, units = "in") : unable to start png() device"**
 - Non permitted use of characters in the title name
 
-## Bugs
+## Submit bugs
 
 Please open a [new issue](https://github.com/brembslab/DTSevaluations/issues/new). Describe the issue or the bug and include a reproducible example and error message if possible.
-
