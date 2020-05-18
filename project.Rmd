@@ -305,7 +305,7 @@ if(NofGroups==3)
   Control=list()
   Exp=list()
   for (t in 1:NofGroups) {
-    if(grepl("test", grouped.OMparamsBefore[[t]]$desc) | grepl("exp", grouped.OMparamsBefore[[t]]$desc) | grepl("experimental",grouped.OMparamsBefore[[t]]$desc)==TRUE){
+    if(grepl("test", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("experimental", tolower(grouped.OMparamsBefore[[t]]$desc))==TRUE){
       Exp = na.omit(grouped.OMparamsBefore[[t]])
     } else {
       Control[[Count]] =na.omit(grouped.OMparamsBefore[[t]])
@@ -454,7 +454,7 @@ if(NofGroups==3){
   Control=list()
   Exp=list()
   for (t in 1:NofGroups) {
-    if(grepl("test", grouped.OMparamsAfter[[t]]$desc) | grepl("exp", grouped.OMparamsAfter[[t]]$desc) |      grepl("experimental",grouped.OMparamsAfter[[t]]$desc)==TRUE){
+    if(grepl("test", tolower(grouped.OMparamsAfter[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsAfter[[t]]$desc)) |      grepl("experimental", tolower(grouped.OMparamsAfter[[t]]$desc))==TRUE){
       Exp = na.omit(grouped.OMparamsAfter[[t]])
     } else {
       Control[[Count]] =na.omit(grouped.OMparamsAfter[[t]])
@@ -863,19 +863,20 @@ PItype <- list()
 for (x in 1:NofGroups){
   PItype[[x]] = melt(PIstat[[x]])
   PItype[[x]]$desc = project.data$resources[[x]]$description
+  PItype[[x]]$name = project.data$resources[[x]]$name
 }
 #groupe in experimental and driver groupe
 Count=1
 Control=list()
 Exp=list()
 for (t in 1:NofGroups) {
-  if(grepl("test", PItype[[t]]$desc) | grepl("exp", PItype[[t]]$desc) | grepl("experimental", PItype[[t]]$desc)==TRUE){
-    Exp = na.omit(PItype[[t]])
+  if(grepl("test", tolower(PItype[[t]]$desc)) | grepl("exp", tolower(PItype[[t]]$desc)) | grepl("experimental", tolower(PItype[[t]]$desc))==TRUE){
   } else {
     Control[[Count]] =na.omit(PItype[[t]])
     Count=Count+1
   }
 }
+PIname<-c(unique(Exp$name), unique(Control[[1]]$name),unique(Control[[2]]$name))
 #drop second column
 Exp<-Exp[ , (names(Exp) %in% "value")]
 Control<-lapply(Control, "[[", "value")
