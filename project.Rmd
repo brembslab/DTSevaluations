@@ -324,11 +324,13 @@ if(NofGroups==3)
     cohend2 = signif(cohen.d(Exp[[v]], Control[[2]][[v]])$estimate, 3)
     #calculate statistical power
     alt = project.data[["statistics"]][["three.groups"]][["power"]]
-    power1=signif(pwr.t2n.test(n1 = samplesizes[3], n2= samplesizes[1], d = cohend1, alternative = alt, sig.level = signif[1])$power, 3)
-    power2=signif(pwr.t2n.test(n1 = samplesizes[3], n2= samplesizes[2], d = cohend2, alternative = alt, sig.level = signif[1])$power, 3)
+    power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, 
+                               sig.level = signif[1])$power, 3)
+    power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, 
+                               sig.level = signif[1])$power, 3)
     #calculate Bayes Factor
     bayesF1=extractBF(ttestBF(Exp[[v]], Control[[1]][[v]]))
-    bayesF2=extractBF(ttestBF(Control[[1]][[v]], Control[[2]][[v]]))
+    bayesF2=extractBF(ttestBF(Exp[[v]], Control[[2]][[v]]))
     #calculate FPR for priors set in project file#
     #run first prior  
     prior=priorval[1]
@@ -473,11 +475,13 @@ if(NofGroups==3){
     cohend2 = signif(cohen.d(Exp[[v]], Control[[2]][[v]])$estimate, 3)
     #calculate statistical power
     alt = project.data[["statistics"]][["three.groups"]][["power"]]
-    power1=signif(pwr.t2n.test(n1 = samplesizes[3], n2= samplesizes[1], d = cohend1, alternative = alt, sig.level = signif[1])$power, 3)
-    power2=signif(pwr.t2n.test(n1 = samplesizes[3], n2= samplesizes[2], d = cohend2, alternative = alt, sig.level = signif[1])$power, 3)
+    power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, 
+                               sig.level = signif[1])$power, 3)
+    power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, 
+                               sig.level = signif[1])$power, 3)
     #calculate Bayes Factor
     bayesF1=extractBF(ttestBF(Exp[[v]], Control[[1]][[v]]))
-    bayesF2=extractBF(ttestBF(Control[[1]][[v]], Control[[2]][[v]]))
+    bayesF2=extractBF(ttestBF(Exp[[v]], Control[[2]][[v]]))
     #calculate FPR for priors set in project file#
     #run first prior  
     prior=priorval[1]
@@ -871,6 +875,7 @@ Control=list()
 Exp=list()
 for (t in 1:NofGroups) {
   if(grepl("test", tolower(PItype[[t]]$desc)) | grepl("exp", tolower(PItype[[t]]$desc)) | grepl("experimental", tolower(PItype[[t]]$desc))==TRUE){
+    Exp = na.omit(PItype[[t]])
   } else {
     Control[[Count]] =na.omit(PItype[[t]])
     Count=Count+1
@@ -891,11 +896,11 @@ cohend1 = signif(cohen.d(Exp, Control[[1]])$estimate, 3)
 cohend2 = signif(cohen.d(Exp, Control[[2]])$estimate, 3)
 #calculate statistical power
 alt = project.data[["statistics"]][["three.groups"]][["power"]]
-power1=signif(pwr.t2n.test(n1 = samplesizes[3], n2= samplesizes[1], d = cohend1, alternative = alt, sig.level = signif[1])$power, 3)
-power2=signif(pwr.t2n.test(n1 = samplesizes[3], n2= samplesizes[2], d = cohend2, alternative = alt, sig.level = signif[1])$power, 3)
+power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, sig.level = signif[1])$power, 3)
+power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, sig.level = signif[1])$power, 3)
 #calculate Bayes Factor
 bayesF1=extractBF(ttestBF(Exp, Control[[1]]))
-bayesF2=extractBF(ttestBF(Control[[1]], Control[[2]]))
+bayesF2=extractBF(ttestBF(Exp, Control[[2]]))
 #calculate FPR for priors set in project file#
 #run first prior  
 prior=priorval[1]
