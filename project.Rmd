@@ -57,7 +57,7 @@ source("DTS_plotfunctions.R")
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
 
 # Experimental Design
-```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 3, fig.width = (NofPeriods+1)}
+```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = (round(NofPeriods/3)), fig.width = (NofPeriods*2)}
 #Write table of period design
 periods <- periods[-6,]
 periods[3,periods["outcome",]==0]="test"
@@ -465,7 +465,7 @@ if(NofGroups==3){
   }
   PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
   for (v in 1:3) {
-    cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
+    cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
     utest1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$p.value, 3)
     utest2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$p.value, 3)#compare the two groups with a U-test and collect p-value
     w.statistic1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$statistic, 3)

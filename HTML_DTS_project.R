@@ -105,7 +105,7 @@ grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group
 
 
 #create dataframes for dwelling data
-dwelldata = dwellplots = dwelltimes = grouped.dwell = list()
+dwelldata = dwellplots = grouped.dwell = list()
 flies = 0 #initialize progress bar
 
 for(x in 1:NofGroups)

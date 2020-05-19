@@ -515,15 +515,15 @@ for (i in nonOMperiods) {
     dwellmeans$punished[l,i] =  mean(dwelldata$punished[[i]])
 
 #Prepare data for plotting cumulative percentages
-#calculate x-axis for cumulative distributions    
-    dwelltimes$punished[[i]] = sort(unique(dwelldata$punished[[i]])) #calculate the dwelling times. It sorts the unique values in ascending order.
-    dwelltimes$unpunished[[i]] = sort(unique(dwelldata$unpunished[[i]])) #calculate the dwelling times
+#sort dwelling times for x-axis for cumulative distributions    
+    DwellTpunished = sort(unique(dwelldata$punished[[i]]))
+    DwellTunpunished = sort(unique(dwelldata$unpunished[[i]]))
 #calculate the cumulative percentages and shift the data down. Shift moves the data down by the number specified in n, fill=100 replaces the shifted value with 100, type="lag" decides in which direction to shift the data.
     dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag")) 
     dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
-#move x-axes to dwelldata dataframe
-    dwelldata$punished[[i]]$times = dwelltimes$punished[[i]]
-    dwelldata$unpunished[[i]]$times = dwelltimes$unpunished[[i]]
+#move x-axes to shifted/melted dwelldata dataframe
+    dwelldata$punished[[i]]$times = DwellTpunished
+    dwelldata$unpunished[[i]]$times = DwellTunpunished
   
 #plots the cumulative percentage data
   dwellplots[[c]] =ggplot() +

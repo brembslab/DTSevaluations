@@ -3,7 +3,7 @@ experiment:
     type: torquemeter
     id: SCR_017276
     name: wtb-yt-learning-fthreegroups
-    title: Wild Type Berlin yaw torque learning - two fake groups
+    title: Wild Type Berlin yaw torque learning - three groups
     description: Standard yaw torque learning by Anders
 licenses:
     name: ODC-PDDL-1.0
@@ -28,7 +28,7 @@ resources:
   - values7.xml
 - name: WTB2
   title: wt Berlin2
-  description: control2
+  description: control
   data:
   - values56.xml
   - values62.xml
