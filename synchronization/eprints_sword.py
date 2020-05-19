@@ -550,7 +550,7 @@ docid=response[0]
 #    cleanup()
 #    exit()
     
-for root, dirs, files in os.walk(htmlpath):
+for root, dirs, files in os.walk(path):
     for htmlfile in files:
         headers={}
         filename, extension = os.path.splitext(htmlfile)
