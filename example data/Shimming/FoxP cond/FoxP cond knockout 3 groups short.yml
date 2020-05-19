@@ -1,0 +1,96 @@
+---
+experiment:
+    type: Torquemeter
+    id: xy
+    name: FoxP cond short
+    title: FoxP cond knockout
+    description: Standard yaw torque learning by Andi with new working setup
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: andi-ehweiner
+    description: Andi Ehweiner
+    firstName: Andi
+    lastName: Ehweiner
+    id: 0000-0000-0000-0000
+resources:
+- name: Cas9
+  title: Control group 1
+  description: Contorl
+  data:
+  #- 1Ctr5.xml #laser zu schwach
+  - 1Ctr_1.xml
+  - 1Ctr_2.xml
+  #- 1Ctr_3.xml
+  #- 1Ctr_6.xml
+  #- 1Ctr_7.xml
+  #- 1Ctr_10.xml
+  #- 1Ctr_11.xml
+  #- 1Ctr_14.xml
+  #- 1Ctr_15.xml
+  #- 1Ctr_16.xml
+  #- 1Ctr_20.xml
+  #- 1Ctr5.xml
+  #- 1Ctr6.xml
+
+- name: gFoxP
+  title: Control group 2
+  description: Control
+  data:
+  - 2Ctr_3.xml
+  - 2Ctr_4.xml
+  #- 2Ctr_5.xml
+  
+- name: UasCas9>UasgFoxP
+  title: FoxP cond knockout
+  description: Exp
+  data:
+  - Exp_1.xml
+  - Exp_3.xml
+  #- Exp_5.xml #fliege tot
+  #- Exp_9.xml
+  #- Exp_10.xml
+  #- Exp_12.xml
+  #- Exp_13.xml
+  #- Exp_16.xml
+  #- Exp_18.xml
+  #- Exp_23.xml
+  #- Exp_24.xml
+ 
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianred1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 8
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 0 #no
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes           
+mediatype: text/csv/xml
+epid: 245
+
