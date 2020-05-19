@@ -107,3 +107,4 @@ statistics:
     power: two.sided #two-sided test (alternatives: greater, two.sided)
     data: 1 #yes         
 mediatype: text/yaml
+epid: 422

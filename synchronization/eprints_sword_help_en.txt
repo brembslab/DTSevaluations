@@ -1,0 +1,62 @@
+# Installation
+## Prequisites:
+curl
+python3
+pyyaml*
+python requests*
+
+*the script will prompt for these when not present. Usually they have to be installed using pip
+
+## Saving user credentials
+Windows: 
+create a file named "_netrc" (no Quotes) in %userprofile%
+Linux:
+create .netrc in /home/user
+
+Contents of the file:
+machine <example.com> login <username> password <password>
+
+## Automatic uploading
+
+Create a cronjob in Linux or scheduled Task in Windows
+    
+Windows:
+Create a new scheduled task
+Task scheduler -> new Task
+any trigger e.g. Login
+Action: Programm/Script python
+Arguments /c [PATH]\synchronization\update_sword.cmd > log.txt 2>&1
+Start in [PATH]\synchronization\
+
+Contents of update_sword.cmd
+Python "[PATH]\synchronization\eprints_sword.py" -p ..\colorlearning\ -v
+
+
+# General Info
+python eprints_sword.py --help
+Displays Help:
+    usage: eprints_sword.py [-h] [--path PATH] [--epid EPID] [--user USER]
+                        [--verbose]
+
+    Eprits SWORD client
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    --path PATH, -p PATH  path containing the yml file
+    --epid EPID, -i EPID  Eprints Id to append to or false to create a new Eprints entry
+    --user USER, -u USER  Eprints username
+    --verbose, -v         Display additional information
+
+
+Example call:
+
+python eprints_sword.py -p /home/winterc/colorlearnijng/xml/ -u winterc -v
+
+Annotation:
+
+The eprintid is being read from/written into the YML File
+You can save your login credentials. For further information c.f. above
+
+Once an experiment is completed, the node "finished" can be added to the yml file, its value doesn't matter.
+When "finished" is set in the yml, no more files will be uploaded to Eprints.
+Furthermore no files will be uploaded if the changed date of the eprints entry is newer than the one of the yml file.

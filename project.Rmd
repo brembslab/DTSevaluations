@@ -988,7 +988,7 @@ plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
 
 ```
 
-```{r Utestpooled, eval=(twogroupstats & PooledGroups), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r Utestpooled, eval=(twogroupstats & PooledGroups), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n## Statistical tests between pooled groups\n")
 
   cat("The following experimental groups were pooled into two groups:\n")
