@@ -23,22 +23,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r, packages, eval=FALSE, echo=FALSE}
 # load packages 
-library(ggplot2)
-library(tidyr)
-library(dygraphs)
-library(grid)
-library(reshape2)
-library(dplyr)
-library(gridExtra)
-library(yaml)
-library(ggsignif)
-library(effsize)
-library(pwr)
-library(BayesFactor)
-library(genefilter)
-library(seewave)
-library(lubridate)
-library(dabestr)
+library(reactable)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -57,12 +42,21 @@ source("DTS_plotfunctions.R")
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
 
 # Experimental Design
-```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = (round(NofPeriods/3)), fig.width = (NofPeriods*2)}
+```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = (round(NofPeriods/3)), fig.width = NofPeriods+1}
 #Write table of period design
 periods <- periods[-6,]
 periods[3,periods["outcome",]==0]="test"
 periods[3,periods["outcome",]==1]="training"
-grid.table(periods)
+reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
+  striped = TRUE,
+  highlight = TRUE,
+  bordered = TRUE,
+  resizable = TRUE,
+  columns = list(
+  property = colDef(
+    style = list(position = "sticky", left = 0, background = "#fff", zIndex = 1),
+    headerStyle = list(position = "sticky", left = 0, background = "#fff", zIndex = 1)
+  )))
 ```
 
 ```{r Graphdim, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}

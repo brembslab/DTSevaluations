@@ -22,21 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r, packages, eval=FALSE, echo=FALSE}
 # load packages 
-library(ggplot2)
-library(tidyr)
-library(dygraphs)
-library(grid)
-library(reshape2)
-library(dplyr)
-library(gridExtra)
-library(yaml)
-library(ggsignif)
-library(effsize)
-library(pwr)
-library(BayesFactor)
-library(genefilter)  # if not available for newest version: setRepositories(addURLs = c(CRANxtras = "http://www.stats.ox.ac.uk/pub/RWin"))
-library(seewave)
-library(zoo)
+library(reactable)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -69,7 +55,16 @@ cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>
     #plot table of period sequence
     periods=t(sequence)
     colnames(periods)<-sprintf("Period %s",1:NofPeriods)
-    grid.table(periods)
+reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
+  striped = TRUE,
+  highlight = TRUE,
+  bordered = TRUE,
+  resizable = TRUE,
+  columns = list(
+  property = colDef(
+    style = list(position = "sticky", left = 0, background = "#fff", zIndex = 1),
+    headerStyle = list(position = "sticky", left = 0, background = "#fff", zIndex = 1)
+  )))    
 ```
 
 # Time Traces
