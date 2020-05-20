@@ -21,9 +21,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r, packages, eval=FALSE, echo=FALSE}
-# load packages 
-library(reactable)
-
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")

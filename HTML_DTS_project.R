@@ -32,6 +32,7 @@ library(questionr)
 library(data.table)
 library(DescTools)
 library(magick)
+library(reactable)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -459,10 +460,10 @@ if(PIs & !is.null(learningscore)){
 
 
 ###### if there are more than two groups, try to pool some data into two groups
-PooledGroups=FALSE
+PoolGrps=FALSE
 
 if(NofGroups>2 & length(unique(groupdescriptions))==2){
-  PooledGroups=TRUE #we have several groups, but only one control and one experimental group
+  PoolGrps=TRUE #we have several groups, but only one control and one experimental group
 
   #find out which group belongs to which pool
   pool1=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[1])])
