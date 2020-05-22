@@ -26,22 +26,22 @@ resources:
   - values5.xml
   - values6.xml
   - values7.xml
+  id: FBst0302270
 - name: WTB2
   title: wt Berlin2
   description: control
   data:
-  - values56.xml
-  - values62.xml
-
-  
+   - values56.xml
+   - values62.xml
+  id: FBst0302270
 - name: WTB3
   title: wt Berlin3
   description: exp
   data:
-
   - values67.xml
   - values71.xml
   - values72.xml
+  id: FBst0302270
 statistics:
   significance-levels:
     - 0.005

@@ -43,7 +43,7 @@ start.wd = getwd()
 ## read single YAML project file
 project.file <- file.choose()
 project.path = dirname(project.file)
-project.data<-yaml.load_file(project.file)
+project.data <- yaml.load_file(project.file)
 
 #start busy animation
 busy <- image_read("dataintegrity.gif")
@@ -76,6 +76,7 @@ setwd(evaluation.path)
 NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
 groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))               #get a vector with all group names
 groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group descriptions
+groupids <- unlist(sapply(project.data[["resources"]], function(x) x["id"]))                   #get a vector with all group FlyBase IDs
 signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
 priorval = project.data[["statistics"]][["priors"]]                                            #get priors for FPR calculation
 twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1                     #determine if statistics for two groups are required
