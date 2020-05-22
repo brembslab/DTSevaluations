@@ -1,57 +1,57 @@
 # DTS evaluations
-
+-----------------
 
 ## Contents
 
 - [About](#about)
 - [Required files](#Required-files)
-- [Usage](#usage)
+- [Instructions](#Instructions)
 - [Troubleshooting](#Troubleshooting)
-- [Bugs](#bugs)
-
-
-
-
-
+- [Bugs](#Submit-issues-or-bugs)
 
 ## About
 R-Code to evaluate Drosophila Time Series data.
 DTSevaluation is an evaluation R-code to analyze, visualize and statistically evaluate  **D**rosophila **T**ime **S**eries data.
-For a comprehensive description of the The Drosophila Time Series (DTS) Data Model you can access it from this [here](https://docs.google.com/document/d/1AN1AaDx_QCwTGT3eXNvgVLIGefST_Jaa31iktVDaSc0/edit)
+
 
 ## Required files
 
 | R Files | Description |
 | --- | --- |
 | HTML_DTS_project.R | R-script reads the YAML DTS project file and analyses, visualizes and statistically evaluates the DTS data. The output is amalgamated into individual data files for each fly as well as a comprehensive HTML output file for the entire project.|
-| single_file_HTML.R | Single fly descriptive data evaluation script. Evaluates each file separately as well as transfer the data to the HTML_DTS_project for group comparison. |
-|project.Rmd | Project evaluation sheet. Uses the grouped information to perform a statistical data evaluation of each individual group as well as a group-to-group comparison.  |
+| single_file_HTML.R | Single fly data evaluation script. Evaluates each file separately and visualizes this as an HTML output.|
+|project.Rmd | Project evaluation sheet. Uses the grouped information to perform a statistical data evaluation of each individual group as well as a group-to-group comparison.|
 | readXMLdatafile.R | Script for importing the XML DTS data. |
-| DTS_plotfunctions.R | Contains all the plotting functions for DTS data. |
-| single_fly.Rmd | Analyses a single file without the need to add any information to the YAML project file.  |
+| DTS_plotfunctions.R | Contains all the plotting functions for DTS data.|
+Additional R-script files
+| R Files | Description |
+| --- | --- |
+| single_fly.Rmd | Evaluate a single file without the need to add any information to the YAML project file.  |
+
 ---------
 | Data Files | Description |
 | --- | --- |
-|Dummy_project_file.yml | All files associated with the project are added to the corresponding group in the YAML-file. Each group is provided with the metadata needed for that particular group: name, title, description as well as the xml data files. In addition to this, the YAML also contains which type of evaluation the project was designed to be used with: single fly analysis, two/three/multiple group comparison. Each individual group comparison contains a title, description as well as a binary data input deciding if the corresponding group is to be analysed or not (1 for yes, 0 for no). |
-|Example_fly.xml | Each individual fly has its own xml file. The file containts all the necessary metadata for that particular experiment. In addition to information about the experimenter the document also carries data about the particular fly: name, genotype and a description as well as Flybase information if available. In addition to this, the xml file also has data about the experimental structure (under "sequence"). The experimental structure is automatically provided by the FPGA SOFTWARE, but can be modified using manual input if needed. Lastly, the actual data for that particular fly can be found in csv_data heading.    |
+|project_file.yml | The project YAML file contains exclusively meta.data containing grouping-information which links each individual datafile to a project|
+|datafile.xml | The xml file contains all the necessary meta-data for that particular fly: name of the experimenter, genotype, FlyBaseID, fly identifier(name), as well as the experimental sequence. The xml is generated through the DTS FS software. In addition to this the experimental file also contains the Time Series data|
 
+## Instructions
+ The following instructions is a brief explanation on how to use the DTS evaluation script. For a more detailed description of the The Drosophila Time Series Data Model with all its parameters you can access it [here](https://github.com/brembslab/dtsdatamodel).
 
-## Usage
+### Essential information 
++ R-script files (DTS_plotfunctions.R, HTML_DTS_project.R, project.Rmd, single_file_HTML.R) need to be in the same directory.
++ Datafiles must be within the same folder as the Project YAML file, but not necessarily as the same folder as the R-script files.
++  The working directory need to be manually set to the directory where the R-script files are.
+
 ### Example_project_file.yml
-- User will provide the yml file with the necessary user information for the particular evaluation. The group description of the experiment, which flight simulator was used as well as a title and description of the project.
-
-- Under resources all information about the different experimental groups are provided (name, title and description). Description decides which group is the control and which one is the experimental. The following three terms can be used to describe these groups: Ctrl/Control, Experimental/Test/Exp. In the case of multiple control groups the are to be separated by numbering. 
-
-In addition to this, the names for all the data files for each group is added with the appropriate extension (.xml). 
-
-- User need to alter the binary data evaluation vector for single.group, two.groups or three.groups: 1 for yes and 0 for no. Default is set to 0. 
+The project file contain all the meta-data for the particular experiment/project. It contains grouping information that links each experimental fly/file to a particular project. In addition to this it also allows has information about the project such as a description and experimental comments. For each project, the YAML file needs to be updated with the necessary user information:
++ Author: Information about the experimenter.
++ Resources: The list of files for each experimental group, between 1 and 3 groups. Each datafile (with .xml file extension) needs to be listed under the "data" heading in resources. In addition to the filelist the user also needs to provide name, title and description of each experimental group. Name and title is free-text descriptions whereas description is categorical and limited to the following: Ctrl/Control, Experimental/Test/Exp (depending on if that particular group is experimental or a control group)
++ The statistical evaluation is determined in the "data" heading in single.group, two.groups and three.groups. The data is binary where 1 corresponds to "yes" and 0 to "no".
+See example file or [The Drosophila Time Series Data Model](https://github.com/brembslab/dtsdatamodel) on how to appropriately add more than one group of data. 
 
 ### HTML_DTS_project.R
-- All evaluation files (DTS_plotfunctions.R, HTML_DTS_project.R, project.Rmd, single_file_HTML.R) need to be within the same folder. All data files (Example_project_file.yml, Example_fly.xml) need to be stored in the same folder, but not necessarily within the same as the evaluation files folder.
-
-- The working directory need to be manually set to the source file location.
-
-- Select the entire block of code within the HTML_DTS_project.R and click either "Run" or simply use Ctrl+Enter. A user input will ask for the Example_project_file.yml. While the code is running, the progress will be printed in the plots window. Upon completion, an evaluation folder will be saved in a evaluation folder in the same location as the data folder.  
+The HTML_DTS_project.R reads YAML DTS project files, as well as visualizes and statistically evaluates the data. The output of the file is reported in HTML.
+- To run HTML_DTS_project.R script, select the entire block of code within the HTML_DTS_project.R and click either "Run" or simply use Ctrl+Enter. A user input will ask the user to select the project YAML file. While the code is running, the progress and an estimated completion time will be shown in the plots window. The script creates an evaluation folder containing all the single and group evaluations, in the same directory as the data is kept.
 
 ## Troubleshooting
 
@@ -68,4 +68,4 @@ In addition to this, the names for all the data files for each group is added wi
 
 ## Submit issues or bugs
 
-Please open a [new issue](https://github.com/brembslab/DTSevaluations/issues/new). Describe the issue or the bug and include a reproducible example and error message if possible.
+Please open a [new issue](https://github.com/brembslab/DTSevaluations/issues/new). Describe the issue and include a reproducible example and error message if possible.
