@@ -32,6 +32,7 @@ library(questionr)
 library(data.table)
 library(DescTools)
 library(magick)
+library(reactable)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -42,7 +43,7 @@ start.wd = getwd()
 ## read single YAML project file
 project.file <- file.choose()
 project.path = dirname(project.file)
-project.data<-yaml.load_file(project.file)
+project.data <- yaml.load_file(project.file)
 
 #start busy animation
 busy <- image_read("dataintegrity.gif")
@@ -75,6 +76,7 @@ setwd(evaluation.path)
 NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
 groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))               #get a vector with all group names
 groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group descriptions
+groupids <- unlist(sapply(project.data[["resources"]], function(x) x["id"]))                   #get a vector with all group FlyBase IDs
 signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
 priorval = project.data[["statistics"]][["priors"]]                                            #get priors for FPR calculation
 twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1                     #determine if statistics for two groups are required
@@ -105,7 +107,7 @@ grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group
 
 
 #create dataframes for dwelling data
-dwelldata = dwellplots = dwelltimes = grouped.dwell = list()
+dwelldata = dwellplots = grouped.dwell = list()
 flies = 0 #initialize progress bar
 
 for(x in 1:NofGroups)
@@ -459,10 +461,10 @@ if(PIs & !is.null(learningscore)){
 
 
 ###### if there are more than two groups, try to pool some data into two groups
-PooledGroups=FALSE
+PoolGrps=FALSE
 
 if(NofGroups>2 & length(unique(groupdescriptions))==2){
-  PooledGroups=TRUE #we have several groups, but only one control and one experimental group
+  PoolGrps=TRUE #we have several groups, but only one control and one experimental group
 
   #find out which group belongs to which pool
   pool1=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[1])])

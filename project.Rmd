@@ -22,24 +22,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r, packages, eval=FALSE, echo=FALSE}
-# load packages 
-library(ggplot2)
-library(tidyr)
-library(dygraphs)
-library(grid)
-library(reshape2)
-library(dplyr)
-library(gridExtra)
-library(yaml)
-library(ggsignif)
-library(effsize)
-library(pwr)
-library(BayesFactor)
-library(genefilter)
-library(seewave)
-library(lubridate)
-library(dabestr)
-
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
@@ -57,12 +39,19 @@ source("DTS_plotfunctions.R")
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
 
 # Experimental Design
-```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 3, fig.width = (NofPeriods+1)}
+```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = (round(NofPeriods/3)), fig.width = NofPeriods+1}
 #Write table of period design
 periods <- periods[-6,]
 periods[3,periods["outcome",]==0]="test"
 periods[3,periods["outcome",]==1]="training"
-grid.table(periods)
+reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
+  striped = TRUE,
+  highlight = TRUE,
+  bordered = TRUE,
+  resizable = TRUE,
+  compact = TRUE,
+  columns = list(property = colDef(style = list(position = "sticky", left = 0, background = "#fff", zIndex = 1),
+    headerStyle = list(position = "sticky", left = 0, background = "#fff", zIndex = 1))))
 ```
 
 ```{r Graphdim, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
@@ -82,10 +71,18 @@ aspect_ratio = 4/nrow(sequence %>% na.omit())
 ```{r singleflydata, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
 exp_groups <- sapply(exp_groups, '[', seq(max(lengths(exp_groups)))) #make dataframe from list
 colnames(exp_groups) = as.character(exp_groups[1, ]) # make group names to column names
-#tidy the dataframe up a little
-exp_groups = exp_groups[-1, ,drop=F] #remove the first row which is now column names, without converting to a vector in case of single column
+exp_groups[1, ] <- paste('<a href="http://flybase.org/reports/',groupids,'">',groupids,'</a>', sep = '')
 rownames(exp_groups) <- NULL #remove the numbers
-kable(exp_groups) #plot table with links to individual fly evaluations
+#plot table with links to individual fly evaluations
+reactable(exp_groups,
+  striped = TRUE,
+  highlight = TRUE,
+  bordered = TRUE,
+  resizable = TRUE,
+  compact = TRUE,
+  fullWidth = FALSE,
+  defaultColDef = colDef(html = TRUE), 
+  defaultPageSize = 45)
 ```
 
 # Histograms
@@ -465,7 +462,7 @@ if(NofGroups==3){
   }
   PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
   for (v in 1:3) {
-    cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
+    cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
     utest1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$p.value, 3)
     utest2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$p.value, 3)#compare the two groups with a U-test and collect p-value
     w.statistic1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$statistic, 3)
@@ -988,11 +985,17 @@ plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
 
 ```
 
-```{r Utestpooled, eval=(twogroupstats & PooledGroups), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r Utestpooled, eval=(twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n## Statistical tests between pooled groups\n")
 
   cat("The following experimental groups were pooled into two groups:\n")
-kable(PooledGroups)
+reactable(PooledGroups,
+  striped = TRUE,
+  highlight = TRUE,
+  bordered = TRUE,
+  resizable = TRUE,
+  compact = TRUE,
+  fullWidth = FALSE)
 
     utest = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
     w.statistic = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$statistic, 3)
@@ -1049,8 +1052,8 @@ kable(PooledGroups)
       geom_jitter(data=PIstatPooled, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
       ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
-      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom") +
+      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=1)+
       geom_signif(comparisons = list(c(colnames(PIprofilePooled[1]), colnames(PIprofilePooled[2]))), 
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=8, vjust=0.5) +
@@ -1063,7 +1066,7 @@ kable(PooledGroups)
 
 ```
 
-```{r estimationstatspooled, eval=(twogroupstats & PooledGroups), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r estimationstatspooled, eval=(twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
  cat("\n## Estimation statistics for pooled groups\n")
  groupnames=unique(groupdescriptions) #rename groupnames to pooled groups specifically for dabestr
  unpaired_median_diff <- dabest(PIstatPooled, group, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
@@ -1071,7 +1074,7 @@ kable(PooledGroups)
 
 ```
 
-```{r splitviolinspooled, eval=(twogroupstats & PooledGroups), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r splitviolinspooled, eval=(twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Split Violin Plot for pooled groups\n")
 
 PIstatPooled$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots

@@ -65,7 +65,7 @@
 		<outcome>0</outcome>
 		<pattern>0</pattern>
 		<coup_coeff>0</coup_coeff>
-		<contingency>0</contingency>
+		<contingency>left_torque</contingency>
 	</period>
 <period number="6">
 		<type>yt</type>
