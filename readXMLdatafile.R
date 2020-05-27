@@ -25,6 +25,9 @@ flyDataImport <- function(xml_name) {
     variables <- xmlToDataFrame(nodes=getNodeSet(flyData,"//timeseries/variables/variable"))
   ##parse the time series raw data
     rawdata <- read.table(text=xmlSApply(flyDataXMLtop[['timeseries']][['csv_data']], xmlValue), col.names=variables$type)
+    if (length(variables$type)>4){
+      rawdata <-  rawdata[,-1]
+    }
   ##reset periods to start from 1 of they start from 0
     if (rawdata$period[1]==0){rawdata$period=rawdata$period+1}
   ##reset position data to +/-180° [-1800..1796] for torquemeter experiments

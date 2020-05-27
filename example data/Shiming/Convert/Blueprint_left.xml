@@ -1,0 +1,139 @@
+<DTS_xml>
+<metadata>
+	<license URI="http://opendatacommons.org/licenses/pddl">PDDL</license>
+	<URIs>
+		<recording />
+		<analysis />
+		<datamodel>someDOI</datamodel>
+	</URIs>
+	<experimenter>
+		<firstname>Andi</firstname>
+		<lastname>Ehweiner</lastname>
+		<orcid>none</orcid>
+	</experimenter>	
+	<fly type="drift test">
+		<name>Rip</name>
+		<description>drift test</description>
+		<flybase>NA</flybase>
+	</fly>
+	<experiment type="torquemeter">
+		<dateTime>Time</dateTime>
+		<duration>1080</duration>
+		<description>switch</description>
+		<sample_rate>60</sample_rate>
+		<arena_type>lightguides</arena_type>
+		<meter_type>Shiming</meter_type>
+	</experiment>
+</metadata>
+<sequence periods="9">
+		<period number="1">
+		<type>yt</type>
+		<duration>120</duration>
+		<outcome>0</outcome>
+		<pattern>0</pattern>
+		<coup_coeff>0</coup_coeff>
+		<contingency>left_torque</contingency>
+	</period>
+<period number="2">
+		<type>yt</type>
+		<duration>120</duration>
+		<outcome>0</outcome>
+		<pattern>0</pattern>
+		<coup_coeff>0</coup_coeff>
+		<contingency>left_torque</contingency>
+	</period>
+<period number="3">
+		<type>yt</type>
+		<duration>120</duration>
+		<outcome>1</outcome>
+		<pattern>0</pattern>
+		<coup_coeff>0</coup_coeff>
+		<contingency>left_torque</contingency>
+	</period>
+<period number="4">
+		<type>yt</type>
+		<duration>120</duration>
+		<outcome>1</outcome>
+		<pattern>0</pattern>
+		<coup_coeff>0</coup_coeff>
+		<contingency>left_torque</contingency>
+	</period>
+<period number="5">
+		<type>yt</type>
+		<duration>120</duration>
+		<outcome>0</outcome>
+		<pattern>0</pattern>
+		<coup_coeff>0</coup_coeff>
+		<contingency>left_torque</contingency>
+	</period>
+<period number="6">
+		<type>yt</type>
+		<duration>120</duration>
+		<outcome>1</outcome>
+		<pattern>0</pattern>
+		<coup_coeff>0</coup_coeff>
+		<contingency>left_torque</contingency>
+	</period>
+<period number="7">
+		<type>yt</type>
+		<duration>120</duration>
+		<outcome>1</outcome>
+		<pattern>0</pattern>
+		<coup_coeff>0</coup_coeff>
+		<contingency>left_torque</contingency>
+	</period>
+<period number="8">
+		<type>yt</type>
+		<duration>120</duration>
+		<outcome>0</outcome>
+		<pattern>0</pattern>
+		<coup_coeff>0</coup_coeff>
+		<contingency>left_torque</contingency>
+	</period>
+<period number="9">
+		<type>yt</type>
+		<duration>120</duration>
+		<outcome>0</outcome>
+		<pattern>0</pattern>
+		<coup_coeff>0</coup_coeff>
+		<contingency>left_torque</contingency>
+	</period>
+</sequence>
+<timeseries>
+	<CSV_descriptor>
+		<delimiter>tab</delimiter>
+		<header>0</header>
+		<nullSequence>NaN</nullSequence>
+	</CSV_descriptor>
+    <variables>
+      <variable number="1">
+        <type>count</type>
+        <var_type>int16</var_type>
+        <unit>arb_unit</unit>
+      </variable>	
+      <variable number="2">
+        <type>time</type>
+        <var_type>uint16</var_type>
+        <unit>ms</unit>
+      </variable>
+      <variable number="3">
+        <type>torque</type>
+        <var_type>int16</var_type>
+        <unit>arb_unit</unit>
+      </variable>
+      <variable number="4">
+        <type>period</type>
+        <var_type>uint8</var_type>
+        <unit>number</unit>
+      </variable>
+      <variable number="5">
+        <type>a_pos</type>
+        <var_type>int16</var_type>
+        <unit>arb_unit</unit>
+      </variable>
+    </variables>
+	<csv_data>
+	
+	</csv_data>
+</timeseries>
+</DTS_xml>
