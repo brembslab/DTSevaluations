@@ -33,6 +33,7 @@ library(data.table)
 library(DescTools)
 library(magick)
 library(reactable)
+library(EnvStats) #for plotting sample sizes
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -240,6 +241,7 @@ for (l in 1:length(xml_list))
       grouped.OMdata[[x]] <- OMdata #save optomotor data to groupwise list
       rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group
       OMparams$group=project.data[["resources"]][[x]][["name"]]
+      OMparams$desc=project.data[["resources"]][[x]][["description"]]
       grouped.OMparams[[x]] <- OMparams #save extracted optomotor parameters to groupwise list
       rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
     }
@@ -462,7 +464,7 @@ if(PIs & !is.null(learningscore)){
 
 ###### if there are more than two groups, try to pool some data into two groups
 PoolGrps=FALSE
-
+threegroupstats <- ifelse(unique(str_sub(sequence$type, end=-2)) == "optomotor", FALSE, TRUE)  #determine if the experiment is only optomotor
 if(NofGroups>2 & length(unique(groupdescriptions))==2){
   PoolGrps=TRUE #we have several groups, but only one control and one experimental group
 
