@@ -11,9 +11,9 @@
 		<lastname>Ehweiner</lastname>
 		<orcid>none</orcid>
 	</experimenter>	
-	<fly type="drift test">
+	<fly type="mutant">
 		<name>Rip</name>
-		<description>drift test</description>
+		<description>NA</description>
 		<flybase>NA</flybase>
 	</fly>
 	<experiment type="torquemeter">
