@@ -173,7 +173,7 @@ plotOMtracesMean(grouped.OMdataAfter) #call function to plot OM traces at end of
 
 `r if (om | beforeafter) '## Optomotor Parameter Analysis'`
 
-```{r OMparams, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r OMparams, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 9.5, comment=NA, results='asis'}
 
 ####### Do not separate optomotor parameters at all ##########
 
@@ -206,7 +206,7 @@ if(NofGroups==2)
 }
 
 
-
+#for three groups with statistics
 if(NofGroups==3)
 {
   Count=1
@@ -302,19 +302,27 @@ if(NofGroups==3)
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
       geom_jitter(data=plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4)+
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
-                                          panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",
-                                                                      fill=NA), legend.position = "top", 
-                                          legend.title = element_blank()) +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+ 
-      ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)
+                                                        panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",
+                                                        fill=NA), legend.position = "top", 
+                                                        legend.title = element_blank()) +
+                    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+ 
+                          ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups) +
+                    geom_signif(comparisons = list(c(colnames(plotOMparams[[OMvariables[v]]][2]), colnames(plotOMparams[[OMvariables[v]]][3]))), 
+                                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                textsize=5, vjust=0.1) +
+                    geom_signif(comparisons = list(c(colnames(plotOMparams[[OMvariables[v]]][1]), colnames(plotOMparams[[OMvariables[v]]][3]))), 
+                                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                textsize=5, vjust=0.1, y_position =1.2) +
+      stat_n_text()
     plots.2test
     #add table with results and plot
     plots.2utest<-tableGrob(results.utest)
     
     grid.arrange(plots.2test,plots.2utest, nrow = 1)
-    
   }
 }
+
+
 ```
 
 ```{r OMparamsBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
@@ -443,21 +451,19 @@ if(NofGroups==3)
     plots.2test<-ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data=PIstatCombined, aes(group, plotOMparamsBefore[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4)
-      scale_y_continuous(breaks = seq(-1, 1, .2)) +
+      geom_jitter(data=plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4)+
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
-                                          panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",
-                                                                      fill=NA), legend.position = "top", 
-                                          legend.title = element_blank()) +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+ 
-      ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-      geom_signif(comparisons = list(c(colnames(plotOMparamsBefore[[OMvariables[v]]][2]), colnames(plotOMparamsBefore[[OMvariables[v]]][3]))), 
-                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                  textsize=5, vjust=0.1) +
-      geom_signif(comparisons = list(c(colnames(plotOMparamsBefore[[OMvariables[v]]][1]), colnames(plotOMparamsBefore[[OMvariables[v]]][3]))), 
-                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                  textsize=5, vjust=0.1, y_position =1.2) +
-      ylim(c(-1, 1.3)) +
+                                                        panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",
+                                                        fill=NA), legend.position = "top", 
+                                                        legend.title = element_blank()) +
+                    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+ 
+                          ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups) +
+                    geom_signif(comparisons = list(c(colnames(grouped.OMparamsBefore[[OMvariables[v]]][2]), colnames(grouped.OMparamsBefore[[OMvariables[v]]][3]))), 
+                                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                textsize=5, vjust=0.1) +
+                    geom_signif(comparisons = list(c(colnames(grouped.OMparamsBefore[[OMvariables[v]]][1]), colnames(grouped.OMparamsBefore[[OMvariables[v]]][3]))), 
+                                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                textsize=5, vjust=0.1, y_position =1.2) +
       stat_n_text()
     
     #add table with results and plot
@@ -591,24 +597,22 @@ if(NofGroups==3){
                                "Likelihood Ratio")
     
     # plot two PIs with asterisks
-        plots.2test<-ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
+    plots.2test<-ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data=PIstatCombined, aes(group, plotOMparamsAfter[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4)
-      scale_y_continuous(breaks = seq(-1, 1, .2)) +
+      geom_jitter(data=plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4)+
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
-                                          panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",
-                                                                      fill=NA), legend.position = "top", 
-                                          legend.title = element_blank()) +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+ 
-      ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-      geom_signif(comparisons = list(c(colnames(plotOMparamsAfter[[OMvariables[v]]][2]), colnames(plotOMparamsBefore[[OMvariables[v]]][3]))), 
-                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                  textsize=5, vjust=0.1) +
-      geom_signif(comparisons = list(c(colnames(plotOMparamsAfter[[OMvariables[v]]][1]), colnames(plotOMparamsAfter[[OMvariables[v]]][3]))), 
-                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                  textsize=5, vjust=0.1, y_position =1.2) +
-      ylim(c(-1, 1.3)) +
+                                                        panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",
+                                                        fill=NA), legend.position = "top", 
+                                                        legend.title = element_blank()) +
+                    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+ 
+                          ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups) +
+                    geom_signif(comparisons = list(c(colnames(grouped.OMparamsAfter[[OMvariables[v]]][2]), colnames(grouped.OMparamsAfter[[OMvariables[v]]][3]))), 
+                                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                textsize=5, vjust=0.1) +
+                    geom_signif(comparisons = list(c(colnames(grouped.OMparamsAfter[[OMvariables[v]]][1]), colnames(grouped.OMparamsAfter[[OMvariables[v]]][3]))), 
+                                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                textsize=5, vjust=0.1, y_position =1.2) +
       stat_n_text()
     
     #add table with results and plot
