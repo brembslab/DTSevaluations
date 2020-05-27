@@ -297,7 +297,7 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
                       theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
                       geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5) +
-                      samplesizes.annotate(boxes, samplesizes))
+                      stat_n_text())
   
   #add table with results
   plots.2test[[2]]<-tableGrob(results.utest)
