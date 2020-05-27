@@ -248,6 +248,7 @@ plotOMtracesMean <- function(OMdata){
 
 ############plot box/whisker plots of optomotor parameters ###############
 plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
+  
   utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$p.value, 3) #compare the two groups with a U-test and collect p-value
   w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$statistic, 3)
   #compute effect size Cohen's D
@@ -288,7 +289,7 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                              paste("FP risk, prior ",priorval[1]),
                              paste("FP risk, prior ",priorval[2]),
                              "Likelihood Ratio")
-  
+  colnames(results.utest)<-c(paste(unique(grouped.OMparams[[1]]$group), unique(grouped.OMparams[[2]]$group))) 
   # plot two optomotor parameters with asterisks
   plots.2test<-list(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
                       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
