@@ -418,10 +418,14 @@ threegroup <-  function(dataframe, plotdata){
       Count=Count+1
     }
   }
+  Control1 = unique(dataframe[[1]]$name)
+  Control2 = unique(dataframe[[2]]$name)
+  Experimental = unique(dataframe[[3]]$name)
+  
   PIname<-c(unique(Exp$name), unique(Control[[1]]$name),unique(Control[[2]]$name))
   
   for (v in 1:length(OMvariables)) {
-    cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
+    #cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
     utest1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$p.value, 3)
     utest2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$p.value, 3)#compare the two groups with a U-test and collect p-value
     w.statistic1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$statistic, 3)

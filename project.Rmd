@@ -919,7 +919,8 @@ print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill
 cat("\n## Statistical tests between three groups\n")
 #creating a list with PIs and condition in on list
 
-data <- list() 
+data <- list()
+PItype = list()
 for (x in 1:NofGroups){
   PItype[[x]] = melt(PIstat[[x]])
   PItype[[x]]$desc = project.data$resources[[x]]$description
