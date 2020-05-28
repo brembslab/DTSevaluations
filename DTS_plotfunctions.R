@@ -208,17 +208,17 @@ plotaveOMtraces <- function(OMdata){
 #########plot averaged optomotor traces of several flies #################
 plotOMtracesMean <- function(OMdata){
     plotOM=ldply(OMdata, data.frame)            #move the dataframes for each group into a single dataframe
-    plotOM=plotOM[,c("time","means","sd","group")]
+    plotOM=plotOM[,c("time","means","sd","name")]
     
     #plot averaged OM traces
     
-    meanOMtraces <- ggplot(plotOM, aes(x=time/1000, y=means, group = group)) +
+    meanOMtraces <- ggplot(plotOM, aes(x=time/1000, y=means, group = name)) +
             theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
             geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
             geom_hline(yintercept = 0, color="black") +
-            geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
+            geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = name), alpha=0.5) +
             scale_fill_manual(values = boxcolors) +
-            geom_line(aes(colour = group), size = 1) + 
+            geom_line(aes(colour = name), size = 1) + 
             scale_color_manual(values = boxcolors) +
             ggtitle("Mean Optomotor Traces and Standard Deviations") +
             guides(colour = guide_legend(override.aes = list(size=3))) +
@@ -499,10 +499,10 @@ threegroup <-  function(dataframe, plotdata){
                                "Likelihood Ratio")
     
     # plot two PIs with asterisks
-    plots.2test<-ggplot(plotdata, aes(group, plotdata[[OMvariables[v]]])) +
+    plots.2test<-ggplot(plotdata, aes(name, plotdata[[OMvariables[v]]])) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data=plotdata, aes(group, plotdata[[OMvariables[v]]]), 
+      geom_jitter(data=plotdata, aes(name, plotdata[[OMvariables[v]]]), 
                   position=position_jitter(0.3), shape=21, size=3) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                                           panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",
@@ -510,15 +510,14 @@ threegroup <-  function(dataframe, plotdata){
                                           legend.title = element_blank()) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
       samplesizes.annotate(boxes, samplesizes)+
-      ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+      ylab(paste0(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
       
-      geom_signif(comparisons = list(c(Control1, Control2)),
+      geom_signif(comparisons = list(c(Control1, Experimental)),
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                  textsize=5, vjust=0.2) +
-      
+                  textsize=5, vjust=0.1, margin_top = 0.1) +
       geom_signif(comparisons = list(c(Control2, Experimental)),
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                  textsize=5, vjust=0.1) 
+                  textsize=5, vjust=0.1, margin_top = 0.05) 
     
     #add table with results and plot
     plots.2utest<-tableGrob(results.utest)
