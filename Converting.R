@@ -2,20 +2,19 @@ library(dplyr)
 library(XML)
 library(yaml)
 library(stringr)
-
 #choose.dir()
-setwd("~/Convert")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 options(max.print = 300000)                                 #increse the max print output
 
 file_list <- list.files(path=getwd(), pattern = "\\.txt$")  #listing the file with the raw data
 file_list2 <- list.files(path=getwd(), pattern =  "TXT")    #listing the file with punished side
-file_list2 <- str_sub(file_list2, end = -5)
-remove<-setdiff(file_list,file_list2)
+file_listDiff <- str_sub(file_list2, end = -5)
+remove<-setdiff(file_list,file_listDiff)
 file_list<-file_list[!file_list%in% remove]
 yml_data<-read_yaml(file.choose())                          #reading template yml file
 yml_data$resources[[1]]$data<-file_list                     #filling in the list in to avoid manual writing
 write_yaml(yml_data, ("New file.yml"))                      # saving the te template yml file
-
+i=1
 if((length(file_list)==length(file_list2))==TRUE){          #check if the list have the smae length and stop if not
   for (i in 1:length(file_list)){
     temp_direct <- read.csv(file_list2[i], header = F,sep = "\t")      #reading the file with punished side
@@ -44,4 +43,4 @@ if((length(file_list)==length(file_list2))==TRUE){          #check if the list h
     print("Lists have not the same lenght")
   }
 
-cat("The following files are removed: \n",remove)
+cat("The following files are removed: \n",remove, remove2)
