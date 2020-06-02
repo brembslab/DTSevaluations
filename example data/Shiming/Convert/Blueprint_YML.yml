@@ -1,0 +1,58 @@
+experiment:
+  type: Torquemeter
+  id: xy
+  name: Name of File
+  title: Name in File
+  description: What it is
+licenses:
+  name: ODC-PDDL-1.0
+  uri: http://opendatacommons.org/licenses/pddl
+author:
+  name: andi-ehweiner
+  description: Andi Ehweiner
+  firstName: Andi
+  lastName: Ehweiner
+  id: 0000-0000-0000-0000
+resources:
+- name: NA
+  title: NA
+  description: control
+  data:
+  
+
+statistics:
+  significance-levels:
+  - 0.005
+  - 0.001
+  - 0.0001
+  priors:
+  - 0.5
+  - 0.9
+  color-range:
+  - khaki
+  - olivedrab3
+  - cornflowerblue
+  - goldenrod1
+  - indianred1
+  - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 8
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes
+      Factor
+    power: less
+    data: 0
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: less
+    data: 0
+mediatype: text/csv/xml
+epid: 245
