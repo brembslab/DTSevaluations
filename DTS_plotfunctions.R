@@ -249,15 +249,15 @@ plotOMtracesMean <- function(OMdata){
 ############plot box/whisker plots of optomotor parameters ###############
 plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
   
-  utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$p.value, 3) #compare the two groups with a U-test and collect p-value
-  w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$statistic, 3)
+  utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$name)$p.value, 3) #compare the two groups with a U-test and collect p-value
+  w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$name)$statistic, 3)
   #compute effect size Cohen's D
-  cohend = signif(cohen.d(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$estimate, 3)
+  cohend = signif(cohen.d(plotOMparams[[OMvariables[v]]] ~ plotOMparams$name)$estimate, 3)
   #calculate statistical power
   alt = project.data[["statistics"]][["two.groups"]][["power"]]
   power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
   #calculate Bayes Factor
-  bayesF=extractBF(ttestBF(plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[1]], plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[2]]))
+  bayesF=extractBF(ttestBF(plotOMparams[[OMvariables[v]]][plotOMparams$name==groupnames[1]], plotOMparams[[OMvariables[v]]][plotOMparams$name==groupnames[2]]))
   #calculate FPR for priors set in project file#
   #run first prior  
   prior=priorval[1]
@@ -289,11 +289,11 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                              paste("FP risk, prior ",priorval[1]),
                              paste("FP risk, prior ",priorval[2]),
                              "Likelihood Ratio")
-  colnames(results.utest)<-c(paste(unique(grouped.OMparams[[1]]$group), unique(grouped.OMparams[[2]]$group))) 
+  colnames(results.utest)<-c(paste(unique(grouped.OMparams[[1]]$name), unique(grouped.OMparams[[2]]$name))) 
   # plot two optomotor parameters with asterisks
-  plots.2test<-list(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
+  plots.2test<-list(ggplot(plotOMparams, aes(name, plotOMparams[[OMvariables[v]]])) +
                       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-                      geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+                      geom_jitter(data = plotOMparams, aes(name, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
                       ggtitle(paste("U-Test, p=", utest)) +
                       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
                       theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
@@ -406,7 +406,7 @@ return(tempOMparams)
 }
 
 threegroup <-  function(dataframe, plotdata){
-  #groupe in experimental and driver groupe
+  #group in experimental and driver group
   Count=1
   Control=list()
   Exp=list()

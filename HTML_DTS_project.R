@@ -5,7 +5,7 @@
 rm(list=ls())                      #clean memory
 gc()                               #collect garbage
 if(!is.null(dev.list())) dev.off() #clear plots
-
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(ggplot2)
 library(tidyr)
 library(dygraphs)
@@ -388,7 +388,7 @@ for (l in 1:length(xml_list))
   #### -- Performance Indices -- ####
 
   PIs <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
-
+  if(PIs == FALSE){twogroupstats = FALSE}
   #PIprofiles for statistical analysis (PIs alone, periods as column names)
   colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)    #make colnames in PIprofile
   grouped.PIprofiles[[x]] = PIprofile                     #add PIprofile to list of grouped PIs

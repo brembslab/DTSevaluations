@@ -188,9 +188,9 @@ if(NofGroups==1)
   {
         for (v in 1:3) {
            cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
-           print(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
+           print(ggplot(plotOMparams, aes(name, plotOMparams[[OMvariables[v]]])) +
               geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+              geom_jitter(data = plotOMparams, aes(name, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
               samplesizes.annotate(boxes, samplesizes))
@@ -208,11 +208,10 @@ if(NofGroups==2)
 
 
 #for three groups with statistics
-if(NofGroups==3)
-
+if(NofGroups==3){
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 threegroup(grouped.OMparams, plotOMparams)
-
+}
 
 ```
 
@@ -229,9 +228,9 @@ if(NofGroups==1)
   {
         for (v in 1:3) {
            cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
-           print(ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
+           print(ggplot(plotOMparamsBefore, aes(name, plotOMparamsBefore[[OMvariables[v]]])) +
               geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+              geom_jitter(data = plotOMparamsBefore, aes(name, plotOMparamsBefore[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
               samplesizes.annotate(boxes, samplesizes))
@@ -251,10 +250,10 @@ if(NofGroups==2)
 #for three groups with statistics
 
 #for three groups with statistics
-if(NofGroups==3)
+if(NofGroups==3){
 
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
-threegroup(grouped.OMparamsBefore, plotOMparamsBefore)
+threegroup(grouped.OMparamsBefore, plotOMparamsBefore)}
 
 ```
 
@@ -292,10 +291,10 @@ if(NofGroups==2)
 
 #for three groups with statistics
 #for three groups with statistics
-if(NofGroups==3)
+if(NofGroups==3){
 
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
-threegroup(grouped.OMparamsAfter, plotOMparamsAfter)
+threegroup(grouped.OMparamsAfter, plotOMparamsAfter)}
 
 ```
 
@@ -486,11 +485,11 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
           results.bayes <- signif(results.bayes, digits=3) # reduce results to 3 significant digits
     }
 # plot PI box plot test against zero
-  plots.singles<-list(ggplot(PIstatCombined, aes(group, PIs)) +
+  plots.singles<-list(ggplot(PIstatCombined, aes(name, PIs)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
     geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
     ggtitle("Wilcoxon") +
-    geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
+    geom_jitter(data=PIstatCombined, aes(name, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
     scale_y_continuous(breaks = seq(-1, 1, .2)) +
     theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "top",legend.title = element_blank()) +
     theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
@@ -510,10 +509,10 @@ cat("\n## Statistical tests between two groups\n")
     w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)
     #compute effect size Cohen's D
     if(samplesizes[1]==samplesizes[2]){equalN=TRUE}else{equalN=FALSE}   #deterine if the samplesizes are identical
-    if(fligner.test(PIstatCombined$PIs,PIstatCombined$group)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
+    if(fligner.test(PIstatCombined$PIs,PIstatCombined$name)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
     if(equalN & hv){hedges=FALSE}else{hedges=TRUE}                      #test if we need to apply Hedge's correction
     if(hedges){
-      cohend = signif(cohen.d(PIstatCombined$PIs, PIstatCombined$group, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
+      cohend = signif(cohen.d(PIstatCombined$PIs, PIstatCombined$name, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
     }else{
       cohend = signif((mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
     }
@@ -555,10 +554,10 @@ cat("\n## Statistical tests between two groups\n")
                                "Likelihood Ratio")
     
 # plot two PIs with asterisks
-  plots.2test<-list(ggplot(PIstatCombined, aes(group, PIs)) +
+  plots.2test<-list(ggplot(PIstatCombined, aes(name, PIs)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
+      geom_jitter(data=PIstatCombined, aes(name, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
       ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -577,7 +576,7 @@ cat("\n## Statistical tests between two groups\n")
 
 ```{r estimationstats, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Estimation statistics\n")
-unpaired_median_diff <- dabest(PIstatCombined, group, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
+unpaired_median_diff <- dabest(PIstatCombined, name, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
 print(plot(unpaired_median_diff)) #plot results
 ```
 
@@ -585,7 +584,7 @@ print(plot(unpaired_median_diff)) #plot results
 cat("\n## Split Violin Plot\n")
 
 PIstatCombined$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
-print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
+print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = name)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
 
@@ -622,10 +621,10 @@ reactable(PooledGroups,
     w.statistic = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$statistic, 3)
     #compute effect size Cohen's D
     if(samplesizes[1]==samplesizes[2]){equalN=TRUE}else{equalN=FALSE}   #deterine if the samplesizes are identical
-    if(fligner.test(PIstatPooled$PIs,PIstatPooled$group)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
+    if(fligner.test(PIstatPooled$PIs,PIstatPooled$name)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
     if(equalN & hv){hedges=FALSE}else{hedges=TRUE}                      #test if we need to apply Hedge's correction
     if(hedges){
-      cohend = signif(cohen.d(PIstatPooled$PIs, PIstatPooled$group, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
+      cohend = signif(cohen.d(PIstatPooled$PIs, PIstatPooled$name, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
     }else{
       cohend = signif((mean(na.omit(PIprofilePooled[[1]]))-mean(na.omit(PIprofilePooled[[2]])))/sqrt((sd(na.omit(PIprofilePooled[[1]]))^2+sd(na.omit(PIprofilePooled[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
     }
@@ -667,10 +666,10 @@ reactable(PooledGroups,
                                "Likelihood Ratio")
     
 # plot two PIs with asterisks
-  plots.2test<-list(ggplot(PIstatPooled, aes(group, PIs)) +
+  plots.2test<-list(ggplot(PIstatPooled, aes(name, PIs)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors[1:2], notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data=PIstatPooled, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
+      geom_jitter(data=PIstatPooled, aes(name, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
       ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom") +
@@ -690,7 +689,7 @@ reactable(PooledGroups,
 ```{r estimationstatspooled, eval=(twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
  cat("\n## Estimation statistics for pooled groups\n")
  groupnames=unique(groupdescriptions) #rename groupnames to pooled groups specifically for dabestr
- unpaired_median_diff <- dabest(PIstatPooled, group, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
+ unpaired_median_diff <- dabest(PIstatPooled, name, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
  print(plot(unpaired_median_diff)) #plot results
 
 ```
@@ -699,6 +698,6 @@ reactable(PooledGroups,
 cat("\n## Split Violin Plot for pooled groups\n")
 
 PIstatPooled$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
-print(ggplot(PIstatPooled, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
+print(ggplot(PIstatPooled, aes(learningscore, PIs, fill = name)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
