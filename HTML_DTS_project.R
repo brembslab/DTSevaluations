@@ -5,6 +5,7 @@
 rm(list=ls())                      #clean memory
 gc()                               #collect garbage
 if(!is.null(dev.list())) dev.off() #clear plots
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set this directory to workinf directory
 
 library(ggplot2)
 library(tidyr)
