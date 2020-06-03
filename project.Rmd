@@ -262,7 +262,7 @@ threegroup(grouped.OMparamsBefore, plotOMparamsBefore)}
 ######### Separate optomotor evaluations: optomotor parameters at the end of the experiment ###############
 
 plotOMparamsAfter=ldply(grouped.OMparamsAfter, data.frame)    #move the dataframes from each group into a single dataframe
-OMvariables = head(names(plotOMparamsAfter),-1)
+OMvariables = head(names(plotOMparamsAfter),-2)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
 #for one group without statistics
