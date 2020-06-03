@@ -265,7 +265,7 @@ for(i in 1:NofPeriods){
     
     ##write histograms
     #fly behavior
-    multiplot(plotlist = flyhistos, cols=round(NofPeriods/5))
+    grid.arrange(grobs = flyhistos, ncol=round(NofPeriods/5))
 ```
 
 ```{r PositionHistogram, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
@@ -279,8 +279,8 @@ for(i in 1:NofPeriods){
       scale_y_continuous(expand = c(0,0)) +
       ggtitle(paste(flyname, "total"))
     
-   ##write positioon histograms
-      multiplot(plotlist = Filter(Negate(is.null), poshistos), cols=round(sum(poshistos!="NULL")/5)) #only print position histograms if there are any
+   ##write position histograms
+      grid.arrange(grobs = Filter(Negate(is.null), poshistos), ncol=round(sum(poshistos!="NULL")/5)) #only print position histograms if there are any
 
 ```
 
@@ -536,7 +536,7 @@ for (i in nonOMperiods) {
                        labels=c("Punished", "Unpunished"))+
     theme(plot.title = element_text(color="black", size=12, face="bold", hjust = 0.5))
 }
-multiplot(plotlist = dwellplots, cols=2)
+grid.arrange(grobs = dwellplots, ncol=2)
 
 ```
 

@@ -74,7 +74,10 @@ setwd(evaluation.path)
 
 #collecting essential data from the project file for statistics and plots
 NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
+samplesizes = unname(lengths(sapply(project.data[["resources"]], function(x) x["data"])))      #get samplesizes
 groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))               #get a vector with all group names
+names(samplesizes) = groupnames                                                                #name the samplesizes to assign them to groups
+sortedSsizes = sort(samplesizes, decreasing = TRUE)                                            #sorted samplesizes for plotting melted data
 groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group descriptions
 groupids <- unlist(sapply(project.data[["resources"]], function(x) x["id"]))                   #get a vector with all group FlyBase IDs
 signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
@@ -116,7 +119,6 @@ for(x in 1:NofGroups)
   grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
   grp_description = groupdescriptions[x] #collect description of the group
   xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
-  if(!exists("samplesizes")) {samplesizes = length(project.data[["resources"]][[x]][["data"]])} else samplesizes[x] = length(project.data[["resources"]][[x]][["data"]]) #get samplesizes
 
 #create/empty lists for collecting all single fly data by period
 period.data <- list()     #data grouped by period
