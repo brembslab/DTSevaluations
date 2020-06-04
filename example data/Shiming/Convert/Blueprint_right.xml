@@ -13,7 +13,7 @@
 	</experimenter>	
 	<fly type="mutant">
 		<name>Rip</name>
-		<description>NA</description>
+		<description>drift test</description>
 		<flybase>NA</flybase>
 	</fly>
 	<experiment type="torquemeter">
@@ -105,33 +105,28 @@
 		<header>0</header>
 		<nullSequence>NaN</nullSequence>
 	</CSV_descriptor>
-    <variables>
-      <variable number="1">
-        <type>count</type>
-        <var_type>int16</var_type>
-        <unit>arb_unit</unit>
-      </variable>	
-      <variable number="2">
-        <type>time</type>
-        <var_type>uint16</var_type>
-        <unit>ms</unit>
-      </variable>
-      <variable number="3">
-        <type>torque</type>
-        <var_type>int16</var_type>
-        <unit>arb_unit</unit>
-      </variable>
-      <variable number="4">
-        <type>period</type>
-        <var_type>uint8</var_type>
-        <unit>number</unit>
-      </variable>
-      <variable number="5">
-        <type>a_pos</type>
-        <var_type>int16</var_type>
-        <unit>arb_unit</unit>
-      </variable>
-    </variables>
+	<variables>
+		<variable number="1">
+		    <type>time</type>		
+			<var_type>uint16</var_type>
+			<unit>ms</unit>
+		</variable>	
+		<variable number="2">
+			<type>torque</type>
+			<var_type>int16</var_type>
+			<unit>arb_unit</unit>
+		</variable>
+		<variable number="3">
+		    <type>period</type>		
+			<var_type>uint8</var_type>
+			<unit>number</unit>
+		</variable>	
+		<variable number="4">
+		    <type>a_pos</type>		
+			<var_type>int16</var_type>
+			<unit>arb_unit</unit>
+		</variable>		
+	</variables>
 	<csv_data>
 	
 	</csv_data>

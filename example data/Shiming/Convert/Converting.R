@@ -2,9 +2,9 @@ library(dplyr)
 library(XML)
 library(yaml)
 library(stringr)
+library(readr)
 #choose.dir()
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-options(max.print = 300000)                                            #increse the max print output
 file_list <- list.files(path=getwd(), pattern = "\\.txt$")             #listing the file with the raw data
 file_list2 <- list.files(path=getwd(), pattern =  "TXT")               #listing the file with punished side
 file_listDiff <- str_sub(file_list2, end = -5)                         #creating list for compairison
@@ -17,7 +17,7 @@ file_list_name <- str_sub(file_list, end = -5)
 file_list_name <- paste(file_list_name, ".xml", sep="")
 yml_data$resources[[1]]$data<-file_list_name                           #filling in the list in to avoid manual writing
 write_yaml(yml_data, ("New file.yml"))                                 #saving the te template yml file
-
+i=3
 if((length(file_list)==length(file_list2))==TRUE){                     #check if the list have the same length and stop if not
   for (i in 1:length(file_list)){
     temp_direct <- read.csv(file_list2[i], header = F,sep = "\t")      #reading the file with punished side
@@ -37,11 +37,9 @@ if((length(file_list)==length(file_list2))==TRUE){                     #check if
     xmlValue(nodeSet[[1]]) = temp_direct[1]                                               #replacing the description
     nodeSet = xpathApply(temp_file,"//fly")
     temp_data <- read.csv(file_list[i], skip = 21, header=T,sep = "\t", row.names = NULL) #reading in the raw data
-    temp_data <-temp_data[-5] %>% filter(temp_data[3] <= 9 & temp_data[3] >= 1)           #removing unnecessary rows and colums
-    names(temp_data)=NULL                                                                 #removing the colum names
-    temp_data<-toString.XMLNode(temp_data, row.names=NULL)                                #converting raw data
+    temp_data <-temp_data[-5] %>% filter(temp_data[3] <= 9 & temp_data[3] >= 1)           #removing unnecessary rows and colums   
     nodeSet = xpathApply(temp_file,"//csv_data")
-    xmlValue(nodeSet[[1]]) = temp_data                                                    #replacing raw data
+    xmlValue(nodeSet[[1]]) = format_delim(temp_data, " ",col_names=F)                                                    #replacing raw data
     saveXML(temp_file, file.path(paste("Output"), file=paste(substr(file_list[i], 1, nchar(file_list[i])-4) ,".xml", sep = "")))
     print(paste0(i, " of ", length(file_list)))
   }}else{
@@ -52,3 +50,4 @@ comment<-na.omit(as.data.frame(comment))
 names(comment)=c("name","comment")
 write.csv(comment,"Comment.txt", row.names = FALSE)
 cat("The following files are removed: \n",remove)
+
