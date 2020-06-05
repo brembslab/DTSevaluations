@@ -131,8 +131,9 @@ flyMetaDataImport <- function(xml_name) {
 
 
 #### make sure all flies in a group have the identical experimental design ####
-MultiFlyDataVerification <- function(xml_list){
-foreach(l=1:length(xml_list)) %do%
+MultiFlyDataVerification <- function(xml_list)
+{
+for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
     ## read the data
@@ -164,7 +165,7 @@ foreach(l=1:length(xml_list)) %do%
 #### make sure there are no duplicated fly behavior traces in the list ####
 MultiFlyDuplicateCheck <- function(xml_list)
 {
-  foreach(l=1:length(xml_list)) %do%
+  for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
     ## read data and extract traces
