@@ -771,7 +771,7 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     grid.arrange(grobs = plots.singles, ncol=2)
 ```
 
-```{r Utest, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
+```{r Utest, eval=(PIs & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
 cat("\n## Statistical tests between two groups\n")
 
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
@@ -843,13 +843,13 @@ cat("\n## Statistical tests between two groups\n")
 
 ```
 
-```{r estimationstats, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r estimationstats, eval=(PIs & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Estimation statistics\n")
 unpaired_median_diff <- dabest(PIstatCombined, group, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
 print(plot(unpaired_median_diff)) #plot results
 ```
 
-```{r splitviolins, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r splitviolins, eval=(PIs & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Split Violin Plot\n")
 
 PIstatCombined$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
@@ -857,7 +857,7 @@ print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill
 
 ```
 
-```{r UtestG3, eval=(threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
+```{r UtestG3, eval=(PIs & threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n## Statistical tests between three groups\n")
 #creating a list with PIs and condition in on list
 PItype <- list() 
@@ -985,7 +985,7 @@ plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
 
 ```
 
-```{r Utestpooled, eval=(twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
+```{r Utestpooled, eval=(PIs & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n## Statistical tests between pooled groups\n")
 
   cat("The following experimental groups were pooled into two groups:\n")
@@ -1066,7 +1066,7 @@ reactable(PooledGroups,
 
 ```
 
-```{r estimationstatspooled, eval=(twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r estimationstatspooled, eval=(PIs & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
  cat("\n## Estimation statistics for pooled groups\n")
  groupnames=unique(groupdescriptions) #rename groupnames to pooled groups specifically for dabestr
  unpaired_median_diff <- dabest(PIstatPooled, group, PIs, idx = groupnames, paired = FALSE, func = median) #create estimation results list
@@ -1074,7 +1074,7 @@ reactable(PooledGroups,
 
 ```
 
-```{r splitviolinspooled, eval=(twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r splitviolinspooled, eval=(PIs & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Split Violin Plot for pooled groups\n")
 
 PIstatPooled$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots

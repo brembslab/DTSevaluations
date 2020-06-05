@@ -5,7 +5,7 @@
 rm(list=ls())                      #clean memory
 gc()                               #collect garbage
 if(!is.null(dev.list())) dev.off() #clear plots
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set this directory to workinf directory
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set the location of this file as working directory
 
 library(ggplot2)
 library(tidyr)
@@ -45,9 +45,10 @@ start.wd = getwd()
 project.file <- file.choose()
 project.path = dirname(project.file)
 project.data <- yaml.load_file(project.file)
+setwd(project.path)
 
 #start busy animation
-busy <- image_read("dataintegrity.gif")
+busy <- image_read(paste(start.wd,"/dataintegrity.gif", sep=""))
 print(busy)
 
 #measure the runtime of the whole analysis
@@ -67,30 +68,24 @@ if(!is_null(offending_metanames)) stop("You have selected files with non-equal m
 offending_behavnames <- MultiFlyDuplicateCheck(xml_list)
 if(!is.null(offending_behavnames)) stop("There are duplicates in the raw data!", cat("Error! List of duplicate file(s): ", offending_behavnames, sep = "\n"))
 
-
-#make sure the evaluations are written in a subfolder of the data folder
-evaluation.path = paste(project.path,"evaluations", sep = "/")
-dir.create(evaluation.path, showWarnings = FALSE)
-setwd(evaluation.path)
-
 #collecting essential data from the project file for statistics and plots
 NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
 samplesizes = unname(lengths(sapply(project.data[["resources"]], function(x) x["data"])))      #get samplesizes
 groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))               #get a vector with all group names
 names(samplesizes) = groupnames                                                                #name the samplesizes to assign them to groups
-sortedSsizes = sort(samplesizes, decreasing = TRUE)                                            #sorted samplesizes for plotting melted data
+sortedSsizes = sort(samplesizes, decreasing = TRUE)                                            #samplesizes sorted in ascending alphabetical groupname order
 groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group descriptions
 groupids <- unlist(sapply(project.data[["resources"]], function(x) x["id"]))                   #get a vector with all group FlyBase IDs
 signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
 priorval = project.data[["statistics"]][["priors"]]                                            #get priors for FPR calculation
-twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1                     #determine if statistics for two groups are required
-threegroupstats <- project.data[["statistics"]][["three.groups"]][["data"]]==1                 #determine if statistics for three groups are required
-wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1                            #determine if we need to do single tests
+twogroupstats <- identical(1,project.data[["statistics"]][["two.groups"]][["data"]])           #determine if statistics for two groups are required
+threegroupstats <- identical(1,project.data[["statistics"]][["three.groups"]][["data"]])       #determine if statistics for three groups are required
+wil <- identical(1,project.data[["statistics"]][["single.groups"]][["data"]])                  #determine if we need to do single tests
 learningscore = project.data[["statistics"]][["learning-score"]][["data"]]                     #get the PI that is going to be tested
 
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
-if (ExpType=="Torquemeter" || ExpType=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
+if (tolower(ExpType)=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
 
 ### Initialize empty lists where data are collected
 grouped.poshistos <- list()   #Arena position histograms for group in a list of length NofPeriods
@@ -126,14 +121,15 @@ period.data <- list()     #data grouped by period
 grouped.data <- list()    #total data grouped
 speclist <- list()        #spectograms
 
-
-
 #start actually evaluating
+print(paste("Evaluating experiments in group: ",grp_title,sep = ""), quote=FALSE)
+pb <- winProgressBar(title = "progress bar", min = 0, max = length(xml_list), width = 300)
+
 for (l in 1:length(xml_list))
   {
     #load current fly name
     xml_name=xml_list[[l]]
-
+    
     ##### read the data with the corresponding function #######
     singleflydata <- flyDataImport(xml_name)
 
@@ -194,7 +190,7 @@ for (l in 1:length(xml_list))
     #### call RMarkdown for single fly evaluations ###############################################
     rmarkdown::render(paste(start.wd,"/single_fly.Rmd", sep=""),                            ######
                       output_file = paste(flyname,"descr_anal.html", sep="_"),              ######
-                      output_dir = evaluation.path)                                         ######
+                      output_dir = project.path)                                            ######
     #### end RMarkdown for single fly evaluations ################################################
 
     ##move PIs and categories to multi-experiment data.frames
@@ -206,7 +202,13 @@ for (l in 1:length(xml_list))
     ##add period data to grouped data
     grouped.data[[l]] <- period.data
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
+    
+    #open window with progress bar
+    setWinProgressBar(pb, l, title=paste(round(l/length(xml_list)*100, 0), "% of",grp_title,"done"))
+    
   } #for number of flies in xml_list - from here on group evaluations
+#close progress bar window
+close(pb)
 
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
 
@@ -437,8 +439,10 @@ for (l in 1:length(xml_list))
 colorrange = project.data[["statistics"]][["color-range"]]
 boxcolors = c(colorrange[1:NofGroups])
 boxes<-c(1:NofGroups)
+if(Dwell){
 dwellrange=-round(1.5*max(dwellrange))
 dwellrange[2]=-dwellrange
+}
 
 #create new dataframes for the chosen PI learningscore values
 if(PIs & !is.null(learningscore)){
@@ -493,7 +497,7 @@ if(NofGroups>2 & length(unique(groupdescriptions))==2){
 #### ----- call RMarkdown for project evaluations ----- ################################################
 rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""),                                          #####
                   output_file = paste(project.data$experiment$name,"html", sep = "."),             #####
-                  output_dir = evaluation.path)                                                    #####
+                  output_dir = project.path)                                                       #####
 #### ----- end RMarkdown for project evaluations ----- #################################################
 
 Progressbar = mtext(paste("Runtime was",(round(((Sys.time() - start_time)), 3)), " minutes in total"), side = 1, line = 1)
