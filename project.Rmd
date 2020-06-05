@@ -32,7 +32,7 @@ source("DTS_plotfunctions.R")
 
 # Metadata
 
-**Project file (YAML):** `r paste('<a href="../', basename(project.file), '">', project.data$experiment$title, '</a>', sep = "")`  
+**Project file (YAML):** `r paste('<a href="', basename(project.file), '">', project.data$experiment$title, '</a>', sep = "")`  
 **Description:** `r paste(project.data$experiment$description)`  
 **Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', project.data$experiment$id, '">', project.data$experiment$id, '</a>', sep = "")`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
@@ -55,14 +55,8 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
 ```
 
 ```{r Graphdim, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
-if(lengths(project.data["resources"]) == 1){
-len = as.integer(5)
-} else {
 len = as.integer(lengths(project.data["resources"])*5)
-}
 aspect_ratio = 4/nrow(sequence %>% na.omit())
-
-
 ```
 
 # Experimental groups and single fly evaluations

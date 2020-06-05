@@ -32,7 +32,7 @@ source("DTS_plotfunctions.R")
 # Metadata
 
 **Date and time of the experiment:** `r format(as.POSIXct(gsub("T", " ", experiment$dateTime)),'%A, %B %d, %Y %H:%M:%S')`  
-**Raw data file (XML):** `r paste('<a href="../', basename(xml_name), '">', flyname, '</a>', sep = "")`  
+**Raw data file (XML):** `r paste('<a href="', basename(xml_name), '">', flyname, '</a>', sep = "")`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment description:** `r paste(experiment$description)`  
 **Experiment duration:** `r paste(experiment$duration)`s  
