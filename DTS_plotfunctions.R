@@ -208,17 +208,17 @@ plotaveOMtraces <- function(OMdata){
 #########plot averaged optomotor traces of several flies #################
 plotOMtracesMean <- function(OMdata){
     plotOM=ldply(OMdata, data.frame)            #move the dataframes for each group into a single dataframe
-    plotOM=plotOM[,c("time","means","sd","name")]
+    plotOM=plotOM[,c("time","means","sd","group")]
     
     #plot averaged OM traces
     
-    meanOMtraces <- ggplot(plotOM, aes(x=time/1000, y=means, group = name)) +
+    meanOMtraces <- ggplot(plotOM, aes(x=time/1000, y=means, group = group)) +
             theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
             geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
             geom_hline(yintercept = 0, color="black") +
-            geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = name), alpha=0.5) +
+            geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
             scale_fill_manual(values = boxcolors) +
-            geom_line(aes(colour = name), size = 1) + 
+            geom_line(aes(colour = group), size = 1) + 
             scale_color_manual(values = boxcolors) +
             ggtitle("Mean Optomotor Traces and Standard Deviations") +
             guides(colour = guide_legend(override.aes = list(size=3))) +
@@ -249,15 +249,15 @@ plotOMtracesMean <- function(OMdata){
 ############plot box/whisker plots of optomotor parameters ###############
 plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
   
-  utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$name)$p.value, 3) #compare the two groups with a U-test and collect p-value
-  w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$name)$statistic, 3)
+  utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$p.value, 3) #compare the two groups with a U-test and collect p-value
+  w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$statistic, 3)
   #compute effect size Cohen's D
-  cohend = signif(cohen.d(plotOMparams[[OMvariables[v]]] ~ plotOMparams$name)$estimate, 3)
+  cohend = signif(cohen.d(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$estimate, 3)
   #calculate statistical power
   alt = project.data[["statistics"]][["two.groups"]][["power"]]
   power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
   #calculate Bayes Factor
-  bayesF=extractBF(ttestBF(plotOMparams[[OMvariables[v]]][plotOMparams$name==groupnames[1]], plotOMparams[[OMvariables[v]]][plotOMparams$name==groupnames[2]]))
+  bayesF=extractBF(ttestBF(plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[1]], plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[2]]))
   #calculate FPR for priors set in project file#
   #run first prior  
   prior=priorval[1]
@@ -289,11 +289,11 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                              paste("FP risk, prior ",priorval[1]),
                              paste("FP risk, prior ",priorval[2]),
                              "Likelihood Ratio")
-  colnames(results.utest)<-c(paste(unique(grouped.OMparams[[1]]$name), unique(grouped.OMparams[[2]]$name))) 
+  colnames(results.utest)<-c(paste(unique(grouped.OMparams[[1]]$group), unique(grouped.OMparams[[2]]$group))) 
   # plot two optomotor parameters with asterisks
-  plots.2test<-list(ggplot(plotOMparams, aes(name, plotOMparams[[OMvariables[v]]])) +
+  plots.2test<-list(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
                       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-                      geom_jitter(data = plotOMparams, aes(name, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+                      geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
                       ggtitle(paste("U-Test, p=", utest)) +
                       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
                       theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
@@ -418,13 +418,17 @@ threegroup <-  function(dataframe, plotdata){
       Count=Count+1
     }
   }
-  Control1 = unique(dataframe[[1]]$name)
-  Control2 = unique(dataframe[[2]]$name)
-  Experimental = unique(dataframe[[3]]$name)
+  Control1 = unique(dataframe[[1]]$group)
+  Control2 = unique(dataframe[[2]]$group)
+  Experimental = unique(dataframe[[3]]$group)
   
-  PIname<-c(unique(Exp$name), unique(Control[[1]]$name),unique(Control[[2]]$name))
-  
+  PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
+  if (length(OMvariables)>2){
+    print("hello world")
+  }
+    
   for (v in 1:length(OMvariables)) {
+    PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
     #cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
     utest1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$p.value, 3)
     utest2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$p.value, 3)#compare the two groups with a U-test and collect p-value
@@ -483,7 +487,7 @@ threegroup <-  function(dataframe, plotdata){
                                                  signif(fpz3, 3),
                                                  signif(fpz4, 3),
                                                  signif(LR2, 3))))
-    colnames(results.utest)<-c(paste(PIname[1], PIname[2]),paste(PIname[1], PIname[3]))  
+    
     
     
     
@@ -497,13 +501,13 @@ threegroup <-  function(dataframe, plotdata){
                                paste("FP risk, prior ",priorval[1]),
                                paste("FP risk, prior ",priorval[2]),
                                "Likelihood Ratio")
-    
+    colnames(results.utest)<-c(paste(PIname[1], PIname[2]),paste(PIname[1], PIname[3]))
     # plot two PIs with asterisks
-    plots.2test<-ggplot(plotdata, aes(name, plotdata[[OMvariables[v]]])) +
+    plots.3test<-ggplot(plotdata, aes(group, plotdata[[OMvariables[v]]])) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data=plotdata, aes(name, plotdata[[OMvariables[v]]]), 
-                  position=position_jitter(0.3), shape=21, size=3) +
+      geom_jitter(data=plotdata, aes(group, plotdata[[OMvariables[v]]]), 
+                  position=position_jitter(0.3), shape=21, size=3, fill = "darkorange3") +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                                           panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",
                                                                       fill=NA), legend.position = "top", 
@@ -511,7 +515,6 @@ threegroup <-  function(dataframe, plotdata){
       theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
       samplesizes.annotate(boxes, samplesizes)+
       ylab(paste0(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-      
       geom_signif(comparisons = list(c(Control1, Experimental)),
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=5, vjust=0.1, margin_top = 0.1) +
@@ -519,8 +522,24 @@ threegroup <-  function(dataframe, plotdata){
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=5, vjust=0.1, margin_top = 0.05) 
     
+    if (any(c("PIs") %in% OMvariables)){
+      plots.3test <- remove_geoms(plots.3test, "GeomPoint")
+      plots.3test <- plots.3test +  geom_jitter(data=plotdata, aes(group, plotdata[[OMvariables[v]]], fill = category), 
+                                             position=position_jitter(0.3), shape=21, size=3)}
     #add table with results and plot
-    plots.2utest<-tableGrob(results.utest)
-    grid.arrange(plots.2test,plots.2utest, nrow = 1)
+    
+    plots.3utest<-tableGrob(results.utest)
+    grid.arrange(plots.3test,plots.3utest, nrow = 1)
   }
+}
+
+remove_geoms <- function(x, geom_type) {
+  # Find layers that match the requested type.
+  selector <- sapply(x$layers,
+                     function(y) {
+                       class(y$geom)[1] == geom_type
+                     })
+  # Delete the layers.
+  x$layers[selector] <- NULL
+  x
 }

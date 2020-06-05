@@ -33,7 +33,6 @@ library(data.table)
 library(DescTools)
 library(magick)
 library(reactable)
-library(EnvStats) #for plotting sample sizes
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -48,7 +47,7 @@ project.data <- yaml.load_file(project.file)
 
 #start busy animation
 busy <- image_read("dataintegrity.gif")
-print(busy)
+#print(busy)
 
 #measure the runtime of the whole analysis
 start_time <- Sys.time() #Records the system time at the start of the analysis
@@ -64,6 +63,7 @@ offending_metanames <- MultiFlyDataVerification(xml_list)
 if(!is_null(offending_metanames)) stop("You have selected files with non-equal metadata. Please check the file(s) above for consistency!", cat("Error! File(s) with differing metadata: ", offending_metanames, sep = "\n"))
 
 #check for duplicates in the raw data and report any occurrences
+
 offending_behavnames <- MultiFlyDuplicateCheck(xml_list)
 if(!is.null(offending_behavnames)) stop("There are duplicates in the raw data!", cat("Error! List of duplicate file(s): ", offending_behavnames, sep = "\n"))
 
@@ -216,31 +216,31 @@ for (l in 1:length(xml_list))
         #before
         OMdataBefore$means=rowMeans(OMdataBefore[-1])
         OMdataBefore$sd=rowSds(OMdataBefore[-1])
-        OMdataBefore$name=project.data[["resources"]][[x]][["name"]]
+        OMdataBefore$group=project.data[["resources"]][[x]][["name"]]
         grouped.OMdataBefore[[x]] <- OMdataBefore #save optomotor data to groupwise list
         rm(OMdataBefore) #remove the optomotor data frame so it can be generated again for the next group
-        OMparamsBefore$name=project.data[["resources"]][[x]][["name"]]
+        OMparamsBefore$group=project.data[["resources"]][[x]][["name"]]
         OMparamsBefore$desc=project.data[["resources"]][[x]][["description"]]
         grouped.OMparamsBefore[[x]] <- OMparamsBefore #save extracted optomotor parameters to groupwise list
         rm(OMparamsBefore) #remove the optomotor parameters dataframe so it can be generated again for the next group
         #after
         OMdataAfter$means=rowMeans(OMdataAfter[-1])
         OMdataAfter$sd=rowSds(OMdataAfter[-1])
-        OMdataAfter$name=project.data[["resources"]][[x]][["name"]]
+        OMdataAfter$group=project.data[["resources"]][[x]][["name"]]
         OMparamsAfter$desc=project.data[["resources"]][[x]][["description"]]
         grouped.OMdataAfter[[x]] <- OMdataAfter #save optomotor data to groupwise list
         rm(OMdataAfter) #remove the optomotor data frame so it can be generated again for the next group
-        OMparamsAfter$name=project.data[["resources"]][[x]][["name"]]
+        OMparamsAfter$group=project.data[["resources"]][[x]][["name"]]
         grouped.OMparamsAfter[[x]] <- OMparamsAfter #save extracted optomotor parameters to groupwise list
         rm(OMparamsAfter) #remove the optomotor parameters dataframe so it can be generated again for the next group
       }
     } else {
       OMdata$means=rowMeans(OMdata[-1])
       OMdata$sd=rowSds(OMdata[-1])
-      OMdata$name=project.data[["resources"]][[x]][["name"]]
+      OMdata$group=project.data[["resources"]][[x]][["name"]]
       grouped.OMdata[[x]] <- OMdata #save optomotor data to groupwise list
       rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group
-      OMparams$name=project.data[["resources"]][[x]][["name"]]
+      OMparams$group=project.data[["resources"]][[x]][["name"]]
       OMparams$desc=project.data[["resources"]][[x]][["description"]]
       grouped.OMparams[[x]] <- OMparams #save extracted optomotor parameters to groupwise list
       rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
@@ -456,7 +456,7 @@ if(PIs & !is.null(learningscore)){
   SDs<-as.numeric(apply(PIstat, 2, function(x) sd(na.omit(x))))
 
   #combine PIstat and CatStat for plotting learningscores
-  PIstatCombined <- melt(CatStat, measure.vars = names(CatStat), variable.name = "name", value.name = "category") #melt categories into dataframe with group as id-variable
+  PIstatCombined <- melt(CatStat, measure.vars = names(CatStat), variable.name = "group", value.name = "category") #melt categories into dataframe with group as id-variable
   PIstatCombined["PIs"] = melt(PIstat)$value                                        #combine the categories with the PIs
   PIstatCombined = na.omit(PIstatCombined)                                          #delete NA rows
 }
