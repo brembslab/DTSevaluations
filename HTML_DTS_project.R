@@ -31,7 +31,6 @@ library(tidyverse)
 library(questionr)
 library(data.table)
 library(DescTools)
-library(magick)
 library(reactable)
 
 ## source the script with the functions needed for analysis
@@ -46,8 +45,8 @@ project.path = dirname(project.file)
 project.data <- yaml.load_file(project.file)
 
 #start busy animation
-busy <- image_read("dataintegrity.gif")
-print(busy)
+#busy <- image_read("dataintegrity.gif")
+#print(busy)
 
 #measure the runtime of the whole analysis
 start_time <- Sys.time() #Records the system time at the start of the analysis
