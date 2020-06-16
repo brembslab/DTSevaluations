@@ -61,4 +61,3 @@ statistics:
     power: two.sided #two-sided test (alternatives: greater, two.sided)
     data: 0 #no    
 mediatype: text/csv/xml
-epid: 417

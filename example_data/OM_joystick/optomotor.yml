@@ -67,5 +67,5 @@ statistics:
     title: a pair of two-sided tests
     description: Testing two controls against one experimental group
     power: two.sided #two-sided test (alternatives: greater, two.sided)
-    data: 0 #yes             
+    data: 0 #no             
 mediatype: text/csv/xml
