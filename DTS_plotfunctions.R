@@ -122,7 +122,11 @@ geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", po
 }
 # usage: ggplot(my_data, aes(x, y, fill = m)) + geom_split_violin()
 
+############### generate hyperlinks to flybase IDs
 
+hyperlinks.FBids <- function(FBids){
+    id.frame=read.csv(text = FBids, header = FALSE)
+}
 
 ###########################################################################
 #                                                                         #

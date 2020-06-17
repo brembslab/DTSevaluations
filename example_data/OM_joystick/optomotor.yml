@@ -23,6 +23,7 @@ resources:
   - 2t4t5Kir2.xml
   - 3t4t5Kir1.xml
   - 4t4t5Kir1.xml
+  id: FBti0191347,FBti0188569,FBtp0014166
 - name: Canton S
   title: wild type flies
   description: wildtype with new software
@@ -35,6 +36,7 @@ resources:
   - Fly6.xml
   - Fly7.xml
   - Fly8.xml
+  id: FBst0064349
 statistics:
   significance-levels:
     - 0.005
