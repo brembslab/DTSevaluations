@@ -127,13 +127,10 @@ geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", po
 hyperlinks.FBids <- function(FBids){
   #generate dataframe with hyperlinked FBids where each group gets one row
     id.frame<-as.data.frame(lapply(read.csv(text = FBids, header = FALSE, na.strings=c("","NA")), function(x) ifelse(!is.na(x), paste('<a href="http://flybase.org/reports/',x,'">',x,'</a>', sep = ''),NA)))
-    id.frame[is.na(id.frame)]<-"" #remove NAs
-    FBids=apply(id.frame,1,paste,collapse=",") #create strings
-    FBids=gsub(",,,,",'',FBids) #remove quadruple commas
-    FBids=gsub(",,,",'',FBids)   #remove triple commas
-    FBids=gsub(",,",'',FBids)    #remove double commas
-    FBids=sub(",$", "", FBids)  #remove trailing commas
-    return(FBids)
+    id.frame[is.na(id.frame)]<-""                     #remove NAs
+    FBids=apply(id.frame,1,paste,collapse=",")        #create strings
+    FBids=gsub("^,*|(?<=,),|,*$", "", FBids, perl=T)  #remove trailing/leading commas
+  return(FBids)
 }
 
 ###########################################################################

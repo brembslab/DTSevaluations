@@ -5,7 +5,7 @@
 rm(list=ls())                      #clean memory
 gc()                               #collect garbage
 if(!is.null(dev.list())) dev.off() #clear plots
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set the location of this file as working directory
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set the location of this file as working directory
 
 library(ggplot2)
 library(tidyr)
@@ -75,7 +75,7 @@ groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))
 names(samplesizes) = groupnames                                                                #name the samplesizes to assign them to groups
 sortedSsizes = sort(samplesizes, decreasing = TRUE)                                            #samplesizes sorted in ascending alphabetical groupname order
 groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group descriptions
-groupids <- unlist(sapply(project.data[["resources"]], function(x) x["id"]))                   #get a vector with all group FlyBase IDs
+groupids <- hyperlinks.FBids(unlist(sapply(project.data[["resources"]], function(x) x["id"]))) #get a vector with all group FlyBase IDs and hyperlinks
 signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
 priorval = project.data[["statistics"]][["priors"]]                                            #get priors for FPR calculation
 twogroupstats <- identical(1,project.data[["statistics"]][["two.groups"]][["data"]])           #determine if statistics for two groups are required
