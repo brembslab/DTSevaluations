@@ -5,7 +5,7 @@
 rm(list=ls())                      #clean memory
 gc()                               #collect garbage
 if(!is.null(dev.list())) dev.off() #clear plots
-#setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) #set the location of this file as working directory
+setwd(dirname(parent.frame(2)$ofile)) #set working directory to source file location (allows loading of function files)
 
 library(ggplot2)
 library(tidyr)
@@ -35,7 +35,7 @@ library(DescTools)
 library(magick)
 library(reactable)
 
-## source the script with the functions needed for analysis
+## source the scripts with the functions needed for analysis
 source("readXMLdatafile.R")
 source("DTS_plotfunctions.R")
 
