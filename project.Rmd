@@ -183,7 +183,7 @@ OMvariables = head(names(plotOMparams),-1)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
 #for one group without statistics
-if(NofGroups==1)
+if(NofGroups==1|NofGroups>3)
   {
         for (v in 1:3) {
            cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
@@ -271,7 +271,7 @@ OMvariables = head(names(plotOMparamsBefore),-1)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
 #for one group without statistics
-if(NofGroups==1)
+if(NofGroups==1 | NofGroups > 3)
   {
         for (v in 1:3) {
            cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
@@ -424,7 +424,7 @@ OMvariables = head(names(plotOMparamsAfter),-1)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
 #for one group without statistics
-if(NofGroups==1)
+if(NofGroups==1 | NofGroups > 3)
   {
         for (v in 1:3) {
            cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
