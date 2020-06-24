@@ -133,9 +133,12 @@ flyMetaDataImport <- function(xml_name) {
 #### make sure all flies in a group have the identical experimental design ####
 MultiFlyDataVerification <- function(xml_list)
 {
+  print("Verifying meta-data integrity:", quote=FALSE)
+  pb <- txtProgressBar(min = 0, max = length(xml_list), style = 3, char = "=")
 for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
+    setTxtProgressBar(pb, l)
     ## read the data
     singleflymetadata <- flyMetaDataImport(xml_name)
     
@@ -165,9 +168,12 @@ for (l in 1:length(xml_list))
 #### make sure there are no duplicated fly behavior traces in the list ####
 MultiFlyDuplicateCheck <- function(xml_list)
 {
+  print("Searching for data duplications:", quote=FALSE)
+  pb <- txtProgressBar(min = 0, max = length(xml_list), style = 3, char = "=")
   for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
+    setTxtProgressBar(pb, l)
     ## read data and extract traces
     singledata <- flyDataImport(xml_name)
     temp.behav = singledata[[9]]$fly
