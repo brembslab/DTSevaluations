@@ -76,6 +76,7 @@ setwd(evaluation.path)
 #collecting essential data from the project file for statistics and plots
 NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
 groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))               #get a vector with all group names
+
 groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group descriptions
 groupids <- unlist(sapply(project.data[["resources"]], function(x) x["id"]))                   #get a vector with all group FlyBase IDs
 signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
@@ -84,9 +85,9 @@ twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1      
 threegroupstats <- project.data[["statistics"]][["three.groups"]][["data"]]==1                 #determine if statistics for three groups are required
 wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1                            #determine if we need to do single tests
 learningscore = project.data[["statistics"]][["learning-score"]][["data"]]                     #get the PI that is going to be tested
-expgroup <- project.data[["statistics"]][["three.groups"]][['exp']]
-controlvector = groupnames[-expgroup]
-expvector = groupnames[expgroup]
+expgroup <- project.data[["statistics"]][["three.groups"]][['exp']]                            #get the position of the experimental group
+controlvector = groupnames[-expgroup]                                                          #store groupnames of control groups
+expvector = groupnames[expgroup]                                                               #store groupnames of experimental group
 
 
 
@@ -145,7 +146,7 @@ for (l in 1:length(xml_list))
     flyname = fly$name[1]
 
     #progress bar
-    if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
+    if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 45  #calculates the iteration time
     if (exists("Progressbar")){dev.off()} #deletes the previous plot. If not, this will generate an ever increasing number of plots in the end.
     while (!is.null(dev.list()))  dev.off()
     esttime = (Sys.time() + (iter_time * (totalflies-flycount))) #estimated finish time, based on the last iteration and the number of flies left
