@@ -130,6 +130,7 @@ hyperlinks.FBids <- function(FBids){
     id.frame[is.na(id.frame)]<-""                     #remove NAs
     FBids=apply(id.frame,1,paste,collapse=",")        #create strings
     FBids=gsub("^,*|(?<=,),|,*$", "", FBids, perl=T)  #remove trailing/leading commas
+    FBids=gsub('<a href="http://flybase.org/reports/none">none</a>', "none", FBids) #remove the link from 'none' FBids
   return(FBids)
 }
 

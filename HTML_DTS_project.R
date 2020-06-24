@@ -75,13 +75,15 @@ groupnames <- unlist(sapply(project.data[["resources"]], function(x) x["name"]))
 names(samplesizes) = groupnames                                                                #name the samplesizes to assign them to groups
 sortedSsizes = sort(samplesizes, decreasing = TRUE)                                            #samplesizes sorted in ascending alphabetical groupname order
 groupdescriptions <- unlist(sapply(project.data[["resources"]], function(x) x["description"])) #get a vector with all group descriptions
-groupids <- hyperlinks.FBids(unlist(sapply(project.data[["resources"]], function(x) x["id"]))) #get a vector with all group FlyBase IDs and hyperlinks
 signif = project.data[["statistics"]][["significance-levels"]]                                 #get significance levels
 priorval = project.data[["statistics"]][["priors"]]                                            #get priors for FPR calculation
 twogroupstats <- identical(1,project.data[["statistics"]][["two.groups"]][["data"]])           #determine if statistics for two groups are required
 threegroupstats <- identical(1,project.data[["statistics"]][["three.groups"]][["data"]])       #determine if statistics for three groups are required
 wil <- identical(1,project.data[["statistics"]][["single.groups"]][["data"]])                  #determine if we need to do single tests
 learningscore = project.data[["statistics"]][["learning-score"]][["data"]]                     #get the PI that is going to be tested
+if(!is.null(unlist(sapply(project.data[["resources"]], function(x) x["id"])))){
+groupids <- hyperlinks.FBids(unlist(sapply(project.data[["resources"]], function(x) x["id"]))) #get a vector with all group FlyBase IDs and hyperlinks
+} else groupids=NULL
 
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"

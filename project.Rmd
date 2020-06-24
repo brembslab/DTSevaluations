@@ -65,7 +65,7 @@ aspect_ratio = 4/nrow(sequence %>% na.omit())
 ```{r singleflydata, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
 exp_groups <- sapply(exp_groups, '[', seq(max(lengths(exp_groups)))) #make dataframe from list
 colnames(exp_groups) = as.character(exp_groups[1, ]) # make group names to column names
-exp_groups[1, ] <- groupids
+if(!is.null(groupids)){exp_groups[1, ] <- groupids}else{exp_groups <- exp_groups[-1, ]} 
 rownames(exp_groups) <- NULL #remove the numbers
 #plot table with links to individual fly evaluations
 reactable(exp_groups,
