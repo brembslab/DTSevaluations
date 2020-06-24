@@ -165,7 +165,7 @@ for (l in 1:length(xml_list))
 MultiFlyDuplicateCheck <- function(xml_list)
 {
   print("Verifying data integrity:", quote=FALSE)
-  pb <- txtProgressBar(min = 0, max = length(xml_list), style = 3, char = "DTS:: ")
+  pb <- txtProgressBar(min = 0, max = length(xml_list), style = 3, char = ":")
   for (l in 1:length(xml_list)) 
   {
     xml_name=xml_list[l]
