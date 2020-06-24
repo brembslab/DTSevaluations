@@ -84,6 +84,11 @@ twogroupstats <- project.data[["statistics"]][["two.groups"]][["data"]]==1      
 threegroupstats <- project.data[["statistics"]][["three.groups"]][["data"]]==1                 #determine if statistics for three groups are required
 wil <- project.data[["statistics"]][["single.groups"]][["data"]]==1                            #determine if we need to do single tests
 learningscore = project.data[["statistics"]][["learning-score"]][["data"]]                     #get the PI that is going to be tested
+expgroup <- project.data[["statistics"]][["three.groups"]][['exp']]
+controlvector = groupnames[-expgroup]
+expvector = groupnames[expgroup]
+
+
 
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
@@ -143,19 +148,23 @@ for (l in 1:length(xml_list))
     if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
     if (exists("Progressbar")){dev.off()} #deletes the previous plot. If not, this will generate an ever increasing number of plots in the end.
     while (!is.null(dev.list()))  dev.off()
-    progress = round(flycount*(100/(totalflies))) #calculates the progress in percentage
     esttime = (Sys.time() + (iter_time * (totalflies-flycount))) #estimated finish time, based on the last iteration and the number of flies left
     rstudioapi::executeCommand("activatePlots") #switch focus from busy animation in viewer to progress bar in plots
+    progress <- c(round(l*(100/(length(xml_list)))),round(flycount*(100/(totalflies))))
     Progressbar = barplot(progress,
-                 col = "grey", ylab = "% progress",
-                 ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
+            xlab = "Running: single_fly.Rmd",
+            ylab = "% progress",
+            axes = FALSE,
+            ylim=c(0,100),
+            col = c("lightgrey","darkgrey"),
+            names.arg = c("Group", "Total"))
     axis(2, seq(0,100,25), las=2) #sets the axis ticks
     mtext(paste("Iteration time: ", iter_time, "sec \n Current fly:", flyname, "\n Current group:", grp_title), side=3)
     mtext(paste("Est. finish time",substring(esttime, 12)), side = 1)
-    text(Progressbar,16, paste(progress, "% completed \n Flies left:", (totalflies-flycount))) #adds the percentage as text and the number of flies left
-    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 20 seconds
+    text(Progressbar, 16, paste(progress, "% completed \n Flies left:", c((length(xml_list)-l),totalflies-flycount)))
     flycount = flycount+1
-
+    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 20 seconds
+    
     ##extract sequence meta-data
     NofPeriods = singleflydata[[5]]
     sequence <- singleflydata[[6]]
@@ -419,7 +428,7 @@ for (l in 1:length(xml_list))
   spectemp[length(spectemp)+1] <- rowMeans(spectemp[, grep("y", colnames(spectemp))]) #calculate the mean power spectrum in the group
   spectemp[length(spectemp)+1] <- rowSds(spectemp[, grep("y", colnames(spectemp))])/sqrt(length(project.data[["resources"]][[x]][["data"]])) #calculate the standard deviation in the group
   spectemp[, grep("y", colnames(spectemp))] <- NULL #drop all raw data for summary data
-  spectemp$group <- as.factor(rep(paste(project.data[["resources"]][[x]][["name"]], ", N=", length(project.data[["resources"]][[x]][["data"]]), sep = ""), nrow(spectemp))) #add grouping variable for later plotting
+  spectemp$group <- as.factor(rep(paste(project.data[["resources"]][[x]][["name"]]))) #add grouping variable for later plotting
   colnames(spectemp)[2] <- "mean"
   colnames(spectemp)[3] <- "sd"
   grouped.spectra[[x]] = spectemp #save group mean/sd
@@ -459,12 +468,16 @@ if(PIs & !is.null(learningscore)){
   PIstatCombined <- melt(CatStat, measure.vars = names(CatStat), variable.name = "group", value.name = "category") #melt categories into dataframe with group as id-variable
   PIstatCombined["PIs"] = melt(PIstat)$value                                        #combine the categories with the PIs
   PIstatCombined = na.omit(PIstatCombined)                                          #delete NA rows
-}
+  
+  #add description to PIstatCombined
+  PIstatCombined <- split(PIstatCombined , f = PIstatCombined$group )
+  for(x in 1:NofGroups){
+    PIstatCombined[[x]]$desc = project.data$resources[[x]]$description}
+  PIstatCombined = bind_rows(PIstatCombined, .id = "group")}
 
 
 ###### if there are more than two groups, try to pool some data into two groups
 PoolGrps=FALSE
-threegroupstats <- ifelse(unique(str_sub(sequence$type, end=-2)) == "optomotor", FALSE, TRUE)  #determine if the experiment is only optomotor
 if(NofGroups>2 & length(unique(groupdescriptions))==2){
   PoolGrps=TRUE #we have several groups, but only one control and one experimental group
 

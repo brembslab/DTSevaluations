@@ -113,7 +113,7 @@ for(x in 1:NofGroups)
 <!-- Superimposed histograms -->
 
 ```{r SupPosHistograms, eval=(NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
-
+supHistos$group <- factor(supHistos$group, levels=paste(groupnames)) # sets the order/level of the data accordingly to groupnames
 if('yt' %in% sequence$type || 'sw' %in% sequence$type)                  #for yt or sw experiments, plot fly data
       {
        cat("\n## Superimposed Histograms\n")
@@ -124,7 +124,7 @@ if('yt' %in% sequence$type || 'sw' %in% sequence$type)                  #for yt 
             scale_x_continuous(limits=maxfly, breaks = c(-200, -100, 0, 100, 200), expand = c(0,0)) +
             scale_y_continuous(expand = c(0,0)) +
             ggtitle("Superimposed Fly Behavior Histogram") +
-            scale_fill_manual(values = c("#E7B800", "#00AFBB")) +
+            scale_fill_manual(labels = paste(groupnames,", n = ", samplesizes, sep=" "), values = c("#E7B800", "#00AFBB")) +
             theme_light() +
             theme(panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank()) +
@@ -141,7 +141,7 @@ if('yt' %in% sequence$type || 'sw' %in% sequence$type)                  #for yt 
             scale_x_continuous(breaks = c(0, 45, 90), expand = c(0,0)) +
             scale_y_continuous(expand = c(0,0)) +
             ggtitle("Superimposed Position Histogram") +
-            scale_fill_manual(values = c("#E7B800", "#00AFBB")) +
+            scale_fill_manual(labels = paste(groupnames,", n = ", samplesizes, sep=" "), values = c("#E7B800", "#00AFBB")) +
             theme_light() +
             theme(panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank()) +
@@ -167,7 +167,7 @@ plotOMtracesMean(grouped.OMdata) #call function to plot OM traces averaged over 
 plotOMtracesMean(grouped.OMdataBefore) #call function to plot OM traces at start of experiment averaged over all flies
   
 cat(paste("\n\n## Optomotor traces (right/left) at end of experiment\n\n"))
-
+plotOMtracesMean(grouped.OMdataAfter) #call function to plot OM traces at start of experiment averaged over all flies
 ```
 
 `r if (om | beforeafter) '## Optomotor Parameter Analysis'`
@@ -178,6 +178,7 @@ cat(paste("\n\n## Optomotor traces (right/left) at end of experiment\n\n"))
 
 
 plotOMparams=ldply(grouped.OMparams, data.frame)    #move the dataframes from each group into a single dataframe
+plotOMparams$group <- factor(plotOMparams$group, levels=paste(groupnames)) # sets the order/level of the data accordingly to groupnames
 OMvariables = head(names(plotOMparams),-2)
 
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
@@ -192,7 +193,7 @@ if(NofGroups==1)
               geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-              samplesizes.annotate(boxes, samplesizes))
+              samplesizes.annotate(boxes, as.numeric(table(plotOMparams$group))))
         }
 }
 #for two groups with statistics
@@ -219,6 +220,7 @@ threegroup(grouped.OMparams, plotOMparams)
 ######### Separate optomotor evaluations: optomotor parameters at the start of the experiment ###############
 
 plotOMparamsBefore=ldply(grouped.OMparamsBefore, data.frame)    #move the dataframes from each group into a single dataframe
+plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=paste(groupnames)) # set the level of the data accordingly to groupnames
 OMvariables = head(names(plotOMparamsBefore),-2)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
@@ -232,7 +234,7 @@ if(NofGroups==1)
               geom_jitter(data = plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-              samplesizes.annotate(boxes, samplesizes))
+              samplesizes.annotate(boxes, as.numeric(table(plotOMparamsBefore$group))))
         }
 }
 
@@ -260,6 +262,7 @@ threegroup(grouped.OMparamsBefore, plotOMparamsBefore)}
 ######### Separate optomotor evaluations: optomotor parameters at the end of the experiment ###############
 
 plotOMparamsAfter=ldply(grouped.OMparamsAfter, data.frame)    #move the dataframes from each group into a single dataframe
+plotOMparamsAfter$group <- factor(plotOMparamsAfter$group, levels=paste(groupnames)) # sets the order/level of the data
 OMvariables = head(names(plotOMparamsAfter),-2)
 OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
 
@@ -273,7 +276,7 @@ if(NofGroups==1)
               geom_jitter(data = plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
               theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-              samplesizes.annotate(boxes, samplesizes))
+              samplesizes.annotate(boxes, as.numeric(table(plotOMparamsAfter$group))))
         }
 }
 
@@ -300,11 +303,12 @@ threegroup(grouped.OMparamsAfter, plotOMparamsAfter)}
 
 ```{r spectra, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8}
 spectemp <- do.call("rbind", grouped.spectra) #create single data.frame with grouping variable from list of groups
+spectemp$group <- factor(spectemp$group, levels=paste(groupnames)) # sets the order/level of the data accordingly to groupnames
 print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) + 
         geom_ribbon(aes(ymin=mean-sd, ymax=mean+sd, fill = group), alpha=0.5) +
-        scale_fill_manual(values = boxcolors) +
         geom_line(aes(colour = group), size = 2) + 
-        scale_color_manual(values = boxcolors) +
+         scale_color_manual(labels = paste(groupnames,", n = ", samplesizes, sep=" "),values = boxcolors)+
+scale_fill_manual(labels = paste(groupnames,", n = ", samplesizes, sep=" "),values=boxcolors)+
         scale_x_continuous(breaks = seq(0, 10, 2), limits = c(0, 10), expand=c(0,0)) +
         scale_y_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1), expand=c(0,0)) +
         ggtitle("Powerspectra") +
@@ -319,7 +323,7 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
                                             legend.text=element_text(size=14), 
                                             panel.grid.major.y = element_blank(),
                                             panel.grid.minor = element_blank(),
-                                            panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+                                            panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
         theme(axis.text.y = element_text(size=12))+ ylab("mean rel. Power") + xlab("Frequency [Hz]"))
 ```
 
@@ -464,7 +468,7 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 
 ```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n# Learning Score Statistics\n## Statistical tests of single groups against zero\n")
-  
+PIstatCombined$group <- factor(PIstatCombined$group, levels=paste(groupnames)) # sets the order/level of the data
   wilcoxon<-numeric()  
   for(x in 1:NofGroups){wilcoxon[x] = signif(wilcox.test(PIstat[[x]])$p.value, 3)} #test all groups against zero
   #compute Bayes Factor for single group 
@@ -490,7 +494,7 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     scale_y_continuous(breaks = seq(-1, 1, .2)) +
     theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "top",legend.title = element_blank()) +
     theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-    samplesizes.annotate(boxes, samplesizes) +
+    samplesizes.annotate(boxes, as.numeric(table(PIstatCombined$group))) +
     wilcox.annotate(boxes, wilcoxon))
   
   
@@ -501,7 +505,7 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
 
 ```{r Utest, eval=(twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
 cat("\n## Statistical tests between two groups\n")
-
+PIstatCombined$group <- factor(PIstatCombined$group, levels=paste(groupnames)) # sets the order/level of the data
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
     w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)
     #compute effect size Cohen's D
@@ -551,6 +555,8 @@ cat("\n## Statistical tests between two groups\n")
                                "Likelihood Ratio")
     
 # plot two PIs with asterisks
+    
+
   plots.2test<-list(ggplot(PIstatCombined, aes(group, PIs)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
@@ -562,7 +568,8 @@ cat("\n## Statistical tests between two groups\n")
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=8, vjust=0.5) +
-      samplesizes.annotate(boxes, samplesizes))
+
+     samplesizes.annotate(boxes, as.numeric(table(PIstatCombined$group))))
   
 
   #add table with results and plot
@@ -593,9 +600,12 @@ data <- list()
 PItype = list()
 OMtitles = paste0("PI ", learningscore)
 for (x in 1:NofGroups){
-  PItype[[x]] = melt(PIstat[[x]])
+  PItype[[x]] = melt(PIstat[[x]], value.name = "PIs")
   PItype[[x]]$desc = project.data$resources[[x]]$description
   PItype[[x]]$group = project.data$resources[[x]]$name
+  PItype[[x]]$category = unlist(CatStat[x])
+  PItype[[x]] = na.omit(PItype[[x]])
+  PIstatCombined = ldply(PItype, data.frame)
 }
 OMvariables = "PIs"
 threegroup(PItype, PIstatCombined)

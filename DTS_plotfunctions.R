@@ -217,9 +217,9 @@ plotOMtracesMean <- function(OMdata){
             geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
             geom_hline(yintercept = 0, color="black") +
             geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
-            scale_fill_manual(values = boxcolors) +
+            scale_fill_manual(labels = paste(groupnames,", n = ", samplesizes, sep=" "),values = boxcolors) +
             geom_line(aes(colour = group), size = 1) + 
-            scale_color_manual(values = boxcolors) +
+            scale_color_manual(labels = paste(groupnames,", n = ", samplesizes, sep=" "),values = boxcolors) +
             ggtitle("Mean Optomotor Traces and Standard Deviations") +
             guides(colour = guide_legend(override.aes = list(size=3))) +
             theme_light(base_size = 16) + 
@@ -289,7 +289,6 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                              paste("FP risk, prior ",priorval[1]),
                              paste("FP risk, prior ",priorval[2]),
                              "Likelihood Ratio")
-  colnames(results.utest)<-c(paste(unique(grouped.OMparams[[1]]$group), unique(grouped.OMparams[[2]]$group))) 
   # plot two optomotor parameters with asterisks
   plots.2test<-list(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
                       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
@@ -297,8 +296,8 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                       ggtitle(paste("U-Test, p=", utest)) +
                       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
                       theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-                      geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5) +
-                      stat_n_text())
+                      samplesizes.annotate(boxes, as.numeric(table(plotOMparams$desc)))+
+                      geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5))
   
   #add table with results
   plots.2test[[2]]<-tableGrob(results.utest)
@@ -410,22 +409,10 @@ threegroup <-  function(dataframe, plotdata){
   Count=1
   Control=list()
   Exp=list()
-  for (t in 1:NofGroups) {
-    if(grepl("test", tolower(dataframe[[t]]$desc)) | grepl("exp", tolower(dataframe[[t]]$desc)) | grepl("experimental", tolower(dataframe[[t]]$desc))==TRUE){
-      Exp = na.omit(dataframe[[t]])
-    } else {
-      Control[[Count]] =na.omit(dataframe[[t]])
-      Count=Count+1
-    }
-  }
-  Control1 = unique(dataframe[[1]]$group)
-  Control2 = unique(dataframe[[2]]$group)
-  Experimental = unique(dataframe[[3]]$group)
-  
+  Control = na.omit(dataframe[-expgroup])
+  Exp = na.omit(dataframe[expgroup])
+  Exp = ldply(Exp, data.frame)
   PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
-  if (length(OMvariables)>2){
-    print("hello world")
-  }
     
   for (v in 1:length(OMvariables)) {
     PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
@@ -513,12 +500,12 @@ threegroup <-  function(dataframe, plotdata){
                                                                       fill=NA), legend.position = "top", 
                                           legend.title = element_blank()) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
-      samplesizes.annotate(boxes, samplesizes)+
+      samplesizes.annotate(boxes, as.numeric(table(plotdata$group)))+
       ylab(paste0(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-      geom_signif(comparisons = list(c(Control1, Experimental)),
+      geom_signif(comparisons = list(c(Control[1], Exp)),
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=5, vjust=0.1, margin_top = 0.1) +
-      geom_signif(comparisons = list(c(Control2, Experimental)),
+      geom_signif(comparisons = list(c(Control[2], Exp)),
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=5, vjust=0.1, margin_top = 0.05) 
     
