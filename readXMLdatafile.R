@@ -163,6 +163,22 @@ for (l in 1:length(xml_list))
   if(!is_empty(offending_metanames)){return(offending_metanames)}else{return(NULL)} #return vector with offending filenames or NULL if empty
 }
 
+GroupDataVerification <- function(project.data){
+  Groupcheck = NULL
+  grouplist = as.data.frame(sapply(project.data[["resources"]], function(x) x))
+  grouplist[grouplist == "NULL"] <- NA
+  if (unname(lengths(project.data["resources"])) != lengths(unique(unlist(sapply(project.data[["resources"]], function(x) x["name"]))))){
+    Groupcheck[1] =  ("Duplicated groupnames ")
+    Groupcheck[1] <<- Groupcheck}
+    
+  if (any(is.na(grouplist))) {
+    Groupcheck[2] = "Missing data in group metadata"
+    Groupcheck[2] <<- Groupcheck[2]
+  } 
+  Groupcheck <<- Groupcheck
+}
+
+
 
 
 #### make sure there are no duplicated fly behavior traces in the list ####
@@ -172,7 +188,7 @@ MultiFlyDuplicateCheck <- function(xml_list)
   pb <- txtProgressBar(min = 0, max = length(xml_list), style = 3, char = "=")
   for (l in 1:length(xml_list)) 
   {
-    xml_name=xml_list[l]
+    xml_name=xml_list[1]
     setTxtProgressBar(pb, l)
     ## read data and extract traces
     singledata <- flyDataImport(xml_name)

@@ -48,8 +48,8 @@ project.data <- yaml.load_file(project.file)
 setwd(project.path)
 
 #start busy animation
-busy <- image_read(paste(start.wd,"/dataintegrity.gif", sep=""))
-print(busy)
+#busy <- image_read(paste(start.wd,"/dataintegrity.gif", sep=""))
+#print(busy)
 
 #measure the runtime of the whole analysis
 start_time <- Sys.time() #Records the system time at the start of the analysis
@@ -64,9 +64,16 @@ xml_list = paste(project.path, unlist(do.call("rbind", lapply(project.data$resou
 offending_metanames <- MultiFlyDataVerification(xml_list)
 if(!is_null(offending_metanames)) stop("You have selected files with non-equal metadata. Please check the file(s) above for consistency!", cat("Error! File(s) with differing metadata: ", offending_metanames, sep = "\n"))
 
+
+
 #check for duplicates in the raw data and report any occurrences
 offending_behavnames <- MultiFlyDuplicateCheck(xml_list)
 if(!is.null(offending_behavnames)) stop("There are duplicates in the raw data!", cat("Error! List of duplicate file(s): ", offending_behavnames, sep = "\n"))
+
+#check for errors in grouped data
+GroupDataVerification(project.data)
+if(!is.null(Groupcheck)) stop("The group metadata is wrong: ", Groupcheck, sep = " ")
+
 
 #collecting essential data from the project file for statistics and plots
 NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
