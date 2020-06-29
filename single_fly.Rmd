@@ -253,7 +253,7 @@ for(i in 1:NofPeriods){
 # Histograms
 ## Fly Behavior Histograms
 
-```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
+```{r FlyHistogram, eval=FALSE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
     
     ## plot position and fly histograms ##
     # add fly behavior pooled histogram

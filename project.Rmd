@@ -82,7 +82,7 @@ reactable(exp_groups,
 # Histograms
 ## Fly Behavior Histograms
 
-```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+```{r FlyHistogram, eval=FALSE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 
 for(x in 1:NofGroups)
   {
@@ -92,6 +92,26 @@ for(x in 1:NofGroups)
 }  
 ```
 
+## alternative Fly Behavior Histograms
+
+```{r altFlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
+
+  for(x in 1:NofGroups)
+  {
+    par(mfrow=c(6,3))
+    old.par = par(mar = c(3, 4, 1, 2))
+    grouphistdata[[x]]$period =as.factor(grouphistdata[[x]]$period)
+    
+    for (i in 1:NofPeriods){
+      df = subset(grouphistdata[[x]], grouphistdata[[x]]$period == i)
+      maxfly = c(-round_any(max(abs(range(df$fly))), 100, f=ceiling),round_any(max(abs(range(df$fly))), 100, f=ceiling))
+      hist(x = df$fly, breaks = 100,xlim = maxfly, xlab="Temperature in degrees Fahrenheit", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i))
+      abline(v = 0, col="black", lwd=2, lty=2)
+    }
+    maxfly = c(-round_any(max(abs(range(grouphistdata[[x]]$fly))), 100, f=ceiling),round_any(max(abs(range(grouphistdata[[x]]$fly))), 100, f=ceiling))
+    hist(grouphistdata[[x]]$fly, breaks = 100,xlim = maxfly, xlab=paste(FlyBehavior, "[arb units]"), main=paste("Pooled Behavior Histogram", groupnames[[x]]))
+  }  
+```
 
 ```{r PositionHistogram, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
 cat("\n## Arena Position Histograms\n")
