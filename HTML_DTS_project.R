@@ -103,7 +103,7 @@ grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group
 grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
-
+grouphistdata <- list()
 
 #create dataframes for dwelling data
 dwelldata = dwellplots = grouped.dwell = list()
@@ -267,6 +267,8 @@ close(pb)
     pooled.data[[i]] <- period.data
   } #for number of periods
 
+  temphistdata = bind_rows(pooled.data, .id = "period")
+  grouphistdata[[x]] = temphistdata
 
   ## pool all fly and position data into single data.frame
 
@@ -501,4 +503,5 @@ rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""),                       
 #### ----- end RMarkdown for project evaluations ----- #################################################
 
 Progressbar = mtext(paste("Runtime was",(round(((Sys.time() - start_time)), 3)), " minutes in total"), side = 1, line = 1)
+endtime = round(((Sys.time() - start_time)), 3)
 setwd(start.wd)
