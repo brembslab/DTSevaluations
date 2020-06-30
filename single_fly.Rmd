@@ -278,7 +278,7 @@ par(mfrow=c(6,3))
 old.par = par(mar = c(3, 4, 1, 2))
 for (i in 1:NofPeriods){
   df = subset(subset, subset$period == i)
-  hist(x = df$fly, breaks = 100,xlim = maxfly, xlab=paste(FlyBehavior, "[arb units]"), border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i))
+  hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab=paste(FlyBehavior, "[arb units]"), border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i))
   abline(v = 0, col="black", lwd=2, lty=2)
  
   }
@@ -422,6 +422,8 @@ plotaveOMtraces(OMdata)
 ```{r OptomotorAverageBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
 
 plotaveOMtraces(OMdataBefore)
+
+
 ```
 
 `r if (beforeafter) '### Averaged optomotor response at end'`
@@ -430,6 +432,7 @@ plotaveOMtraces(OMdataBefore)
 
 plotaveOMtraces(OMdataAfter)
 ```
+
 
 `r if (om | beforeafter) '## Further optomotor evaluations'`
 
