@@ -99,6 +99,7 @@ for(x in 1:NofGroups)
   for(x in 1:NofGroups)
   {
     par(mfrow=c(6,3))
+    par(mfrow=c(round(NofPeriods/5)*2, round(NofPeriods/5))) # sets the dimension of the multiplot, row x column
     old.par = par(mar = c(3, 4, 1, 2))
     grouphistdata[[x]]$period =as.factor(grouphistdata[[x]]$period)
     

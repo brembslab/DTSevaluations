@@ -274,15 +274,24 @@ for(i in 1:NofPeriods){
 ```{r AltFlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
   subset = rawdata[c("fly","period","a_pos")]
   subset$period = as.factor(subset$period)
-par(mfrow=c(6,3))
-old.par = par(mar = c(3, 4, 1, 2))
+par(mfrow=c(round(NofPeriods/5)*2, round(NofPeriods/5))) # sets the dimension of the multiplot, row x column
+old.par = par(mar = c(4, 4, 1, 0)) # sets the margins for the plots (bottom, left, top and right margins respectively)
 for (i in 1:NofPeriods){
-  df = subset(subset, subset$period == i)
-  hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab=paste(FlyBehavior, "[arb units]"), border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i))
-  abline(v = 0, col="black", lwd=2, lty=2)
+  df = subset(subset, subset$period == i) # subset the data for only one period
+  hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i)) #plots the data as a histogram
+  abline(v = 0, col="black", lwd=2, lty=2) # adds a line at 0
+  mtext(text = paste(FlyBehavior, "[arb units]"),
+        cex = 0.8,
+      side = 1,#side 1 = bottom
+      line = 2.5)
+  mtext(text = "Frequency",
+        cex = 0.8,
+      side = 2, #side 2 = left
+      line = 2)
  
   }
-hist(subset$fly, breaks = 100, main=paste(flyname, "Total"))
+hist(subset$fly, breaks = 100, border = "grey30", col = "grey30", main=paste(flyname, "Total"))
+
 ```
 
 ```{r PositionHistogram, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
