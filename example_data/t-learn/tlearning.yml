@@ -26,6 +26,12 @@ resources:
   - wtb-05.xml #missed flight pause
   #- wtb-06.xml #forgot IR filter first training; low data sampling
   - wtb-07.xml #many flight pauses
+#  - test-1.xml #did not rest 24h
+  - wtb-08.xml
+  - wtb-09.xml
+  - wtb-10.xml
+  - wtb-11.xml
+  - wtb-12.xml  #very weak at the end
   id: FBst0302270
 statistics:
   significance-levels:
