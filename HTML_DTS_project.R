@@ -34,6 +34,8 @@ library(data.table)
 library(DescTools)
 library(magick)
 library(reactable)
+library(cowplot)
+library(ggiraph)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -108,7 +110,7 @@ grouphistdata <- list()
 #create dataframes for dwelling data
 dwelldata = dwellplots = grouped.dwell = list()
 flies = 0 #initialize progress bar
-
+flynames = matrix(ncol = NofGroups, nrow = totalflies)
 for(x in 1:NofGroups)
 {
   #gather necessary data and variables
@@ -122,8 +124,8 @@ grouped.data <- list()    #total data grouped
 speclist <- list()        #spectograms
 
 #start actually evaluating
-print(paste("Evaluating experiments in group: ",grp_title,sep = ""), quote=FALSE)
-pb <- winProgressBar(title = "progress bar", min = 0, max = length(xml_list), width = 300)
+# print(paste("Evaluating experiments in group: ",grp_title,sep = ""), quote=FALSE)
+# pb <- winProgressBar(title = "progress bar", min = 0, max = length(xml_list), width = 300)
 
 for (l in 1:length(xml_list))
   {
@@ -136,6 +138,7 @@ for (l in 1:length(xml_list))
     ##extract fly meta-data
     fly <- singleflydata[[3]]
     flyname = fly$name[1]
+    flynames[l,x] = paste(flyname) 
 
     #progress bar
     if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
@@ -204,11 +207,11 @@ for (l in 1:length(xml_list))
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
     
     #open window with progress bar
-    setWinProgressBar(pb, l, title=paste(round(l/length(xml_list)*100, 0), "% of",grp_title,"done"))
+    #setWinProgressBar(pb, l, title=paste(round(l/length(xml_list)*100, 0), "% of",grp_title,"done"))
     
   } #for number of flies in xml_list - from here on group evaluations
 #close progress bar window
-close(pb)
+#close(pb)
 
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
 
