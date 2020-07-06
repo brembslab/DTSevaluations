@@ -611,7 +611,7 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
 
 <!-- Compute dwelling times -->
 
-```{r Mean dwelling, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+```{r Mean dwelling, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 4, comment=NA, results='asis'}
 
 cat("\n# Dwelling Times\n")
 
@@ -644,7 +644,7 @@ for(x in 1:NofGroups){
   guides(fill = FALSE, size = FALSE)
 }
  #grid.arrange(grobs = dwellmeanplots)
-girafe( ggobj = plot_grid(plotlist=dwellmeanplots, ncol = 1))
+girafe( ggobj = plot_grid(plotlist=dwellmeanplots, ncol = 1), width_svg = 3.5+(NofPeriods), height_svg = 4*NofGroups)
 ```
 
 ```{r PIbar, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
