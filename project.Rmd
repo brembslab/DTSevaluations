@@ -590,7 +590,7 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
 
 <!-- Compute dwelling times -->
 
-```{r Mean dwelling, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+```{r Mean dwelling, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 5, fig.width = 5, comment=NA, results='asis'}
 
 cat("\n# Dwelling Times\n")
 
@@ -599,17 +599,18 @@ dwellmeanplots = list() #create a list to store all the plots
 for(x in 1:NofGroups){
   grouped.dwell[[x]]$punished = -grouped.dwell[[x]]$punished #invert the punished values to make the bars go downwards
   dwellmeans[[x]] = reshape2::melt(grouped.dwell[[x]])       #load each group of data into a dataframe
-  colnames(dwellmeans[[x]])=c("period","value","Outcome")
+  dwellmeans[[x]]$fly = rep(flynames[,x][!is.na(flynames[,x])])
+  colnames(dwellmeans[[x]])=c("period","value","Outcome", "flyname")
   dwellmeanplots[[x]] <-   ggplot(dwellmeans[[x]], aes(as.factor(period), value, fill = Outcome)) +
   stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
    stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
   geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
-  geom_jitter(pch=21, colour="Black", size=2.3, width = 0.25)+
+  geom_jitter_interactive(tooltip = dwellmeans[[x]]$flyname, data_id = dwellmeans[[x]]$flyname , col = "grey", pch=21, size=1.3, width = 0.25)+
   ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
-  theme_light(base_size = 16) +
+  #theme_light(base_size = 16) +
   theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
         ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
-  theme(axis.text.y = element_text(size=18), legend.position = "none")+
+  #theme(axis.text.y = element_text(size=18), legend.position = "none")+
   ylab("mean dwelling [sec]")+
   labs(fill = "Outcome") +
   xlab("Experiment Sequence")+
@@ -621,7 +622,10 @@ for(x in 1:NofGroups){
   ylim(dwellrange) +
   guides(fill = FALSE, size = FALSE)
 }
- grid.arrange(grobs = dwellmeanplots)
+ #grid.arrange(grobs = dwellmeanplots)
+
+ girafe( ggobj = plot_grid(plotlist=dwellmeanplots, ncol = 1), width_svg = 3, height_svg = 3)
+ 
 ```
 
 ```{r PIbar, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}

@@ -34,6 +34,8 @@ library(data.table)
 library(DescTools)
 library(magick)
 library(reactable)
+library(ggiraph)
+library(cowplot)
 
 ## source the script with the functions needed for analysis
 source("readXMLdatafile.R")
@@ -105,6 +107,8 @@ grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group
 grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group at end of experiment
 
 
+flynames = matrix(ncol = NofGroups, nrow = totalflies)
+
 #create dataframes for dwelling data
 dwelldata = dwellplots = grouped.dwell = list()
 flies = 0 #initialize progress bar
@@ -122,8 +126,8 @@ grouped.data <- list()    #total data grouped
 speclist <- list()        #spectograms
 
 #start actually evaluating
-print(paste("Evaluating experiments in group: ",grp_title,sep = ""), quote=FALSE)
-pb <- winProgressBar(title = "progress bar", min = 0, max = length(xml_list), width = 300)
+#print(paste("Evaluating experiments in group: ",grp_title,sep = ""), quote=FALSE)
+#pb <- winProgressBar(title = "progress bar", min = 0, max = length(xml_list), width = 300)
 
 for (l in 1:length(xml_list))
   {
@@ -136,23 +140,24 @@ for (l in 1:length(xml_list))
     ##extract fly meta-data
     fly <- singleflydata[[3]]
     flyname = fly$name[1]
+    flynames[l,x] = paste(flyname) 
 
     #progress bar
-    if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
-    if (exists("Progressbar")){dev.off()} #deletes the previous plot. If not, this will generate an ever increasing number of plots in the end.
-    while (!is.null(dev.list()))  dev.off()
-    progress = round(flycount*(100/(totalflies))) #calculates the progress in percentage
-    esttime = (Sys.time() + (iter_time * (totalflies-flycount))) #estimated finish time, based on the last iteration and the number of flies left
-    rstudioapi::executeCommand("activatePlots") #switch focus from busy animation in viewer to progress bar in plots
-    Progressbar = barplot(progress,
-                 col = "grey", ylab = "% progress",
-                 ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
-    axis(2, seq(0,100,25), las=2) #sets the axis ticks
-    mtext(paste("Iteration time: ", iter_time, "sec \n Current fly:", flyname, "\n Current group:", grp_title), side=3)
-    mtext(paste("Est. finish time",substring(esttime, 12)), side = 1)
-    text(Progressbar,16, paste(progress, "% completed \n Flies left:", (totalflies-flycount))) #adds the percentage as text and the number of flies left
-    starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 20 seconds
-    flycount = flycount+1
+    # if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
+    # if (exists("Progressbar")){dev.off()} #deletes the previous plot. If not, this will generate an ever increasing number of plots in the end.
+    # while (!is.null(dev.list()))  dev.off()
+    # progress = round(flycount*(100/(totalflies))) #calculates the progress in percentage
+    # esttime = (Sys.time() + (iter_time * (totalflies-flycount))) #estimated finish time, based on the last iteration and the number of flies left
+    # rstudioapi::executeCommand("activatePlots") #switch focus from busy animation in viewer to progress bar in plots
+    # Progressbar = barplot(progress,
+    #              col = "grey", ylab = "% progress",
+    #              ylim=c(0,100), axes = FALSE) #set axis to 100 and then removes it
+    # axis(2, seq(0,100,25), las=2) #sets the axis ticks
+    # mtext(paste("Iteration time: ", iter_time, "sec \n Current fly:", flyname, "\n Current group:", grp_title), side=3)
+    # mtext(paste("Est. finish time",substring(esttime, 12)), side = 1)
+    # text(Progressbar,16, paste(progress, "% completed \n Flies left:", (totalflies-flycount))) #adds the percentage as text and the number of flies left
+    # starttime = Sys.time() #sets the start time until it reaches this point in the next iteration. 1st iteration is hardcoded to 20 seconds
+    # flycount = flycount+1
 
     ##extract sequence meta-data
     NofPeriods = singleflydata[[5]]
@@ -204,11 +209,11 @@ for (l in 1:length(xml_list))
     xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
     
     #open window with progress bar
-    setWinProgressBar(pb, l, title=paste(round(l/length(xml_list)*100, 0), "% of",grp_title,"done"))
+    #setWinProgressBar(pb, l, title=paste(round(l/length(xml_list)*100, 0), "% of",grp_title,"done"))
     
   } #for number of flies in xml_list - from here on group evaluations
 #close progress bar window
-close(pb)
+#close(pb)
 
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
 
@@ -500,5 +505,5 @@ rmarkdown::render(paste(start.wd,"/project.Rmd", sep=""),                       
                   output_dir = project.path)                                                       #####
 #### ----- end RMarkdown for project evaluations ----- #################################################
 
-Progressbar = mtext(paste("Runtime was",(round(((Sys.time() - start_time)), 3)), " minutes in total"), side = 1, line = 1)
+#Progressbar = mtext(paste("Runtime was",(round(((Sys.time() - start_time)), 3)), " minutes in total"), side = 1, line = 1)
 setwd(start.wd)
