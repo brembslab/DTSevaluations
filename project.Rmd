@@ -98,8 +98,7 @@ for(x in 1:NofGroups)
 
   for(x in 1:NofGroups)
   {
-    par(mfrow=c(6,3))
-    par(mfrow=c(round(NofPeriods/5)*2, round(NofPeriods/5))) # sets the dimension of the multiplot, row x column
+    par(mfrow=c(ceiling((NofPeriods+1)/3),3)) # sets the dimension of the multiplot, row x column
     old.par = par(mar = c(3, 4, 1, 2))
     grouphistdata[[x]]$period =as.factor(grouphistdata[[x]]$period)
     
@@ -611,40 +610,43 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
 
 <!-- Compute dwelling times -->
 
-```{r Mean dwelling, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 4, comment=NA, results='asis'}
 
+```{r dwellingalternative, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 5, comment=NA, results='asis'}
 cat("\n# Dwelling Times\n")
-
-dwellmeanplots = list() #create a list to store all the plots
+dwellmeans = list()
 
 for(x in 1:NofGroups){
   grouped.dwell[[x]]$punished = -grouped.dwell[[x]]$punished #invert the punished values to make the bars go downwards
-  dwellmeans[[x]] = reshape2::melt(grouped.dwell[[x]])       #load each group of data into a dataframe
+  dwellmeans[[x]] = reshape2::melt(grouped.dwell[[x]])
   dwellmeans[[x]]$flyname = rep(flynames[,x][!is.na(flynames[,x])])
-  colnames(dwellmeans[[x]])=c("period","value","Outcome","flyname")
-  dwellmeanplots[[x]] <-   ggplot(dwellmeans[[x]], aes(as.factor(period), value, fill = Outcome)) +
+}
+
+names(dwellmeans) = groupnames
+dwellmeansdata = bind_rows(dwellmeans, .id = "group")
+colnames(dwellmeansdata)=c("group","period","value","Outcome","flyname")
+
+
+dwellplot = ggplot(dwellmeansdata, aes(as.factor(period), value, fill = Outcome)) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0, 
+           alpha = .3)+
   stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
-   stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
-  geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
-  geom_jitter_interactive(tooltip = dwellmeans[[x]]$flyname, data_id = dwellmeans[[x]]$flyname , col = "grey", pch=21, size=1.3, width = 0.25)+
-  ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
-  theme_light(base_size = 16) +
-  theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
-        ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
-  theme(axis.text.y = element_text(size=18), legend.position = "none")+
+  stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
+  geom_jitter_interactive(tooltip = dwellmeansdata$flyname, data_id = dwellmeansdata$flyname , col = "grey", pch=21, size=1.0, width = 0.25)+
+  ylim(dwellrange)+
+  theme_light(base_size = 10) +
   ylab("mean dwelling [sec]")+
   labs(fill = "Outcome") +
   xlab("Experiment Sequence")+
+  theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
+        ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
+    theme(axis.text.y = element_text(size=10))+
   scale_fill_manual(values=c("red1", "steelblue4"))+
   scale_color_manual(values=c("firebrick4", "steelblue3"))+
-  theme(panel.grid.major = element_line(colour = "#808080")) + 
-  annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0, 
-           alpha = .3)+
-  ylim(dwellrange) +
-  guides(fill = FALSE, size = FALSE)
-}
- #grid.arrange(grobs = dwellmeanplots)
-girafe( ggobj = plot_grid(plotlist=dwellmeanplots, ncol = 1), width_svg = 3.5+(NofPeriods), height_svg = 4*NofGroups)
+  facet_wrap(vars(group), ncol = 1)
+
+
+girafe( ggobj = plot_grid(dwellplot),
+        options = list(opts_selection(type = "single",css = "fill:orange;stroke:gray;r:2pt;", only_shiny = FALSE)), width_svg = 4, height_svg = 4)
 ```
 
 ```{r PIbar, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
@@ -658,7 +660,7 @@ for(x in 1:NofGroups)
     # plot graph
      PIplots[[x]] <- ggplot(PIprofile, aes(x=period, y=PIs)) + 
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
+              stat_summary(geom = "bar", fun = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
               stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .2)) +
@@ -673,18 +675,19 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
 
-```{r BoxWithNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 10, comment=NA, results='asis'}
+```{r BoxWithNotchjitter, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 15, fig.width = 10, comment=NA, results='asis'}
 cat("\n## Performance Index box&dotplot with notches:\n")
 
 for(x in 1:NofGroups)
   {
     PIprofile <- grouped.PIcombined[[x]] #get PIs with categories
+    PIprofile$flyname = rep(flynames[,x][!is.na(flynames[,x])])
 
     #plot graph
     PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
+              geom_jitter_interactive(data = PIprofile, aes(period, PIs, fill=category) ,tooltip = PIprofile$flyname, data_id = PIprofile$flyname , col = "grey", pch=21, size=3.3, width = 0.25, alpha=0.7)+
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
@@ -696,9 +699,9 @@ for(x in 1:NofGroups)
               scale_fill_discrete(name = "Categories") #legend title for categories 
 
     }  
-grid.arrange(grobs = PIplots, nrow=NofGroups)
+#grid.arrange(grobs = PIplots, nrow=NofGroups)
+girafe( ggobj = plot_grid(plotlist=PIplots, ncol = 1),options = list(opts_selection(type = "single",css = "fill:orange;stroke:gray;r:4pt;", only_shiny = FALSE)), width_svg = 3.5+(length(unique(PIprofile$period))), height_svg = 4*NofGroups)
 ```
-
 
 ```{r BoxNoNotch, eval=PIs, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 10, comment=NA, results='asis'}
 cat("\n## Performance Index box&dotplot without notches:\n")
@@ -706,12 +709,13 @@ cat("\n## Performance Index box&dotplot without notches:\n")
 for(x in 1:NofGroups)
   {
     PIprofile <- grouped.PIcombined[[x]] #get PIs with categories
+    PIprofile$flyname = rep(flynames[,x][!is.na(flynames[,x])])
 
     #plot graph
     PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = PIprofile, aes(period, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
+              geom_jitter_interactive(data = PIprofile, aes(period, PIs, fill=category) ,tooltip = PIprofile$flyname, data_id = PIprofile$flyname , col = "grey", pch=21, size=3.3, width = 0.25, alpha=0.7)+
               ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
@@ -722,8 +726,9 @@ for(x in 1:NofGroups)
               theme(aspect.ratio=aspect_ratio) +
               scale_fill_discrete(name = "Categories") #legend title for categories 
 
-    }        
-grid.arrange(grobs = PIplots, nrow=NofGroups)
+    }  
+#grid.arrange(grobs = PIplots, nrow=NofGroups)
+girafe( ggobj = plot_grid(plotlist=PIplots, ncol = 1),options = list(opts_selection(type = "single",css = "fill:orange;stroke:gray;r:2pt;", only_shiny = FALSE)), width_svg = 3.5+(length(unique(PIprofile$period))), height_svg = 4*NofGroups)
 ```
 
 
@@ -1098,3 +1103,20 @@ PIstatPooled$learningscore=project.data$statistics$`learning-score`$title #add x
 print(ggplot(PIstatPooled, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
+
+```{r test, eval=(PIs & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Split Violin Plot for pooled groups\n")
+
+PIstatPooled$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
+print(ggplot(PIstatPooled, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
+
+```
+
+mtcars <- mtcars
+mtcars$tooltip <- rownames(mtcars)
+
+theme_set(theme_minimal())
+
+gg1 <- ggplot(mtcars) +
+  geom_point_interactive(aes(x = drat, y = wt, color = qsec,
+                             tooltip = tooltip, data_id = tooltip ), size = 4)

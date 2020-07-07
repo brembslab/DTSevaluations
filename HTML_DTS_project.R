@@ -50,8 +50,8 @@ project.data <- yaml.load_file(project.file)
 setwd(project.path)
 
 #start busy animation
-busy <- image_read(paste(start.wd,"/dataintegrity.gif", sep=""))
-print(busy)
+# busy <- image_read(paste(start.wd,"/dataintegrity.gif", sep=""))
+# print(busy)
 
 #measure the runtime of the whole analysis
 start_time <- Sys.time() #Records the system time at the start of the analysis
