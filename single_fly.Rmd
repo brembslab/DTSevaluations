@@ -274,7 +274,7 @@ for(i in 1:NofPeriods){
 ```{r AltFlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
   subset = rawdata[c("fly","period","a_pos")]
   subset$period = as.factor(subset$period)
-par(mfrow=c(round(NofPeriods/5)*2, round(NofPeriods/5))) # sets the dimension of the multiplot, row x column
+par(mfrow=c(round(NofPeriods/5)*2, 3)) # sets the dimension of the multiplot, row x column
 old.par = par(mar = c(4, 4, 1, 0)) # sets the margins for the plots (bottom, left, top and right margins respectively)
 for (i in 1:NofPeriods){
   df = subset(subset, subset$period == i) # subset the data for only one period
@@ -331,13 +331,13 @@ if (om & any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-o
 
 ### extract optomotor traces and generate dataframe for right (clockwise) turning arena
 OMperiods = which(grepl("optomotorR", sequence$type))                                     #collect the right turning OM periods
-rightOMdata <- generateOMdata(OMperiods)                                                  #call function which assembles optomotor data for the identified periods
+rightOMdata <- generateOMdata(rawdata, OMperiods)                                                  #call function which assembles optomotor data for the identified periods
 omtitle = "Right (clockwise) arena rotations -"                                           #set plot title
 plotrawOMtraces(rightOMdata, omtitle)                                                     #call function to pot the OM traces
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
 OMperiods = which(grepl("optomotorL", sequence$type))                                     #collect the left turning OM periods
-leftOMdata <- generateOMdata(OMperiods)                                                   #call function which assembles optomotor data for the identified periods
+leftOMdata <- generateOMdata(rawdata, OMperiods)                                                   #call function which assembles optomotor data for the identified periods
 leftOMdata$time=leftOMdata$time+max(rightOMdata$time)                                     #make left data start after right data
 omtitle = "Left (counter-clockwise) arena rotations -"                                    #set plot title
 plotrawOMtraces(leftOMdata, omtitle)                                                      #call function to pot the OM traces
@@ -352,6 +352,43 @@ if(!exists("OMdata"))
   OMdata=tempOMdata
 } else {
   OMdata[[as.character(flyname)]]=tempOMdata[[as.character(flyname)]]
+}
+```
+
+
+`r if (om | beforeafter) '## Optomotor traces (right/left) Normalized'`
+```{r OptomotorTracesNormalized, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
+
+rawdatanormalized = split(rawdata, with(rawdata, interaction(period)), drop = TRUE)
+for (i in 1:NofPeriods){
+rawdatanormalized[[i]]$fly = rawdatanormalized[[i]]$fly-head(rawdatanormalized[[i]]$fly, n=1)
+}
+rawdatanormalized = ldply(rawdatanormalized, rbind)
+####### Do not separate optomotor traces at all ##########
+
+### extract optomotor traces and generate dataframe for right (clockwise) turning arena
+OMperiods = which(grepl("optomotorR", sequence$type))                                     #collect the right turning OM periods
+rightOMdata <- generateOMdata(rawdatanormalized, OMperiods)                                                  #call function which assembles optomotor data for the identified periods
+omtitle = "Right (clockwise) arena rotations -"                                           #set plot title
+#plotrawOMtraces(rightOMdata, omtitle)                                                     #call function to pot the OM traces
+
+### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
+OMperiods = which(grepl("optomotorL", sequence$type))                                     #collect the left turning OM periods
+leftOMdata <- generateOMdata(rawdatanormalized, OMperiods)                                                   #call function which assembles optomotor data for the identified periods
+leftOMdata$time=leftOMdata$time+max(rightOMdata$time)                                     #make left data start after right data
+omtitle = "Left (counter-clockwise) arena rotations -"                                    #set plot title
+#plotrawOMtraces(leftOMdata, omtitle)                                                      #call function to pot the OM traces
+
+### generate averaged optomotor responses over both rotation directions
+tempOMdata=rbind(rightOMdata,leftOMdata)                                                  #combine left and right OMdata in one dataframe
+tempOMdata=aggregate(tempOMdata$fly,FUN=mean,by=list(tempOMdata$time))                    #average across periods
+colnames(tempOMdata) <- c("time", as.character(flyname))                                  #set dataframe names
+
+if(!exists("OMdatanorm"))
+{
+  OMdatanorm=tempOMdata
+} else {
+  OMdatanorm[[as.character(flyname)]]=tempOMdata[[as.character(flyname)]]
 }
 ```
 
@@ -426,6 +463,13 @@ if(!exists("OMdataAfter"))
 plotaveOMtraces(OMdata)
 ```
 
+`r if (om | beforeafter) '## Averaged optomotor response Normalized'`
+
+```{r OptomotorAveragenormalized, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
+
+plotaveOMtraces(OMdatanorm)
+```
+
 `r if (beforeafter) '### Averaged optomotor response at start'`
 
 ```{r OptomotorAverageBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}    
@@ -461,6 +505,29 @@ if(!exists("OMparams"))
 }
 
 ```
+
+
+`r if (om | beforeafter) '## Further optomotor evaluations normalized'`
+
+```{r moreOptomotornorm, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 8, fig.width = 6, comment=NA, results='asis'}    
+
+####### Do not separate optomotor parameters at all ##########
+
+tempOMparamsnorm <- OMparamextract(OMdatanorm) #call fucntion for parameter estimation
+kable(tempOMparamsnorm)  #plot table with data
+
+###collect all coefficients in dataframe for the group
+if(!exists("OMparamsnorm"))
+{
+  OMparamsnorm=tempOMparamsnorm
+} else {
+  OMparamsnorm[as.character(flyname),]=tempOMparamsnorm
+}
+
+```
+
+
+
 
 `r if (beforeafter) '### Optomotor parameters at start'`
 

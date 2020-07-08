@@ -133,8 +133,8 @@ geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", po
 
 
 ##################generate optomotor data for plotting ######################
-generateOMdata <- function(OMperiods){
-  OMdata<-filter(rawdata, rawdata$period %in% OMperiods) #extract only right turning arena periods
+generateOMdata <- function(dataframe, OMperiods){
+  OMdata<-filter(dataframe, dataframe$period %in% OMperiods) #extract only right turning arena periods
   OMdata <- OMdata %>% select(-c(a_pos,date)) #drop unnecessary columns
   OMdata$time=ave(OMdata$period, OMdata$period, FUN=seq_along) #match the time values to start at each period start
   OMdata$time=(OMdata$time-1)*50 #make 20Hz data into ms time scale

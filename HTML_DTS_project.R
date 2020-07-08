@@ -67,8 +67,8 @@ offending_metanames <- MultiFlyDataVerification(xml_list)
 if(!is_null(offending_metanames)) stop("You have selected files with non-equal metadata. Please check the file(s) above for consistency!", cat("Error! File(s) with differing metadata: ", offending_metanames, sep = "\n"))
 
 #check for duplicates in the raw data and report any occurrences
-offending_behavnames <- MultiFlyDuplicateCheck(xml_list)
-if(!is.null(offending_behavnames)) stop("There are duplicates in the raw data!", cat("Error! List of duplicate file(s): ", offending_behavnames, sep = "\n"))
+#offending_behavnames <- MultiFlyDuplicateCheck(xml_list)
+#if(!is.null(offending_behavnames)) stop("There are duplicates in the raw data!", cat("Error! List of duplicate file(s): ", offending_behavnames, sep = "\n"))
 
 #collecting essential data from the project file for statistics and plots
 NofGroups = unname(lengths(project.data["resources"]))                                         #get number of experimental groups
@@ -100,7 +100,9 @@ grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of le
 
 exp_groups <- list()              #Individual fly names in each group for display in project evaluation
 grouped.OMdata <-list()           #Averaged optomotor data traces for each group
+grouped.OMdatanorm <- list()
 grouped.OMparams <-list()         #Extracted optomotor parameters for each group
+grouped.OMparamsnorm <-list()         #Extracted optomotor parameters for each group
 grouped.OMdataBefore <-list()     #Averaged optomotor data traces for each group at start of experiment
 grouped.OMparamsBefore <-list()   #Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()      #Averaged optomotor data traces for each group at end of experiment
@@ -251,6 +253,16 @@ for (l in 1:length(xml_list))
       grouped.OMparams[[x]] <- OMparams #save extracted optomotor parameters to groupwise list
       rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
     }
+    if(exists("OMdatanorm")){
+      OMdatanorm$means=rowMeans(OMdatanorm[-1])
+      OMdatanorm$sd=rowSds(OMdatanorm[-1])
+      OMdatanorm$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMdatanorm[[x]] <- OMdatanorm #save optomotor data to groupwise list
+      rm(OMdatanorm)
+      OMparamsnorm$group=project.data[["resources"]][[x]][["name"]]
+      grouped.OMparamsnorm[[x]] <- OMparamsnorm #save extracted optomotor parameters to groupwise list
+      rm(OMparamsnorm) #remove the optomotor parameters dataframe so it can be generated again for the next group
+    } 
   }
 
 
