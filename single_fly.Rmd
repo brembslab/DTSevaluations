@@ -37,7 +37,7 @@ source("DTS_plotfunctions.R")
 **Experiment description:** `r paste(experiment$description)`  
 **Experiment duration:** `r paste(experiment$duration)`s  
 **Arena type:** `r paste(experiment$arena_type)`; **Measurement device:** `r paste(experiment$meter_type)`  
-**Fly description:** `r paste(fly$description)`; **FlyBase ID:** [`r paste(fly$flybase)`](http://flybase.org/reports/`r paste(fly$flybase)`)  
+**Fly description:** `r paste(fly$description)`; **FlyBase ID:** `r hyperlinks.FBids(fly$flybase)`  
 **Sampling rate:** `r paste(experiment$sample_rate)`Hz
 ```{r sr_condition, echo=FALSE}
 sampleratecondition <- round(real_sample_rate)>20

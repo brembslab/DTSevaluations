@@ -29,8 +29,8 @@ flyDataImport <- function(xml_name) {
     if (rawdata$period[1]==0){rawdata$period=rawdata$period+1}
   ##reset position data to +/-180° [-1800..1796] for torquemeter experiments
     if (tolower(ExpType)=="torquemeter"){
-    if (experiment$arena_type=="lightguides"){rawdata$a_pos = rawdata$a_pos-1800}
-    if (experiment$arena_type=="motor"){rawdata$a_pos = round(rawdata$a_pos*0.87890625)}
+    if (tolower(experiment$arena_type)=="lightguides"){rawdata$a_pos = rawdata$a_pos-1800}
+    if (tolower(experiment$arena_type)=="motor"){rawdata$a_pos = round(rawdata$a_pos*0.87890625)}
     }
     
   ##adjusting data for shiming

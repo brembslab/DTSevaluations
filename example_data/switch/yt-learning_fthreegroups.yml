@@ -33,7 +33,7 @@ resources:
   data:
    - values56.xml
    - values62.xml
-  id: FBst0302270
+  id: none
 - name: WTB3
   title: wt Berlin3
   description: exp
