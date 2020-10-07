@@ -85,6 +85,9 @@ if(!is.null(unlist(sapply(project.data[["resources"]], function(x) x["id"])))){
 groupids <- hyperlinks.FBids(unlist(sapply(project.data[["resources"]], function(x) x["id"])))       #get a vector with all group FlyBase IDs and hyperlinks
 } else groupids=NULL
 
+#ensure all groups have unique names
+if(anyDuplicated(groupnames)>0) stop("There is a duplicate group name!", cat("Error! Duplicate name(s): ", groupnames[anyDuplicated(groupnames)], sep = "\n"))
+
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=project.data$experiment)){ExpType = project.data$experiment$type} else ExpType = "Torquemeter"
 if (tolower(ExpType)=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
