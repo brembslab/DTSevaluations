@@ -395,7 +395,7 @@ close(pb)
 
   #### -- Performance Indices -- ####
 
-  PIs <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
+  PIs_present <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
 
   #PIprofiles for statistical analysis (PIs alone, periods as column names)
   colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)    #make colnames in PIprofile
@@ -408,7 +408,7 @@ close(pb)
   Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
 
   #PCombine categories with PIs for plotting (melted, periods as id-variable)
-  if (PIs)
+  if (PIs_present)
   {
     PIcombined <- melt(Categories, measure.vars = names(Categories), variable.name = "period", value.name = "category") #melt data frame to create a variable with periods as id values
     PIcombined["PIs"] = melt(PIprofile)$value                 #combine the categories with the PIs
@@ -450,7 +450,7 @@ dwellrange[2]=-dwellrange
 }
 
 #create new dataframes for the chosen PI learningscore values
-if(PIs & !is.null(learningscore)){
+if(PIs_present & !is.null(learningscore)){
   PIstat <- list()
   CatStat <- list()
   for(x in 1:NofGroups){
