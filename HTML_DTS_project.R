@@ -272,13 +272,10 @@ close(pb)
     }
     pooled.data[[i]] <- period.data
   } #for number of periods
-
+ 
+  ##create a list with data for histograms
+   grouphistdata[[x]] = bind_rows(pooled.data, .id = "period")
   
-#testing new histogram code
-  temphistdata = bind_rows(pooled.data, .id = "period")
-  grouphistdata[[x]] = temphistdata
-  
-
   ## pool all fly and position data into single data.frame
 
   all.data <- do.call(rbind, pooled.data)
