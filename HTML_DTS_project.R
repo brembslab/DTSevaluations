@@ -100,6 +100,7 @@ grouped.PIcombined <- list()  #For categorical color coding of PIs
 grouped.periods <- list()     #Period designs in a list of length NofGroups
 grouped.spectra <- list()     #Power spectra in a list of length NofGroups
 grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of length NofPeriods
+grouphistdata <- list()       #testing New histogram code
 
 exp_groups <- list()              #Individual fly names in each group for display in project evaluation
 grouped.OMdata <-list()           #Averaged optomotor data traces for each group
@@ -272,6 +273,11 @@ close(pb)
     pooled.data[[i]] <- period.data
   } #for number of periods
 
+  
+#testing new histogram code
+  temphistdata = bind_rows(pooled.data, .id = "period")
+  grouphistdata[[x]] = temphistdata
+  
 
   ## pool all fly and position data into single data.frame
 
