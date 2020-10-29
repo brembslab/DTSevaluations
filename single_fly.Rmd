@@ -145,81 +145,6 @@ for(i in 1:NofPeriods){
         fly_pos_traces(temp) #plot the fly behavior and arena position time traces
       }
 
-      ####Calculate period histograms####
-      
-      #fly behavior
-        if(sequence$contingency[i]=="left_torque"){         #shade left torque area
-          flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
-                    geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-                    geom_vline(xintercept=0, linetype="dotted") +
-                    geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-                    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
-                    theme_light() +
-                    theme(panel.grid.major = element_blank(),
-                          panel.grid.minor = element_blank()) +
-                    xlim(maxfly) +
-                    scale_y_continuous(expand = c(0,0)) +
-                    ggtitle(paste(flyname, "Period", i))
-        } else if(sequence$contingency[i]=="right_torque"){  #shade right torque area
-          flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
-                    geom_rect(aes(xmin = 0, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-                    geom_vline(xintercept=0, linetype="dotted") +
-                    geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-                    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
-                    theme_light() +
-                    theme(panel.grid.major = element_blank(),
-                          panel.grid.minor = element_blank()) +
-                    xlim(maxfly) +
-                    scale_y_continuous(expand = c(0,0)) +
-                    ggtitle(paste(flyname, "Period", i))
-        } else {                                            #no shading
-          flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
-                    geom_vline(xintercept=0, linetype="dotted") +
-                    geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-                    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
-                    theme_light() +
-                    theme(panel.grid.major = element_blank(),
-                          panel.grid.minor = element_blank()) +
-                    xlim(maxfly) +
-                    scale_y_continuous(expand = c(0,0)) +
-                    ggtitle(paste(flyname, "Period", i))
-        }
-
-          
-      #arena position
-      if(sequence$type[i]=="fs"||sequence$type[i]=="color")
-      {
-        if(sequence$contingency[i]=="1_3_Q"){  #shade first and third quadrant
-          poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
-                    geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-                    geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-                    geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-                    geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
-                    geom_histogram(binwidth=20, fill = sequence$histocolor[i]) +
-                    labs(x="Arena Position [degrees*10]", y="frequency") +
-                    theme_light() +
-                    theme(panel.grid.major = element_blank(),
-                          panel.grid.minor = element_blank()) +
-                    scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), limits = c(-1800,1800), expand = c(0,0)) +
-                    scale_y_continuous(expand = c(0,0)) +
-                    ggtitle(paste(flyname, "Period", i))
-        } else {                                #shade second and fourth quadrant
-                poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
-                    geom_rect(aes(xmin = -1350, xmax = -450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-                    geom_rect(aes(xmin = 450, xmax = 1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-                    geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
-                    geom_histogram(binwidth=20, fill = sequence$histocolor[i]) +
-                    labs(x="Arena Position [degrees*10]", y="frequency") +
-                    theme_light() +
-                    theme(panel.grid.major = element_blank(),
-                          panel.grid.minor = element_blank()) +
-                    scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), limits = c(-1800,1800), expand = c(0,0)) +
-                    scale_y_continuous(expand = c(0,0)) +
-                    ggtitle(paste(flyname, "Period", i))
-        }
-      }
-      
-      
       ##calculate PIs and 
       if(!exists("PIprofile")){PIprofile <- data.frame(matrix(ncol = NofPeriods))} ##create data.frame for adding PIs if it doesn't exist, yet
       if(sequence$type[i]=="fs"||sequence$type[i]=="color") #for arena position
@@ -253,21 +178,7 @@ for(i in 1:NofPeriods){
 # Histograms
 ## Fly Behavior Histograms
 
-```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
-    
-    ## plot position and fly histograms ##
-    # add fly behavior pooled histogram
-    flyhistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$fly)) + 
-      geom_histogram(binwidth=3) + 
-      labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") + 
-      xlim(-maxfly) +
-      ggtitle(paste(flyname, "total"))
-    
-    ##write histograms
-    #fly behavior
-    grid.arrange(grobs = flyhistos, ncol=round(NofPeriods/5))
-    
-
+```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
   subset = rawdata[c("fly","period","a_pos")]
   subset$period = as.factor(subset$period)
 par(mfrow=c(round(NofPeriods/5)*2, 3)) # sets the dimension of the multiplot, row x column
@@ -275,61 +186,88 @@ old.par = par(mar = c(4, 4, 1, 0)) # sets the margins for the plots (bottom, lef
 for (i in 1:NofPeriods){
   df = subset(subset, subset$period == i) # subset the data for only one period
   hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i)) #plots the data as a histogram
+#add shading in case of torque/switch learning
+    if(sequence$contingency[i]=="left_torque"){          #shade left torque area
+    rect(-2000, 0, 0, 500, col=("lightgrey"))
+    hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plot new hist
+  } else if(sequence$contingency[i]=="right_torque"){  #shade right torque area
+    rect(0, 0, 2000, 500, col=("lightgrey"))
+    hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plot new hist
+  }
   abline(v = 0, col="black", lwd=2, lty=2) # adds a line at 0
   mtext(text = paste(FlyBehavior, "[arb units]"),
-        cex = 0.8,
+        cex = 1,
       side = 1,#side 1 = bottom
       line = 2.5)
   mtext(text = "Frequency",
-        cex = 0.8,
+        cex = 1,
       side = 2, #side 2 = left
       line = 2)
- 
   }
-hist(subset$fly, breaks = 100, border = "grey30", col = "grey30", main=paste(flyname, "Total"))
-    
-    
+hist(subset$fly, breaks = 100, border = "grey40", col = "grey40", main=paste(flyname, "Total"), xlab="", ylab = "") #histogram of pooled data
+  mtext(text = paste(FlyBehavior, "[arb units]"),
+        cex = 1,
+      side = 1,#side 1 = bottom
+      line = 2.5)
+  mtext(text = "Frequency",
+        cex = 1,
+      side = 2, #side 2 = left
+      line = 2)
+
 ```
 
 
 ```{r PositionHistogram, eval=('fs' %in% sequence$type || 'color' %in% sequence$type), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8, comment=NA, results='asis'}    
       cat("\n## Arena Position Histograms\n")
-    # add pooled position histogram
-      poshistos[[NofPeriods+1]] <- ggplot(data=rawdata, aes_string(rawdata$a_pos)) + 
-      geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
-      geom_histogram(binwidth=10) +
-      labs(x="position [degrees*10]", y="frequency") + 
-      scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), limits = c(-1800,1800), expand = c(0,0)) +
-      scale_y_continuous(expand = c(0,0)) +
-      ggtitle(paste(flyname, "total"))
-    
-   ##write position histograms
-      grid.arrange(grobs = Filter(Negate(is.null), poshistos), ncol=round(sum(poshistos!="NULL")/5)) #only print position histograms if there are any
 
-```
-
-## Alternative way of plotting histograms
-
-```{r AltFlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}    
   subset = rawdata[c("fly","period","a_pos")]
   subset$period = as.factor(subset$period)
-par(mfrow=c(round(NofPeriods/5)*2, 3)) # sets the dimension of the multiplot, row x column
+par(mfrow=c(round(NofPeriods/2), 2)) # sets the dimension of the multiplot, row x column
 old.par = par(mar = c(4, 4, 1, 0)) # sets the margins for the plots (bottom, left, top and right margins respectively)
 for (i in 1:NofPeriods){
   df = subset(subset, subset$period == i) # subset the data for only one period
-  hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i)) #plots the data as a histogram
-  abline(v = 0, col="black", lwd=2, lty=2) # adds a line at 0
-  mtext(text = paste(FlyBehavior, "[arb units]"),
-        cex = 0.8,
+  hist(x = df$a_pos, breaks = 180,xlim = c(-1800,1800), xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), xaxt='n', yaxs="i") #plots the data as a histogram
+#add shading in case of torque/switch learning
+  if(sequence$contingency[i]=="1_3_Q"){  #shade first and third quadrant
+     rect(-1800, 0, -1350, 800, col=("lightgrey"))
+     rect(-450, 0, 450, 800, col=("lightgrey"))
+     rect(1350, 0, 1800, 800, col=("lightgrey"))
+     hist(x = df$a_pos, breaks = 900,xlim = c(-1800,1800), xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plots histogram again
+  } else {
+     rect(-1350,0,-450,800, col=("lightgrey"))
+     rect(450,0,1350,800, col=("lightgrey"))
+     hist(x = df$a_pos, breaks = 900,xlim = c(-1800,1800), xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plots histogram again
+  }
+  abline(v = 0, col="black", lwd=1, lty="dotted") # adds a line at 0
+  abline(v = 900, col="black", lwd=1, lty="dotted") # adds a line at 90°  
+  abline(v = -900, col="black", lwd=1, lty="dotted") # adds a line at -90° 
+  axis(side=1, at=c(-1800, -900, 0, 900, 1800))
+  mtext(text = paste("Arena Position [degrees*10]"),
+        cex = 1,
       side = 1,#side 1 = bottom
       line = 2.5)
   mtext(text = "Frequency",
-        cex = 0.8,
+        cex = 1,
       side = 2, #side 2 = left
       line = 2)
- 
   }
-hist(subset$fly, breaks = 100, border = "grey30", col = "grey30", main=paste(flyname, "Total"))
+hist(subset$a_pos, breaks = 360, border = "grey40", col = "grey40", main=paste(flyname, "Total"), xlab="", ylab = "", xaxt='n', yaxs="i") #histogram of pooled data
+  axis(side=1, at=c(-1800, -900, 0, 900, 1800))
+  #add quadrant borders
+  abline(v = -1350, col="black", lwd=1, lty="dotted") # adds a line at -135°
+  abline(v = -450, col="black", lwd=1, lty="dotted") # adds a line at -45° 
+  abline(v = 450, col="black", lwd=1, lty="dotted") # adds a line at 45° 
+  abline(v = 1350, col="black", lwd=1, lty="dotted") # adds a line at 135° 
+  
+  mtext(text = paste("Arena Position [degrees*10]"),
+        cex = 1,
+      side = 1,#side 1 = bottom
+      line = 2.5)
+  mtext(text = "Frequency",
+        cex = 1,
+      side = 2, #side 2 = left
+      line = 2)      
+
 ```
 
 
