@@ -185,14 +185,14 @@ par(mfrow=c(round(NofPeriods/5)*2, 3)) # sets the dimension of the multiplot, ro
 old.par = par(mar = c(4, 4, 1, 0)) # sets the margins for the plots (bottom, left, top and right margins respectively)
 for (i in 1:NofPeriods){
   df = subset(subset, subset$period == i) # subset the data for only one period
-  hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i)) #plots the data as a histogram
+  hist(x = df$fly, breaks = 100,xlim = maxfly, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i)) #plots the data as a histogram
 #add shading in case of torque/switch learning
     if(sequence$contingency[i]=="left_torque"){          #shade left torque area
     rect(-2000, 0, 0, 500, col=("lightgrey"))
-    hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plot new hist
+    hist(x = df$fly, breaks = 100,xlim = maxfly, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plot new hist
   } else if(sequence$contingency[i]=="right_torque"){  #shade right torque area
     rect(0, 0, 2000, 500, col=("lightgrey"))
-    hist(x = df$fly, breaks = 100,xlim = round(range(subset$fly))*1.1, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plot new hist
+    hist(x = df$fly, breaks = 100,xlim = maxfly, xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plot new hist
   }
   abline(v = 0, col="black", lwd=2, lty=2) # adds a line at 0
   mtext(text = paste(FlyBehavior, "[arb units]"),

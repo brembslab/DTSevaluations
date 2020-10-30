@@ -176,7 +176,7 @@ for (l in 1:length(xml_list))
     flyrange = singleflydata[[10]]
     traces <- singleflydata[[13]]
     #calculate max fly values for axes when plotting
-    maxfly = c(-round_any(max(abs(flyrange)), 100, f=ceiling),round_any(max(abs(flyrange)), 100, f=ceiling))
+    maxfly = c(-round_any(max(abs(flyrange)), 100, f=ceiling)*0.5,round_any(max(abs(flyrange)), 100, f=ceiling)*0.5)
 
     #create/empty plot lists
     poshistos <- list()
@@ -408,7 +408,7 @@ if(PIs & !is.null(learningscore)){
 }
 
 
-###### if there are more than two groups, try to pool some data into two groups
+###### if there are more than two groups, try to pool some PI data into two groups
 PoolGrps=FALSE
 
 if(NofGroups>2 & length(unique(groupdescriptions))==2){
