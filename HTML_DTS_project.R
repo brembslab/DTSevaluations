@@ -93,13 +93,12 @@ if (exists('type', where=project.data$experiment)){ExpType = project.data$experi
 if (tolower(ExpType)=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
 
 ### Initialize empty lists where data are collected
-grouped.poshistos <- list()   #Arena position histograms for group in a list of length NofPeriods
 grouped.PIprofiles <- list()  #PIProfile data frames in a list of length NofGroups
 grouped.Categories <- list()  #For saving categories within groups
 grouped.PIcombined <- list()  #For categorical color coding of PIs
 grouped.periods <- list()     #Period designs in a list of length NofGroups
 grouped.spectra <- list()     #Power spectra in a list of length NofGroups
-grouped.flyhistos <- list()   #Fly behavior histograms for group in a list of length NofPeriods
+grouphistdata <- list()       #list for histogram data
 
 exp_groups <- list()              #Individual fly names in each group for display in project evaluation
 grouped.OMdata <-list()           #Averaged optomotor data traces for each group
@@ -177,7 +176,7 @@ for (l in 1:length(xml_list))
     flyrange = singleflydata[[10]]
     traces <- singleflydata[[13]]
     #calculate max fly values for axes when plotting
-    maxfly = c(-round_any(max(abs(flyrange)), 100, f=ceiling),round_any(max(abs(flyrange)), 100, f=ceiling))
+    maxfly = c(-round_any(max(abs(flyrange)), 100, f=ceiling)*0.5,round_any(max(abs(flyrange)), 100, f=ceiling)*0.5)
 
     #create/empty plot lists
     poshistos <- list()
@@ -271,68 +270,13 @@ close(pb)
     }
     pooled.data[[i]] <- period.data
   } #for number of periods
-
-
+ 
+  ##create a list with data for histograms
+   grouphistdata[[x]] = bind_rows(pooled.data, .id = "period")
+  
   ## pool all fly and position data into single data.frame
 
   all.data <- do.call(rbind, pooled.data)
-
-  ## generate pooled position and fly histograms by period and add them to the list
-
-  for(i in 1:NofPeriods)
-  {
-    temp<-pooled.data[[i]]
-
-    #fly
-    flyhistos[[i]] <- ggplot(data=temp, aes_string(temp$fly)) +
-      geom_rect(aes(xmin = -Inf, xmax = 0, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-      geom_vline(xintercept=0, linetype="dotted") +
-      geom_histogram(binwidth = 3, fill = sequence$histocolor[i]) +
-      labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
-      xlim(maxfly) +
-      theme_light() +
-      theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank()) +
-      scale_x_continuous(expand = c(0,0)) +
-      scale_y_continuous(expand = c(0,0)) +
-      ggtitle(paste("Period", i))
-
-    #position
-    if(sequence$type[i]=="fs" || sequence$type[i]=="color")
-    {
-      poshistos[[i]] <- ggplot(data=temp, aes_string(temp$a_pos)) +
-        geom_rect(aes(xmin = -Inf, xmax = -1350, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-        geom_rect(aes(xmin = -450, xmax = 450, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-        geom_rect(aes(xmin = 1350, xmax = Inf, ymin = -Inf, ymax = Inf), fill=("lightgrey")) +
-        geom_vline(xintercept=c(-900,0,900), linetype="dotted") +
-        geom_histogram(binwidth=10, fill = sequence$histocolor[i]) +
-        labs(x="arena position [arb units]", y="frequency") +
-        theme_light() +
-        theme(panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank()) +
-        scale_x_continuous(breaks = c(-1800, -900, 0, 900, 1800), expand = c(0,0)) +
-        scale_y_continuous(expand = c(0,0)) +
-        ggtitle(paste("Period", i))
-    }
-  }
-
-  ## generate pooled histograms for all flies over all periods and add them to the list
-
-  #fly behavior
-  flyhistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$fly)) +
-    geom_histogram(binwidth=3) +
-    labs(x=paste(FlyBehavior, "[arb units]"), y="frequency") +
-    xlim(maxfly) +
-    ggtitle("Pooled Behavior Histogram")
-
-  #position (if there are fs periods)
-  if ('fs' %in% sequence$type || 'color' %in% sequence$type) {
-    poshistos[[NofPeriods+1]] <- ggplot(data=all.data, aes_string(all.data$a_pos)) +
-      geom_histogram(binwidth=10) +
-      labs(x="position [arb units]", y="frequency") +
-      xlim(-1800,1800) +
-      ggtitle("Pooled Position Histogram")
-  }
 
 
   ## if we have two groups, collect data for superimposed histograms for either fly behavior or position
@@ -349,20 +293,20 @@ close(pb)
         colnames(histo2)=c("fly","group")
         supHistos <- rbind(histo1,histo2) #make dataframe with fly data from both groups and group name as factor
       }
-    } else if ('fs' %in% sequence$type || 'color' %in% sequence$type) #for fs or color experiments, collect arena position data and fold them to 0..90°
+    } else if ('fs' %in% sequence$type || 'color' %in% sequence$type) #for fs or color experiments, collect arena position data and fold them to 0..90�
     {
       if(x==1){
         histo1 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
         histo1$v2 = groupnames[x]
         colnames(histo1)=c("a_pos","group")
         histo1$a_pos = abs(histo1$a_pos)/10    #fold position data over to look at 180° equivalent fixation and bring into degree range
-        histo1$a_pos[histo1$a_pos>90] = -histo1$a_pos[histo1$a_pos>90]+180 #fold anything larger than 90° to 0..90°
+        histo1$a_pos[histo1$a_pos>90] = -histo1$a_pos[histo1$a_pos>90]+180 #fold anything larger than 90� to 0..90�
       } else {
         histo2 <- data.frame(pooled.data[[learningscore]][["a_pos"]])
         histo2$v2 = groupnames[x]
         colnames(histo2)=c("a_pos","group")
         histo2$a_pos = abs(histo2$a_pos)/10  #fold position data over to look at 180° equivalent fixation and bring into degree range
-        histo2$a_pos[histo2$a_pos>90] = -histo2$a_pos[histo2$a_pos>90]+180 #fold anything larger than 90° to 0..90°
+        histo2$a_pos[histo2$a_pos>90] = -histo2$a_pos[histo2$a_pos>90]+180 #fold anything larger than 90� to 0..90�
         supHistos <- rbind(histo1,histo2)  #make dataframe with position data from both groups and group name as factor
       }
     }
@@ -374,14 +318,6 @@ close(pb)
 
   #### -- Period sequence design meta-data -- ####
   grouped.periods[[x]] = periods
-
-  #### --Fly Histograms -- ####
-  grouped.flyhistos[[x]] = flyhistos #add fly histograms to list of grouped histograms
-  flyhistos <- list() #empty fly histograms
-
-  #### -- Position Histograms -- ####
-  grouped.poshistos[[x]] = poshistos #add position histograms to list of grouped position histograms
-  poshistos <- list() #empty list of position histograms
 
   #### -- Dwelling times -- ####
   if (Dwell){
@@ -472,7 +408,7 @@ if(PIs_present & !is.null(learningscore)){
 }
 
 
-###### if there are more than two groups, try to pool some data into two groups
+###### if there are more than two groups, try to pool some PI data into two groups
 PoolGrps=FALSE
 
 if(NofGroups>2 & length(unique(groupdescriptions))==2){
