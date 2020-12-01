@@ -8,6 +8,8 @@ if(!is.null(dev.list())) dev.off() #clear plots
 setwd(dirname(parent.frame(2)$ofile)) #set working directory to source file location (allows loading of function files)
 
 library(ggplot2)
+library(cowplot)
+library(ggiraph)
 library(tidyr)
 library(dygraphs)
 library(grid)
@@ -55,7 +57,7 @@ print(busy)
 start_time <- Sys.time() #Records the system time at the start of the analysis
 
 #progressbar
-totalflies <- length(paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/"))#gets the number of total flies
+totalflies <- length(paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/"))#gets the number of flies total
 flycount = 1
 
 
@@ -100,6 +102,8 @@ grouped.periods <- list()     #Period designs in a list of length NofGroups
 grouped.spectra <- list()     #Power spectra in a list of length NofGroups
 grouphistdata <- list()       #list for histogram data
 
+flynames = matrix(ncol=NofGroups, nrow=max(samplesizes)) #create a place to collect all flynames
+
 exp_groups <- list()              #Individual fly names in each group for display in project evaluation
 grouped.OMdata <-list()           #Averaged optomotor data traces for each group
 grouped.OMparams <-list()         #Extracted optomotor parameters for each group
@@ -111,6 +115,7 @@ grouped.OMparamsAfter <-list()    #Extracted optomotor parameters for each group
 
 #create dataframes for dwelling data
 dwelldata = dwellplots = grouped.dwell = list()
+
 flies = 0 #initialize progress bar
 
 for(x in 1:NofGroups)
@@ -140,6 +145,7 @@ for (l in 1:length(xml_list))
     ##extract fly meta-data
     fly <- singleflydata[[3]]
     flyname = fly$name[1]
+    flynames[l,x] = paste(flyname) #copy the name into the list of all flynames
 
     #progress bar
     if (exists("starttime")){iter_time = round((Sys.time()-starttime), 2)} else iter_time = 20  #calculates the iteration time
