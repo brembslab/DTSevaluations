@@ -726,7 +726,7 @@ for(x in 1:NofGroups)
               scale_fill_discrete(name = "Categories") #legend title for categories 
 
     }  
-girafe( ggobj = plot_grid(plotlist=PIplots, ncol = 1),options = list(opts_selection(type = "single",css = "fill:orange;stroke:gray;r:4pt;", only_shiny = FALSE)), width_svg = 3.5+(length(unique(PIprofile$period))), height_svg = 4*NofGroups)
+girafe( ggobj = plot_grid(plotlist=PIplots, ncol = 1),options = list(opts_selection(type = "single",css = "fill:orange;stroke:gray;r:4pt;", only_shiny = FALSE)), width_svg = 4+(length(unique(PIprofile$period))), height_svg = 5*NofGroups)
 ```
 
 
@@ -825,7 +825,7 @@ cat("\n## Statistical tests between two groups\n")
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
     w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)
     #compute effect size Cohen's D
-    if(samplesizes[1]==samplesizes[2]){equalN=TRUE}else{equalN=FALSE}   #deterine if the samplesizes are identical
+    if(samplesizes[1]==samplesizes[2]){equalN=TRUE}else{equalN=FALSE}   #determine if the samplesizes are identical
     if(fligner.test(PIstatCombined$PIs,PIstatCombined$group)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
     if(equalN & hv){hedges=FALSE}else{hedges=TRUE}                      #test if we need to apply Hedge's correction
     if(hedges){
