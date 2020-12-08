@@ -1,0 +1,158 @@
+---
+experiment:
+    type: Torquemeter
+    id: PB
+    name: PB x Cas9gFoxP Exp 3
+    title: PB x Cas9gFoxP
+    description: Standard yaw torque learning by Andi
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: andi-ehweiner
+    description: Andi Ehweiner
+    firstName: Andi
+    lastName: Ehweiner
+    id: 0000-0000-0000-0000
+resources:
+- name: PCBCas9gFoxP
+  title: PCb x Cas9gFoxP
+  description: Exp
+  data:
+  #- Proto.xml
+  - Proto_10.xml
+  #- Proto_11.xml
+  #- Proto_2.xml
+  - Proto_3.xml
+  - Proto_5.xml
+  #- Proto_6.xml
+  #- Proto_8.xml
+  - ProtoCas9FoxP_1.xml
+  - ProtoCas9FoxP_10.xml
+  - ProtoCas9FoxP_11.xml
+  #- ProtoCas9FoxP_16.xml
+  #- ProtoCas9FoxP_18.xml
+  #- ProtoCas9FoxP_19.xml
+  - ProtoCas9FoxP_2.xml
+  #- ProtoCas9FoxP_20.xml
+  #- ProtoCas9FoxP_24.xml
+  #- ProtoCas9FoxP_26.xml
+  - ProtoCas9FoxP_28.xml
+  #- ProtoCas9FoxP_3.xml
+  - ProtoCas9FoxP_30.xml
+  - ProtoCas9FoxP_4.xml
+  - ProtoCas9FoxP_6.xml
+  - ProtoCas9FoxP_9.xml
+  - PCBCas9gFoxP_10.xml
+  - PCBCas9gFoxP_11.xml
+  - PCBCas9gFoxP_13.xml
+  #- PCBCas9gFoxP_16.xml
+  - PCBCas9gFoxP_17.xml
+  - PCBCas9gFoxP_19.xml
+  #- PCBCas9gFoxP_20.xml
+  #- PCBCas9gFoxP_23.xml
+  - PCBCas9gFoxP_24.xml
+  - PCBCas9gFoxP_3.xml
+  - PCBCas9gFoxP_5.xml
+  #- PCBCas9gFoxP_7.xml
+  #- PCBCas9gFoxP_8.xml
+- name: PCBgFoxp
+  title: PCb x gFoxP
+  description: Control
+  data:  
+  - PCBFoxP_10.xml
+  - PCBFoxP_12.xml
+  - PCBFoxP_15.xml
+  - PCBFoxP_16.xml
+  - PCBFoxP_18.xml
+  - PCBFoxP_23.xml
+  - PCBFoxP_24.xml
+  - PCBFoxP_3.xml
+  #- PCBFoxP_5.xml
+  - PCBFoxP_6.xml
+  - PCBFoxP_8.xml
+  #- PCBCas_1.xml
+  #- PCBCas_2.xml
+  #- PCBCas_5.xml
+  - ProtFoxP_3.xml  
+  - PCBFoxP_25.xml
+  - PCBFoxP_27.xml
+  - PCBFoxP_29.xml
+  - PCBFoxP_34.xml
+  - PCBFoxP_35.xml
+  - PCBFoxP_39.xml
+  - PCBFoxP_42.xml
+  - PCBFoxP_43.xml
+  - PCBFoxP_44.xml
+  - PCBFoxP_45.xml
+  - PCBFoxP_46.xml
+  - PCBFoxP_47.xml  
+- name: PCBCas9
+  title: PCb x Cas9
+  description: Control
+  data:  
+  #- PCBCas_1.xml
+  #- PCBCas_2.xml
+  - PCBCas_4.xml
+  #- PCBCas_5.xml
+  - PCBCas_8.xml
+  #- ProtCas_1.xml
+  - PCBCas_12.xml
+  - PCBCas_16.xml
+  - PCBCas_17.xml
+  - PCBCas_20.xml
+  - PCBCas_24.xml
+  #- PCBCas_25.xml
+  - PCBCas_27.xml
+  - PCBCas_29.xml
+  - PCBCas_30.xml
+  - PCBCas_32.xml
+  #- PCBCas_33.xml
+  #- PCBCas_39.xml
+  - PCBCas_41.xml
+  - PCBCas_44.xml
+  - PCBCas_45.xml
+  - PCBCas_46.xml
+  - PCBCas_49.xml
+  - PCBCas_50.xml
+  - PCBCas_51.xml
+  - PCBCas_53.xml
+  - PCBCas_55.xml
+  - PCBCas_56.xml
+  - PCBCas_58.xml
+  - PCBCas_60.xml
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianred1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 8
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #yes
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: greater #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: two.sided #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes           
+mediatype: text/csv/xml
+epid: 245

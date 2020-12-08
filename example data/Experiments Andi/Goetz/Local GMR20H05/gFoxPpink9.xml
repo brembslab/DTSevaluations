@@ -1,0 +1,95 @@
+<DTS_xml>
+<metadata>
+	<license URI="http://opendatacommons.org/licenses/pddl">PDDL</license>
+	<URIs>
+		<recording />
+		<analysis />
+		<datamodel>someDOI</datamodel>
+	</URIs>
+	<experimenter>
+		<firstname>Andreas</firstname>
+		<lastname>Ehweiner</lastname>
+		<orcid>Na</orcid>
+	</experimenter>	
+	<fly type="mutant">
+		<name>gFoxPpink9</name>
+		<RRID>Na</RRID>
+		<description>motor</description>
+		<flybase>FB</flybase>
+	</fly>
+	<experiment type="torquemeter">
+		<dateTime>2020-12-02T10:14:03</dateTime>
+		<duration>1320</duration>
+		<description>motor</description>
+		<sample_rate>72</sample_rate>
+		<arena_type>LightGuides</arena_type>
+		<meter_type>Goetz</meter_type>
+	</experiment>
+</metadata>
+<sequence periods="17">
+<period number="1"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="2"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="3"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="4"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="5"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>right_torque</contingency></period><period number="6"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>right_torque</contingency></period><period number="7"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>right_torque</contingency></period><period number="8"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>right_torque</contingency></period><period number="9"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>right_torque</contingency></period><period number="10"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>right_torque</contingency></period><period number="11"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>right_torque</contingency></period><period number="12"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>right_torque</contingency></period><period number="13"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>right_torque</contingency></period><period number="14"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="15"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="16"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="17"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period></sequence>
+<timeseries>
+	<CSV_descriptor>
+		<delimiter>tab</delimiter>
+		<header>0</header>
+		<nullSequence>NaN</nullSequence>
+	</CSV_descriptor>
+	<variables>
+		<variable number="1">
+		    <type>time</type>		
+			<var_type>uint16int16</var_type>
+			<unit>ms</unit>
+		</variable>	
+		<variable number="2">
+		    <type>a_pos</type>		
+			<var_type>int16</var_type>
+			<unit>arb_unit</unit>
+		</variable>
+		<variable number="3">
+			<type>torque</type>
+			<var_type>int16</var_type>
+			<unit>arb_unit</unit>
+		</variable>
+		<variable number="4">
+		    <type>period</type>		
+			<var_type>uint8</var_type>
+			<unit>number</unit>
+		</variable>		
+	</variables>
+	<csv_data>
+	0	1152	-2047	0
+15	2300	-2047	0
+35	3452	-2047	0
+50	1004	-2047	0
+66	2156	-2047	0
+81	3308	-2047	0
+97	860	-2047	0
+113	2012	-2047	0
+128	3164	-2047	0
+160	711	-2047	0
+176	1863	-2047	0
+191	3015	-2047	0
+212	567	-2047	0
+227	1719	-2047	0
+243	2871	-2047	0
+258	423	-2047	0
+275	1575	-2047	0
+290	2722	-2047	0
+306	274	-2047	0
+323	1426	-2047	0
+340	2578	-2047	0
+357	130	-2047	0
+372	1282	-2047	0
+388	2434	-2047	0
+404	3586	-2047	0
+419	1134	-2047	0
+437	2286	-2047	0
+452	3438	-2047	0
+467	990	-2047	0
+483	2142	-2047	0
+499	3294	-2047	0
+515	846	-2047	0
+530	1998	-2047	0
+</csv_data>
+</timeseries>
+</DTS_xml>

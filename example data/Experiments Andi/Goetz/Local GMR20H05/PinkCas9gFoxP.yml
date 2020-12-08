@@ -1,0 +1,145 @@
+---
+experiment:
+    type: Torquemeter
+    id: SCR_017276
+    name: local knocout GMR20H05
+    title: Pink Foxp knockout
+    description: GMR20H05expresses in or near nAChRalpha6
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: andreas-ehweiner
+    description: Andreas Ehweiner
+    firstName: Andreas
+    lastName: Ehweiner
+    id: Na
+resources:
+
+- name: Pink Cas9gFoxp
+  title: Cas9gFoxP Pink
+  description: Exp
+  data:
+  #- Cas9gFoxPpink0.xml #flugfaul
+  - Cas9gFoxPpink1.xml 
+  - Cas9gFoxPpink2.xml #left
+  - Cas9gFoxPpink3.xml #right
+  - Cas9gFoxPpink4.xml #left #schlechte vermeidung am ende
+  #- Cas9gFoxPpink5.xml #right # extrem flugfaul verwerfen
+  - Cas9gFoxPpink6.xml #left #flugfaul verwerfen
+  #- Cas9gFoxPpink7.xml #right flugfaul keine vermeidung
+  - Cas9gFoxPpink8.xml #left
+  - Cas9gFoxPpink9.xml #right #flugfaul
+  - Cas9gFoxPpink10.xml #left  
+  - Cas9gFoxPpink11.xml #right
+  #- Cas9gFoxPpink12.xml #left #kein opotomo
+  - Cas9gFoxPpink13.xml #right
+  #- Cas9gFoxPpink14.xml #left #unfinished
+  #- Cas9gFoxPpink15.xml #right #unfinished
+  - Cas9gFoxPpink16.xml #left 
+  - Cas9gFoxPpink17.xml #right
+  - Cas9gFoxPpink18.xml #left #flugfaul verwerfen
+  - Cas9gFoxPpink19.xml #right  
+  - Cas9gFoxPpink20.xml #right #schlechte vermeidung flugfaul
+  - Cas9gFoxPpink21.xml #left #flugfaul
+  - Cas9gFoxPpink22.xml #right #schlechte vermeidung idel beat fraglich
+  #- Cas9gFoxPpink23.xml #left #sehr flugfauk kein optomo
+  - Cas9gFoxPpink24.xml #left #stark flugfaul
+  #- Cas9gFoxPpink25.xml #right #laser wrong stark flugfaul verwerfen
+  #- Cas9gFoxPpink25.xml #right #extrem flugfaul verwerfen
+  - Cas9gFoxPpink26.xml #left #flugfaul
+  - Cas9gFoxPpink27.xml #right
+  id: FBst0
+  
+- name: Pink gFoxp
+  title: gFoxP Pink
+  description: Control
+  data:
+  - gFoxPpink0.xml #left
+  - gFoxPpink1.xml #right
+  - gFoxPpink2.xml #left
+  - gFoxPpink3.xml #left
+  - gFoxPpink4.xml #right #flugfaul
+  - gFoxPpink5.xml #left
+  - gFoxPpink6.xml #right
+  - gFoxPpink7.xml #left idel beat  
+  #- gFoxPpink8.xml #right no optomotor
+  #- gFoxPpink9.xml #right 
+  - gFoxPpink10.xml #left
+  - gFoxPpink11.xml #right 
+  - gFoxPpink12.xml #left
+  - gFoxPpink13.xml #right
+  - gFoxPpink14.xml #left
+  - gFoxPpink15.xml #right #flugfaul
+  #- gFoxPpink16.xml #left #kein optomo
+  - gFoxPpink17.xml #right schlechte vermeidung
+  - gFoxPpink18.xml #right
+  - gFoxPpink19.xml #left  
+  - gFoxPpink20.xml #right
+  - gFoxPpink21.xml #left #flugfaul verwerfen
+  #- gFoxPpink22.xml #left
+  - gFoxPpink23.xml #left
+  id: FBst0
+
+- name: Pink Cas9
+  title: Cas9 Pink
+  description: Control
+  data:
+  #- Cas9Pink0.xml #left torque, gute vermeidung
+  - Cas9Pink0.xml #left
+  - Cas9Pink1.xml #right #schlechte vermeidung
+  - Cas9Pink2.xml #right
+  - Cas9Pink3.xml #left
+  - Cas9Pink4.xml #left
+  - Cas9Pink5.xml #right
+  - Cas9Pink6.xml #left #fehler
+  - Cas9Pink7.xml #left
+  - Cas9Pink8.xml #right
+  #- Cas9Pink9.xml #left
+  - Cas9Pink9.xml #right
+  - Cas9Pink10.xml #right
+  #- Cas9Pink11.xml #left #schlechte vermeidung #ungleich
+  - Cas9Pink12.xml #right #m
+  - Cas9Pink13.xml #left #m flugfaul
+  - Cas9Pink14.xml #right #opto seltsam
+  - Cas9Pink15.xml #left
+  - Cas9Pink16.xml #right
+  - Cas9Pink17.xml #left
+  - Cas9Pink18.xml #right #ungleich
+  - Cas9Pink19.xml #left
+  - Cas9Pink20.xml #right
+  id: FBst0  
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianPink1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 8
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #yes
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes             
+mediatype: text/csv/xml

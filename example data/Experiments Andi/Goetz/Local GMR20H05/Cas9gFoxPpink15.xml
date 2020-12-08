@@ -1,0 +1,162 @@
+<DTS_xml>
+<metadata>
+	<license URI="http://opendatacommons.org/licenses/pddl">PDDL</license>
+	<URIs>
+		<recording />
+		<analysis />
+		<datamodel>someDOI</datamodel>
+	</URIs>
+	<experimenter>
+		<firstname>Andreas</firstname>
+		<lastname>Ehweiner</lastname>
+		<orcid>Na</orcid>
+	</experimenter>	
+	<fly type="mutant">
+		<name>Cas9gFoxPpink15</name>
+		<RRID>Na</RRID>
+		<description>motor</description>
+		<flybase>FB</flybase>
+	</fly>
+	<experiment type="torquemeter">
+		<dateTime>2020-12-05T09:19:00</dateTime>
+		<duration>1200</duration>
+		<description>motor</description>
+		<sample_rate>72</sample_rate>
+		<arena_type>LightGuides</arena_type>
+		<meter_type>Goetz</meter_type>
+	</experiment>
+</metadata>
+<sequence periods="13">
+<period number="1"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="2"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="3"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="4"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="5"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="6"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="7"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="8"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="9"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="10"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="11"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="12"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="13"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period></sequence>
+<timeseries>
+	<CSV_descriptor>
+		<delimiter>tab</delimiter>
+		<header>0</header>
+		<nullSequence>NaN</nullSequence>
+	</CSV_descriptor>
+	<variables>
+		<variable number="1">
+		    <type>time</type>		
+			<var_type>uint16int16</var_type>
+			<unit>ms</unit>
+		</variable>	
+		<variable number="2">
+		    <type>a_pos</type>		
+			<var_type>int16</var_type>
+			<unit>arb_unit</unit>
+		</variable>
+		<variable number="3">
+			<type>torque</type>
+			<var_type>int16</var_type>
+			<unit>arb_unit</unit>
+		</variable>
+		<variable number="4">
+		    <type>period</type>		
+			<var_type>uint8</var_type>
+			<unit>number</unit>
+		</variable>		
+	</variables>
+	<csv_data>
+	0	2254	-47	0
+15	2277	-54	0
+31	2308	-60	0
+47	2344	-84	0
+62	2390	-98	0
+82	2444	-71	0
+97	2484	-50	0
+112	2516	-50	0
+128	2542	-43	0
+143	2565	-61	0
+158	2601	-88	0
+174	2650	-67	0
+189	2686	-56	0
+209	2718	-75	0
+225	2763	-62	0
+240	2794	-64	0
+255	2830	-72	0
+270	2871	-64	0
+286	2907	-91	0
+301	2961	-74	0
+321	3002	-65	0
+337	3038	-58	0
+353	3069	-66	0
+368	3110	-60	0
+383	3141	-94	0
+399	3195	-83	0
+415	3240	-62	0
+430	3276	-51	0
+450	3303	-42	0
+480	3330	-48	0
+495	3357	-96	0
+510	3411	-99	0
+530	3465	-87	0
+545	3514	-68	0
+560	3550	-41	0
+576	3573	-36	0
+592	3596	-72	0
+607	36	-90	0
+622	86	-91	0
+643	140	-77	0
+660	180	-44	0
+677	207	-35	0
+694	225	-62	0
+711	261	-78	0
+726	306	-88	0
+741	356	-84	0
+757	400	-54	0
+772	432	-43	0
+788	454	-66	0
+803	490	-73	0
+818	536	-83	0
+834	580	-83	0
+850	626	-55	0
+865	657	-66	0
+880	693	-63	0
+895	729	-66	0
+912	770	-70	0
+927	806	-62	0
+962	842	-53	0
+977	873	-79	0
+992	918	-80	0
+1007	963	-80	0
+1023	1008	-77	0
+1039	1048	-65	0
+1054	1084	-54	0
+1074	1116	-63	0
+1090	1152	-66	0
+1105	1188	-71	0
+1120	1228	-87	0
+1136	1278	-63	0
+1152	1314	-54	0
+1168	1346	-61	0
+1183	1377	-57	0
+1198	1408	-57	0
+1218	1440	-70	0
+1233	1480	-59	0
+1248	1516	-57	0
+1263	1548	-87	0
+1279	1598	-76	0
+1294	1638	-70	0
+1314	1678	-65	0
+1329	1714	-55	0
+1344	1746	-82	0
+1359	1791	-86	0
+1374	1840	-70	0
+1394	1881	-66	0
+1424	1917	-63	0
+1439	1953	-51	0
+1454	1980	-77	0
+1475	2025	-82	0
+1491	2070	-79	0
+1506	2115	-72	0
+1521	2156	-57	0
+1537	2187	-41	0
+1553	2210	-69	0
+1568	2250	-82	0
+1583	2295	-89	0
+1598	2344	-86	0
+1618	2394	-47	0
+1633	2421	-37	0
+</csv_data>
+</timeseries>
+</DTS_xml>

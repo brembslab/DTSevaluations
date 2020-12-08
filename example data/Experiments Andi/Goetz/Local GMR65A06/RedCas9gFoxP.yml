@@ -1,0 +1,171 @@
+---
+experiment:
+    type: Torquemeter
+    id: SCR_017276
+    name: GMR 65A06 local knocout
+    title: Red Foxp knockout
+    description: Local knockout near bib
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: andreas-ehweiner
+    description: Andreas Ehweiner
+    firstName: Andreas
+    lastName: Ehweiner
+    id: Na
+resources:
+
+- name: Red Cas9gFoxp
+  title: Cas9gFoxP red
+  description: Exp
+  data:
+  ##- redCas9gFoxP0.xml #negativ avoid
+  #- redCas9gFoxP1.xml
+  #- Cas9gFoxPred0.xml #fehlerhaft
+  #- Cas9gFoxPbib0.xml #right, gute vermeidung
+  #- Cas9gFoxPbib1.xml #left, flugfaul
+  #- Cas9gFoxPbib2.xml #right, 
+  #- Cas9gFoxPbib3.xml #left fehlerhaft kein opomo
+  ##- Cas9gFoxPbib4.xml #left #nur eine seite negativ avoid
+  - Cas9gFoxPbib5.xml #right schkechte vermeidung, ungleich
+  - Cas9gFoxPbib6.xml #right
+  - Cas9gFoxPbib7.xml #left
+  - Cas9gFoxPbib8.xml #right schlechte vermeidung
+  - Cas9gFoxPbib9.xml #left
+  - Cas9gFoxPbib10.xml #right
+  - Cas9gFoxPbib11.xml #left
+  - Cas9gFoxPbib12.xml #right
+  #- Cas9gFoxPbib13.xml #right
+  - Cas9gFoxPbib14.xml #right
+  - Cas9gFoxPbib15.xml #left schlechte vermeidung
+  #- Cas9gFoxPbib16.xml #right einseitig
+  - Cas9gFoxPbib17.xml #left
+  - Cas9gFoxPbib18.xml #right schlecht geflogen
+  - Cas9gFoxPbib19.xml #left wohl right
+  - Cas9gFoxPbib20.xml #right wohl left
+  - Cas9gFoxPbib21.xml #right
+  - Cas9gFoxPbib22.xml #left
+  - Cas9gFoxPbib23.xml #right 
+  - Cas9gFoxPbib24.xml #left
+  #- Cas9gFoxPbib25.xml #right
+  #- Cas9gFoxPbib26.xml #left
+  #- Cas9gFoxPbib27.xml #right ungleich
+  - Cas9gFoxPbib28.xml #left
+  - Cas9gFoxPbib29.xml #right  
+  id: FBst0
+  
+- name: Red gFoxp
+  title: gFoxP red
+  description: Control
+  data:
+  #- redgFoxP0.xml
+  #- redgFoxP1.xml #vermeidung fehlerhaft
+  #- redgFoxP2.xml
+  #- redgFoxP3.xml
+  ##- redgFoxP4.xml #negativ avoid
+  - redgFoxP5.xml
+  #- redgFoxP6.xml
+  ##- redgFoxP7.xml #negativ avoid
+  #- redgFoxP8.xml
+  ##- redgFoxP9.xml #negativ avoid
+  - gFoxpred0.xml
+  - FoxPred0.xml
+  #- gFoxPbib0.xml #left torque, gute vermeidung, etwas flugfaul
+  #- gFoxPbib1.xml #right, 
+  - gFoxPbib2.xml #left
+  - gFoxPbib3.xml #rigt schlechte vermeidung
+  - gFoxPbib4.xml #right
+  #- gFoxPbib5.xml #right stoped flying in the end
+  - gFoxPbib6.xml #left #stark positiv
+  - gFoxPbib7.xml #right
+  - gFoxPbib8.xml #left
+  - gFoxPbib9.xml #right flugfaul
+  # - gFoxPbib10.xml #left
+  # - gFoxPbib11.xml #right
+  # - gFoxPbib12.xml #left
+  - gFoxPbib13.xml #right #stark postitiv
+  - gFoxPbib14.xml #left
+  - gFoxPbib15.xml #right
+  - gFoxPbib16.xml #left #schlechte vermeidung
+  - gFoxPbib17.xml #right
+  - gFoxPbib18.xml #left schwache vermeidung
+  #- gFoxPbib19.xml #right
+  - gFoxPbib20.xml #right
+  - gFoxPbib21.xml #right schlecht geflogen
+  - gFoxPbib22.xml #left  
+  - gFoxPbib23.xml #left 
+  id: FBst0
+
+- name: Red Cas9
+  title: Cas9 red
+  description: Control
+  data:
+  #- redCas9only0.xml #negativ avoid
+  - redCas9o0.xml
+  - redCas9o1.xml
+  - redCas9o2.xml
+  - redCas9o3.xml
+  - redCas9o4.xml
+  #- Cas9red0.xml
+  #- Cas9bib0.xml #left torque, gute vermeidung
+  #- Cas9bib1.xml #left, low range
+  #- Cas9bib2.xml #left
+  - Cas9bib3.xml #left
+  #- Cas9bib4.xml #right schlechte vermeidung
+  - Cas9bib5.xml
+  # - Cas9bib6.xml
+  #- Cas9bib7.xml
+  - Cas9bib8.xml
+  - Cas9bib9.xml
+  - Cas9bib10.xml
+  - Cas9bib11.xml
+  - Cas9bib12.xml #left
+  - Cas9bib13.xml #right
+  #- Cas9bib14.xml #left nicht fertig
+  #- Cas9bib15.xml #left einseitig
+  - Cas9bib16.xml #left laser in 10 nicht mehr aktiv
+  - Cas9bib17.xml #right
+  - Cas9bib18.xml #left #flugfaul, optomo seltsam
+  #- Cas9bib19.xml #right
+  - Cas9bib20.xml #left
+  - Cas9bib21.xml #left
+  - Cas9bib22.xml #right
+  - Cas9bib23.xml #left
+  - Cas9bib24.xml #right   
+  id: FBst0  
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianred1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 8
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #yes
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes             
+mediatype: text/csv/xml
+epid: 245

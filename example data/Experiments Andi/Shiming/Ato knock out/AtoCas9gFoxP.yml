@@ -1,0 +1,175 @@
+---
+experiment:
+    type: Torquemeter
+    id: Ato
+    name: Ato x Cas9gFoxP
+    title: Ato x Cas9gFoxP
+    description: Standard yaw torque learning by Andi with new working setup
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: andi-ehweiner
+    description: Andi Ehweiner
+    firstName: Andi
+    lastName: Ehweiner
+    id: 0000-0000-0000-0000
+resources:
+- name: AtoCas9gFoxP
+  title: Ato x Cas9gFoxP
+  description: Exp
+  data:
+  - AtoCasFoxP_4.xml
+  - AtoCasFoxP_6.xml
+  - AtoCasFoxP_7.xml
+  - AtoCasFoxP_8.xml
+  #- AtoCasFoxP_105.xml
+  #- AtoCasFoxP_109.xml
+  - AtoCasFoxP_111.xml
+  - AtoCasFoxP_114.xml
+  #- AtoCasFoxP_115.xml
+  - AtoCasFoxP_116.xml
+  - AtoCasFoxP_117.xml
+  #- AtoCasFoxP_118.xml
+  #- AtoCasFoxP_12.xml
+  #- AtoCasFoxP_120.xml
+  #- AtoCasFoxP_124.xml
+  #- AtoCasFoxP_125.xml
+  #- AtoCasFoxP_128.xml
+  #- AtoCasFoxP_16.xml
+  - AtoCasFoxP_19.xml
+  - AtoCasFoxP_22.xml
+  #- AtoCasFoxP_27.xml
+  - AtoCasFoxP_29.xml
+  - AtoCasFoxP_30.xml
+  #- AtoCasFoxP_31.xml
+  - AtoCasFoxP_32.xml
+  #- AtoCasFoxP_34.xml
+  - AtoCasFoxP_35.xml
+  - AtoCasFoxP_37.xml
+  - AtoCasFoxP_40.xml
+  - AtoCasFoxP_41.xml
+  - AtoCasFoxP_42.xml
+  - AtoCasFoxP_48.xml
+  #- AtoCasFoxP_51.xml
+  - AtoCasFoxP_52.xml
+  - AtoCasFoxP_54.xml
+  - AtoCasFoxP_56.xml
+  #- AtoCasFoxP_59.xml
+  #- AtoCasFoxP_61.xml
+  #- AtoCasFoxP_67.xml
+  - AtoCasFoxP_68.xml
+  #- AtoCasFoxP_70.xml
+  - AtoCasFoxP_71.xml
+  - AtoCasFoxP_72.xml
+  #- AtoCasFoxP_73.xml
+  - AtoCasFoxP_78.xml 
+- name: AtogFoxp
+  title: Ato x gFoxP
+  description: Control2
+  data:  
+  #- AtoFoxp_3.xml
+  #- AtoFoxp_4.xml
+  #- AtoFoxp_5.xml
+  - AtoFoxp_8.xml
+  - AtoFoxp_10.xml
+  #- AtoFoxP_12.xml
+  - AtoFoxP_13.xml
+  - AtoFoxP_14.xml
+  #- AtoFoxP_15.xml
+  - AtoFoxP_18.xml
+  - AtoFoxp_20.xml
+  - AtoFoxp_21.xml
+  - AtoFoxP_24.xml
+  #- AtoFoxP_26.xml
+  - AtoFoxP_27.xml
+  - AtoFoxP_30.xml
+  - AtoFoxP_31.xml
+  - AtoFoxP_33.xml
+  - AtoFoxP_34.xml
+  - AtoCas_62.xml
+  #- AtoCas_64.xml
+  #- AtoCas_65.xml
+  - AtoCas_67.xml
+  #- AtoCas_69.xml
+  - AtoCas_70.xml
+  - AtoCas_71.xml
+  #- AtoCas_73.xml
+  - AtoCas_75.xml
+  - AtoCas_76.xml
+  #- AtoCas_77.xml
+  #- AtoCas_78.xml
+
+- name: AtoCas9
+  title: Ato x Cas9
+  description: Control2
+  data:  
+  #- AtoCas_11.xml
+  - AtoCas_13.xml
+  #- AtoCas_14.xml
+  #- AtoCas_18.xml
+  #- AtoCas_21.xml
+  - AtoCas_26.xml
+  #- AtoCas_27.xml
+  #- AtoCas_29.xml
+  - AtoCas_33.xml
+  #- AtoCas_34.xml
+  #- AtoCas_36.xml
+  - AtoCas_37.xml
+  - AtoCas_39.xml
+  - AtoCas_40.xml
+  - AtoCas_41.xml
+  - AtoCas_42.xml
+  - AtoCas_43.xml
+  #- AtoCas_45.xml
+  - AtoCas_51.xml
+  - AtoCas_53.xml
+  #- AtoCas_54.xml
+  - AtoCas_55.xml
+  - AtoCas_57.xml
+  - AtoCas_7.xml
+  - AtoCas_9.xml
+  - AtoFoxp_40.xml
+  - AtoFoxp_44.xml
+  #- AtoFoxp_48.xml
+  #- AtoFoxP_49.xml
+  - AtoFoxP_50.xml
+  - AtoFoxp_52.xml
+  - AtoFoxp_54.xml
+  - AtoFoxp_56.xml  
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianred1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 8
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #no
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes           
+mediatype: text/csv/xml
+epid: 245
+

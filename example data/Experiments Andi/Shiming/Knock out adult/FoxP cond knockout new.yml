@@ -1,0 +1,135 @@
+---
+experiment:
+    type: Torquemeter
+    id: xy
+    name: FoxP cond
+    title: FoxP knock out adult
+    description: Standard yaw torque learning by Andi with new working setup
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: andi-ehweiner
+    description: Andi Ehweiner
+    firstName: Andi
+    lastName: Ehweiner
+    id: 0000-0000-0000-0000
+resources:
+- name: UasCas9>UasgFoxP
+  title: FoxP cond knockout
+  description: exp
+  data:
+  - Cas9gFoxP_1.xml
+  - Cas9gFoxP_2.xml
+  - Cas9gFoxP_3.xml
+  #- Cas9gFoxP_5.xml
+  #- Cas9gFoxP_6.xml
+  #- Cas9gFoxP_9.xml #drift
+  #- Cas9gFoxP_12.xml
+  - Cas9gFoxP_14.xml
+  #- Cas9gFoxP_15.xml  
+  - Cas9gFoxP_16.xml #drifting?
+  #- Cas9gFoxP_18.xml
+  - Cas9gFoxP_22.xml
+  #- Cas9gFoxP_23.xml
+  - Cas9gFoxP_25.xml
+  - Cas9gFoxP_26.xml
+  - Cas9gFoxP_29.xml
+  - Cas9gFoxP_32.xml
+  #- Cas9gFoxP_33.xml
+  - Cas9gFoxP_34.xml
+  #- Cas9gFoxP_37.xml
+  - Cas9gFoxP_41.xml
+  - Cas9gFoxP_44.xml
+  - Cas9gFoxP_46.xml
+  - Cas9gFoxP_47.xml
+  - Cas9gFoxP_49.xml
+  - Cas9gFoxP_50.xml
+  - Cas9gFoxP_51.xml  
+  - Cas9gFoxP_76.xml
+  - Cas9gFoxP_78.xml
+  - Cas9gFoxP_83.xml
+  - Cas9gFoxP_84.xml
+  - Cas9gFoxP_86.xml  
+- name: Cas9
+  title: Cas9 only
+  description: Contorl
+  data:
+  - Cas_2.xml
+  - Cas_6.xml
+  #- Cas_7.xml
+  - Cas_9.xml
+  #- Cas_10.xml
+  - Cas_11.xml
+  #- Cas_12.xml 
+  #- Cas_17.xml
+  - Cas_18.xml
+  - Cas_20.xml
+  - Cas_21.xml
+  - Cas_22.xml
+  - Cas_34.xml
+  - Cas_37.xml
+  - Cas_38.xml
+  - Cas_39.xml
+  - Cas_48.xml
+  #- Cas_54.xml 
+- name: gFoxP
+  title: gFoxP only
+  description: Control
+  data:
+  - gFoxP_1.xml
+  - gFoxP_2.xml
+  - gFoxP_3.xml
+  - gFoxP_4.xml
+  - gFoxP_9.xml  
+  - gFoxP_16.xml
+  #- gFoxP_17.xml
+  - gFoxP_20.xml
+  - gFoxP_22.xml
+  - gFoxP_25.xml   
+  - gFoxP_43.xml
+  - gFoxP_52.xml
+  - gFoxP_56.xml
+  - gFoxP_57.xml
+  - gFoxP_58.xml
+  - gFoxP_59.xml
+  - gFoxP_60.xml
+  - gFoxP_61.xml
+  #- gFoxP_62.xml     
+
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianred1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 8
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #no
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes           
+mediatype: text/csv/xml
+epid: 245
+

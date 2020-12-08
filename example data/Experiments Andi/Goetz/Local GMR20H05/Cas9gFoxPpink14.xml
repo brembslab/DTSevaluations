@@ -1,0 +1,379 @@
+<DTS_xml>
+<metadata>
+	<license URI="http://opendatacommons.org/licenses/pddl">PDDL</license>
+	<URIs>
+		<recording />
+		<analysis />
+		<datamodel>someDOI</datamodel>
+	</URIs>
+	<experimenter>
+		<firstname>Andreas</firstname>
+		<lastname>Ehweiner</lastname>
+		<orcid>Na</orcid>
+	</experimenter>	
+	<fly type="mutant">
+		<name>Cas9gFoxPpink14</name>
+		<RRID>Na</RRID>
+		<description>motor</description>
+		<flybase>FB</flybase>
+	</fly>
+	<experiment type="torquemeter">
+		<dateTime>2020-12-05T09:18:20</dateTime>
+		<duration>1320</duration>
+		<description>motor</description>
+		<sample_rate>72</sample_rate>
+		<arena_type>LightGuides</arena_type>
+		<meter_type>Goetz</meter_type>
+	</experiment>
+</metadata>
+<sequence periods="17">
+<period number="1"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="2"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="3"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="4"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="5"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="6"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="7"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="8"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="9"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="10"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="11"><type>yt</type><duration>120</duration><outcome>1</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="12"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="13"><type>yt</type><duration>120</duration><outcome>0</outcome><pattern>0</pattern><coup_coeff>0</coup_coeff><contingency>left_torque</contingency></period><period number="14"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="15"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="16"><type>optomotorR</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period><period number="17"><type>optomotorL</type><duration>30</duration><outcome>0</outcome><pattern>2</pattern><coup_coeff>0</coup_coeff><contingency /></period></sequence>
+<timeseries>
+	<CSV_descriptor>
+		<delimiter>tab</delimiter>
+		<header>0</header>
+		<nullSequence>NaN</nullSequence>
+	</CSV_descriptor>
+	<variables>
+		<variable number="1">
+		    <type>time</type>		
+			<var_type>uint16int16</var_type>
+			<unit>ms</unit>
+		</variable>	
+		<variable number="2">
+		    <type>a_pos</type>		
+			<var_type>int16</var_type>
+			<unit>arb_unit</unit>
+		</variable>
+		<variable number="3">
+			<type>torque</type>
+			<var_type>int16</var_type>
+			<unit>arb_unit</unit>
+		</variable>
+		<variable number="4">
+		    <type>period</type>		
+			<var_type>uint8</var_type>
+			<unit>number</unit>
+		</variable>		
+	</variables>
+	<csv_data>
+	0	1935	-4	0
+16	1935	-23	0
+32	1948	-31	0
+49	1966	-36	0
+65	1984	-13	0
+80	1994	6	0
+95	1994	9	0
+110	1989	-2	0
+125	1989	-22	0
+142	1998	-53	0
+158	2025	-50	0
+174	2056	-17	0
+189	2066	23	0
+205	2056	38	0
+221	2034	32	0
+236	2016	6	0
+252	2012	-31	0
+269	2025	-45	0
+285	2052	-35	0
+300	2070	-16	0
+317	2079	-20	0
+333	2092	-27	0
+348	2106	-44	0
+364	2133	-49	0
+379	2160	-52	0
+415	2187	-31	0
+431	2205	-43	0
+446	2232	-37	0
+463	2250	-40	0
+479	2272	-48	0
+496	2300	-41	0
+512	2322	-39	0
+527	2344	-52	0
+544	2376	-45	0
+559	2398	-46	0
+576	2426	-54	0
+591	2457	-44	0
+607	2480	-45	0
+623	2506	-61	0
+735	2542	-45	0
+741	2565	-46	0
+746	2592	-41	0
+751	2614	-32	0
+756	2632	-45	0
+761	2660	-76	0
+766	2700	-72	0
+771	2740	-58	0
+776	2772	-49	0
+782	2804	-33	0
+799	2822	-42	0
+814	2844	-83	0
+830	2889	-88	0
+845	2938	-76	0
+860	2984	-63	0
+892	3020	-33	0
+913	3038	-42	0
+928	3060	-33	0
+945	3078	-24	0
+961	3092	-12	0
+977	3100	0	0
+994	3100	0	0
+1010	3100	-13	0
+1026	3105	-19	0
+1042	3118	-13	0
+1058	3123	-2	0
+1075	3128	13	0
+1091	3123	11	0
+1108	3114	-15	0
+1126	3118	-32	0
+1141	3136	-50	0
+1157	3168	-66	0
+1173	3204	-46	0
+1189	3231	-46	0
+1204	3254	-53	0
+1220	3285	-42	0
+1236	3308	-45	0
+1252	3334	-42	0
+1267	3357	-35	0
+1282	3380	-42	0
+1298	3402	-75	0
+1314	3442	-69	0
+1330	3483	-65	0
+1346	3519	-60	0
+1361	3550	-43	0
+1389	3578	-65	0
+1405	14	-69	0
+1422	54	-68	0
+1439	90	-69	0
+1455	130	-63	0
+1470	166	-40	0
+1486	189	-53	0
+1501	216	-46	0
+1516	243	-50	0
+1532	270	-51	0
+1549	302	-54	0
+1564	328	-46	0
+1580	356	-64	0
+1596	392	-67	0
+1612	428	-68	0
+1629	468	-78	0
+1644	513	-59	0
+1666	544	-65	0
+1681	580	-88	0
+1699	630	-74	0
+1714	670	-56	0
+1729	702	-47	0
+1744	729	-42	0
+1759	756	-52	0
+1774	783	-93	0
+1789	837	-90	0
+1805	886	-71	0
+1820	927	-57	0
+1840	958	-41	0
+1872	981	-57	0
+1887	1012	-75	0
+1902	1058	-88	0
+1917	1107	-93	0
+1932	1156	-80	0
+1952	1202	-43	0
+1967	1228	-52	0
+1983	1256	-56	0
+1998	1287	-76	0
+2013	1332	-92	0
+2028	1382	-84	0
+2046	1431	-52	0
+2061	1458	-63	0
+2076	1494	-55	0
+2096	1526	-54	0
+2111	1557	-70	0
+2126	1593	-59	0
+2141	1629	-58	0
+2156	1660	-87	0
+2176	1710	-70	0
+2191	1750	-60	0
+2206	1782	-66	0
+2221	1818	-53	0
+2236	1850	-52	0
+2257	1876	-85	0
+2273	1926	-77	0
+2288	1971	-78	0
+2303	2012	-64	0
+2319	2048	-41	0
+2350	2074	-58	0
+2365	2106	-65	0
+2380	2142	-73	0
+2400	2182	-85	0
+2415	2232	-76	0
+2430	2272	-57	0
+2445	2304	-62	0
+2460	2340	-71	0
+2480	2380	-70	0
+2497	2421	-71	0
+2512	2462	-69	0
+2527	2498	-57	0
+2542	2529	-85	0
+2557	2578	-76	0
+2572	2619	-67	0
+2592	2660	-61	0
+2608	2691	-49	0
+2624	2722	-53	0
+2639	2750	-88	0
+2654	2799	-89	0
+2671	2848	-77	0
+2686	2894	-61	0
+2702	2930	-40	0
+2717	2952	-38	0
+2732	2970	-80	0
+2752	3015	-91	0
+2767	3069	-86	0
+2782	3114	-74	0
+2797	3159	-45	0
+2832	3182	-36	0
+2847	3204	-77	0
+2863	3244	-81	0
+2880	3294	-71	0
+2897	3330	-68	0
+2914	3370	-42	0
+2930	3393	-58	0
+2946	3424	-77	0
+2961	3470	-76	0
+2976	3514	-72	0
+2992	3555	-68	0
+3008	3591	-49	0
+3023	18	-73	0
+3038	58	-82	0
+3054	108	-88	0
+3070	158	-88	0
+3085	207	-69	0
+3100	243	-44	0
+3121	270	-55	0
+3137	302	-64	0
+3152	338	-77	0
+3167	378	-89	0
+3182	428	-60	0
+3197	464	-48	0
+3212	490	-51	0
+3232	518	-57	0
+3248	549	-70	0
+3265	590	-82	0
+3282	634	-64	0
+3300	670	-59	0
+3325	706	-74	0
+3340	747	-64	0
+3360	783	-61	0
+3376	819	-68	0
+3391	855	-58	0
+3406	886	-72	0
+3422	927	-86	0
+3438	976	-75	0
+3453	1017	-58	0
+3468	1053	-55	0
+3489	1084	-42	0
+3504	1107	-67	0
+3519	1143	-83	0
+3534	1192	-79	0
+3549	1233	-77	0
+3565	1278	-69	0
+3580	1318	-46	0
+3600	1341	-70	0
+3617	1382	-77	0
+3632	1426	-91	0
+3647	1476	-97	0
+3662	1530	-69	0
+3678	1570	-53	0
+3694	1602	-61	0
+3709	1634	-55	0
+3729	1665	-57	0
+3745	1696	-65	0
+3760	1732	-46	0
+3775	1760	-48	0
+3806	1786	-76	0
+3821	1832	-72	0
+3841	1872	-68	0
+3857	1908	-69	0
+3872	1948	-54	0
+3887	1976	-63	0
+3902	2012	-94	0
+3917	2066	-90	0
+3937	2115	-79	0
+3952	2160	-60	0
+3967	2196	-37	0
+3982	2214	-42	0
+3997	2241	-70	0
+4017	2277	-76	0
+4032	2322	-82	0
+4047	2367	-69	0
+4063	2408	-45	0
+4078	2430	-58	0
+4093	2466	-62	0
+4113	2498	-77	0
+4129	2542	-86	0
+4144	2592	-71	0
+4159	2632	-59	0
+4175	2664	-71	0
+4191	2704	-77	0
+4206	2745	-76	0
+4222	2790	-72	0
+4237	2830	-49	0
+4252	2858	-49	0
+4287	2884	-69	0
+4302	2925	-63	0
+4317	2961	-63	0
+4332	2997	-65	0
+4352	3033	-50	0
+4368	3060	-51	0
+4383	3087	-68	0
+4398	3128	-68	0
+4414	3164	-74	0
+4429	3208	-87	0
+4444	3254	-66	0
+4464	3294	-62	0
+4480	3326	-74	0
+4495	3370	-65	0
+4510	3406	-62	0
+4525	3442	-66	0
+4540	3478	-52	0
+4560	3506	-83	0
+4575	3555	-71	0
+4590	3596	-59	0
+4605	27	-46	0
+4620	54	-52	0
+4640	81	-54	0
+4655	112	-95	0
+4671	166	-103	0
+4686	225	-84	0
+4702	270	-57	0
+4717	302	-41	0
+4737	324	-47	0
+4768	351	-89	0
+4783	400	-98	0
+4798	459	-92	0
+4813	508	-71	0
+4833	549	-38	0
+4849	572	-26	0
+4865	585	-58	0
+4880	616	-78	0
+4895	662	-96	0
+4910	716	-88	0
+4925	765	-53	0
+4945	796	-35	0
+4960	814	-55	0
+4975	846	-70	0
+4990	886	-88	0
+5005	936	-99	0
+5025	990	-73	0
+5040	1030	-78	0
+5055	1076	-52	0
+5070	1102	-45	0
+5085	1130	-60	0
+5105	1166	-80	0
+5121	1210	-68	0
+5137	1246	-88	0
+5152	1296	-68	0
+5167	1336	-55	0
+5182	1364	-57	0
+5197	1400	-55	0
+5217	1426	-60	0
+</csv_data>
+</timeseries>
+</DTS_xml>
