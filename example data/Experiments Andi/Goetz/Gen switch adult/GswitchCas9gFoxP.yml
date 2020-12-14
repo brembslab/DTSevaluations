@@ -1,0 +1,135 @@
+---
+experiment:
+    type: Torquemeter
+    id: SCR_017276
+    name: gen switch yellow
+    title: gen switch adult Foxp knockout
+    description: gen switch in adult drosophila
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: andreas-ehweiner
+    description: Andreas Ehweiner
+    firstName: Andreas
+    lastName: Ehweiner
+    id: Na
+resources:
+
+- name: gswitch Cas9gFoxp
+  title: Cas9gFoxP gswitch
+  description: Exp
+  data:
+  - Cas9gFoxPswitchg0.xml #left
+  - Cas9gFoxPswitchg1.xml #right
+  - Cas9gFoxPswitchg2.xml #left
+  - Cas9gFoxPswitchg3.xml #right
+  - Cas9gFoxPswitchg4.xml #left
+  - Cas9gFoxPswitchg5.xml #right
+  - Cas9gFoxPswitchg6.xml #left
+  - Cas9gFoxPswitchg7.xml #right
+  - Cas9gFoxPswitchg8.xml #left
+  - Cas9gFoxPswitchg9.xml #right #flugfaul
+  - Cas9gFoxPswitchg10.xml #left
+  - Cas9gFoxPswitchg11.xml #right
+  - Cas9gFoxPswitchg12.xml #left
+  - Cas9gFoxPswitchg13.xml #right #flugfaul
+  - Cas9gFoxPswitchg14.xml #left
+  - Cas9gFoxPswitchg15.xml #right 
+  - Cas9gFoxPswitchg16.xml #left #flugfaul
+  - Cas9gFoxPswitchg17.xml #left
+  - Cas9gFoxPswitchg18.xml #right 
+  - Cas9gFoxPswitchg19.xml #left  
+  id: FBst0
+  
+- name: gswitch gFoxp
+  title: gFoxP gswitch
+  description: Control
+  data:
+  - gFoxPswitchg0.xml #left
+  - gFoxPswitchg1.xml #right
+  - gFoxPswitchg2.xml #left
+  - gFoxPswitchg3.xml #right
+  #- gFoxPswitchg4.xml #left #schelchte vermeidung
+  - gFoxPswitchg5.xml #right
+  - gFoxPswitchg6.xml #left
+  - gFoxPswitchg7.xml #right
+  #- gFoxPswitchg8.xml #left #unfinished
+  - gFoxPswitchg9.xml #right
+  - gFoxPswitchg10.xml #left
+  - gFoxPswitchg11.xml #right
+  - gFoxPswitchg12.xml #right
+  #- gFoxPswitchg13.xml #left #no optomotor
+  - gFoxPswitchg14.xml #left fehler
+  - gFoxPswitchg15.xml #left fehler
+  - gFoxPswitchg16.xml #right
+  - gFoxPswitchg17.xml #left
+  - gFoxPswitchg18.xml #left 
+  - gFoxPswitchg19.xml #right
+  - gFoxPswitchg20.xml #left
+  - gFoxPswitchg21.xml #right
+  - gFoxPswitchg22.xml #left
+  id: FBst0
+
+- name: gswitch Cas9
+  title: Cas9 gswitch
+  description: Control
+  data:
+  - Cas9switchg0.xml #left
+  - Cas9switchg1.xml #right
+  #- Cas9switchg2.xml #left #unfertig
+  - Cas9switchg3.xml #left
+  - Cas9switchg4.xml #right
+  - Cas9switchg5.xml #left
+  - Cas9switchg6.xml #right
+  - Cas9switchg7.xml #left
+  - Cas9switchg8.xml #right
+  - Cas9switchg9.xml #left
+  - Cas9switchg10.xml #right
+  - Cas9switchg11.xml #left
+  - Cas9switchg12.xml #right
+  - Cas9switchg13.xml #left
+  - Cas9switchg14.xml #right
+  - Cas9switchg15.xml #left #flugfaul
+  #- Cas9switchg16.xml #right #schlechte vermeidung
+  - Cas9switchg17.xml #left
+  - Cas9switchg18.xml #right
+  - Cas9switchg19.xml #left
+  - Cas9switchg20.xml #right
+  - Cas9switchg21.xml #left
+  id: FBst0  
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianPink1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 8
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #yes
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes             
+mediatype: text/csv/xml
+epid: 245
