@@ -20,11 +20,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-```{r, packages, eval=FALSE, echo=FALSE}
-## source the script with the functions needed for analysis
-source("readXMLdatafile.R")
-source("DTS_plotfunctions.R")
-```
+
 
 <center><h2>for time series experiment `r paste(flyname)`</h2></center>
 <center>Rendered on `r format(Sys.time(), '%d %B %Y')`</center>

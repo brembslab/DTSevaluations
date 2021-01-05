@@ -21,10 +21,8 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-```{r, packages, eval=FALSE, echo=FALSE}
-## source the script with the functions needed for analysis
-source("readXMLdatafile.R")
-source("DTS_plotfunctions.R")
+```{r, setwd, eval=FALSE, echo=FALSE}
+setwd(project.path)
 ```
 
 <center><h2>for time series data set: "<b>`r paste(project.data$experiment$title)`</b>"</h2></center>

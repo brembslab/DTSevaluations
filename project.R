@@ -5,14 +5,12 @@
 setwd(dirname(parent.frame(2)$ofile)) #set working directory to source file location (allows loading of function files)
 
 ## source libraries and functions needed for analysis
-source("/include/includes.R")
-source("/include/importfunctions.R")
-source("/include/plotfunctions.R")
-
-start.wd = getwd()
-
+source("include/includes.R")
+source("include/importfunctions.R")
+source("include/plotfunctions.R")
+start.wd=getwd()
 ## read single YAML project file and collect essential data from the project file for statistics and plots
-source("/include/readyamldata.R")
+source("include/readyamldata.R")
 
 #start busy animation and initialize progress bar
 busy <- image_read(paste(start.wd,"/include/dataintegrity.gif", sep=""))
@@ -21,10 +19,10 @@ start_time <- Sys.time() #Records the system time at the start of the analysis
 flycount = 1 #for progressbar
 
 ## check that all prerequisites are met and what kind of experiments we are dealing with
-source("/include/prerequisite.R")
+source("include/prerequisites.R")
 
 ## Initialize empty lists where data are collected and some other variables
-source("/include/initialize.R")
+source("include/initialize.R")
 
 for(x in 1:NofGroups) #start main loop that colects data in each experimental group
 {
@@ -51,17 +49,17 @@ for(x in 1:NofGroups) #start main loop that colects data in each experimental gr
       singleflydata <- flyDataImport(xml_name)
   
       #extract single fly data
-      source("/include/extractsingleflydata.R")
+      source("include/extractsingleflydata.R")
   
       #progress bar
-      source("/include/progressbar.R")    
+      source("include/progressbar.R")    
       
       #### call RMarkdown for single fly evaluations ###############################################
       rmarkdown::render(paste(start.wd,"/rmarkdown/single_fly.Rmd", sep=""),                  ######
                         output_file = paste(flyname,"descr_anal.html", sep="_"),              ######
                         output_dir = project.path)                                            ######
       #### end RMarkdown for single fly evaluations ################################################
-  
+      
       ##once created, move PIs and categories to multi-experiment data.frames
       if(l>1){
         PIprofile <- rbind2(PIprofile, as.vector(t(sequence$lambda)))      #PIs in one dataframe
@@ -83,16 +81,16 @@ for(x in 1:NofGroups) #start main loop that colects data in each experimental gr
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
   
   ## derive means and SDs for optomotor data in the group and collect extracted OM parameters
-  source("/include/optomotor.R")
+  source("include/optomotor.R")
 
   ## pool raw data traces in various ways for later (histogram) plotting
-  source("/includes/pool.R")
+  source("include/pool.R")
 
   ## if we have two groups, collect data for superimposed histograms for either fly behavior or position
-  source("/include/superimposedhistograms.R")
+  source("include/superimposedhistograms.R")
 
   ## Wrap up: Collect data from each group in their respective lists and empty the variables
-  source("/include/wrapgroupup.R")
+  source("include/wrapgroupup.R")
   
 } #for nofGroups
 
@@ -105,10 +103,10 @@ dwellrange[2]=-dwellrange
 }
 
 ## extract the PI learningscore values for the period specified in the project yaml file
-source("/include/extractlearningscores.R")
+source("include/extractlearningscores.R")
 
 ## if there are more than two groups, attempt to pool some PI data into two groups
-source("/include/poolgroups.R")
+source("include/poolgroups.R")
 
 #### ----- call RMarkdown for project evaluations ----- ################################################
 rmarkdown::render(paste(start.wd,"/rmarkdown/project.Rmd", sep=""),                                #####
@@ -117,4 +115,5 @@ rmarkdown::render(paste(start.wd,"/rmarkdown/project.Rmd", sep=""),             
 #### ----- end RMarkdown for project evaluations ----- #################################################
 
 Progressbar = mtext(paste("Runtime was",(round(((Sys.time() - start_time)), 3)), " minutes in total"), side = 1, line = 1)
+
 setwd(start.wd)

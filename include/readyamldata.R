@@ -3,7 +3,6 @@
 project.file <- file.choose()
 project.path = dirname(project.file)
 project.data <- yaml.load_file(project.file)
-setwd(project.path)
 
 totalflies <- length(paste(project.path, unlist(do.call("rbind", lapply(project.data$resources, '[', 4))), sep = "/"))#get the number of flies total
 NofGroups = unname(lengths(project.data["resources"]))                                               #get number of experimental groups
