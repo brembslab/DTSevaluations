@@ -2,7 +2,7 @@
 #extract fly meta-data
 fly <- singleflydata[[3]]
 flyname = fly$name[1]
-flynames[l,x] = paste(flyname) #copy the name into the list of all flynames
+if(exists("flynames")){flynames[l,x] = paste(flyname)} #copy the name into the list of all flynames
 
 #extract sequence meta-data
 NofPeriods = singleflydata[[5]]
