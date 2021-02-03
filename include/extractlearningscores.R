@@ -1,4 +1,4 @@
-### DTS script to extract the PI learningscore values for the period specified in the project yaml file (and some other PIs)
+### DTS script to extract the PI learningscore values for the period specified in the project yaml file (and some other important PIs)
 if(PIs_present & !is.null(learningscore)){
   PIstat <- list()
   CatStat <- list()
