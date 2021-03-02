@@ -174,7 +174,7 @@ for(i in 1:NofPeriods){
 # Histograms
 ## Fly Behavior Histograms
 
-```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 12, fig.width = 8}
+```{r FlyHistogram, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 16, fig.width = 8}
   subset = rawdata[c("fly","period","a_pos")]
   subset$period = as.factor(subset$period)
 par(mfrow=c(round(NofPeriods/5)*2, 3)) # sets the dimension of the multiplot, row x column

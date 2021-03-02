@@ -11,6 +11,8 @@ samplerate = as.numeric(as.character(singleflydata[[4]]$sample_rate))
 real_sample_rate = as.numeric(as.character(singleflydata[[11]]))
 down_sample_rate = as.numeric(as.character(singleflydata[[12]]))
 nonOMperiods=which(!grepl("optomotor", sequence$type)==TRUE) #vector containing period numbers for non-optomotor periods
+testperiods=which((sequence$type=="color" | sequence$type=="fs" | sequence$type=="yt" | sequence$type=="sw") & sequence$outcome=="0") #vector containing all testperiods
+pretestperiods=as.vector(unlist(split(testperiods, cumsum(c(1, diff(testperiods) != 1)))[1]))
 
 #extract experiment meta-data
 experimenter <- singleflydata[[2]]

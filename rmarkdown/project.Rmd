@@ -899,6 +899,23 @@ print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill
 
 ```
 
+```{r raincloudplots, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Raincloudplot\n")
+
+print(raincloud_2x2_repmes(
+  data = na.omit(rcp.PIs),
+  colors = (rep(boxcolors, 2)),
+  fills = (rep(boxcolors, 2)),
+  size = 3,
+  alpha = .7,
+  spread_x_ticks = FALSE) +
+  scale_x_continuous(breaks=c(1,2), labels=c("Pre", "Post"), limits=c(0, 3)) +
+  xlab("Time") + 
+  ylab("PI [rel. units]") +
+  theme_classic())
+
+```
+
 ```{r UtestG3, eval=(PIs_present & threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n## Statistical tests between three groups\n")
 #creating a list with PIs and condition in on list

@@ -102,7 +102,7 @@ dwellrange=-round(1.5*max(dwellrange))
 dwellrange[2]=-dwellrange
 }
 
-## extract the PI learningscore values for the period specified in the project yaml file
+## extract the PI learningscore values for the period specified in the project yaml file and create dataframes of PIs for plotting
 source("include/extractlearningscores.R")
 
 ## if there are more than two groups, attempt to pool some PI data into two groups

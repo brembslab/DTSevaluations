@@ -1,0 +1,32 @@
+### install all packages required for DTS evaluations with dependencies ###
+install.packages("ggplot2",
+                 "cowplot",
+                 "ggiraph",
+                 "tidyr"
+                 ,"dygraphs"
+                 ,"grid"
+                 ,"reshape2"
+                 ,"plyr"
+                 ,"dplyr"
+                 ,"gridExtra"
+                 ,"yaml"
+                 ,"ggsignif"
+                 ,"effsize"
+                 ,"pwr"
+                 ,"BayesFactor"
+                 ,"genefilter"
+                 ,"seewave"
+                 ,"lubridate"
+                 ,"rmarkdown"
+                 ,"markdown"
+                 ,"knitr"
+                 ,"dabestr"
+                 ,"zoo"
+                 ,"tidyverse"
+                 ,"questionr"
+                 ,"data.table"
+                 ,"DescTools"
+                 ,"magick"
+                 ,"reactable"
+                 ,"raincloudplots"
+                 , dependencies = TRUE)

@@ -77,10 +77,10 @@ statistics:
     - 0.5
     - 0.9
   color-range:
-    - khaki
-    - olivedrab3
     - cornflowerblue
     - goldenrod1
+    - khaki
+    - olivedrab3
     - indianred1
     - plum3
   learning-score:
