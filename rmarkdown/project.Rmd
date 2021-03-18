@@ -803,7 +803,7 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
     scale_y_continuous(breaks = seq(-1, 1, .2)) +
     theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "top",legend.title = element_blank()) +
-    theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
     samplesizes.annotate(boxes, samplesizes) +
     wilcox.annotate(boxes, wilcoxon))
   
@@ -872,7 +872,7 @@ cat("\n## Statistical tests between two groups\n")
       ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=4/NofGroups)+
+      theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=4/NofGroups)+
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=8, vjust=0.5) +
