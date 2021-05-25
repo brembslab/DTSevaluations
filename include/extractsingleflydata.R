@@ -23,7 +23,7 @@ rawdata <- singleflydata[[9]]
 flyrange = singleflydata[[10]]
 traces <- singleflydata[[13]]
 #calculate max fly values for axes when plotting
-maxfly = c(-round_any(max(abs(flyrange)), 100, f=ceiling)*0.5,round_any(max(abs(flyrange)), 100, f=ceiling)*0.5)
+maxfly = c(-round_any(max(abs(flyrange)), 100, f=ceiling)*0.9,round_any(max(abs(flyrange)), 100, f=ceiling)*0.9)
 
 #create/empty the dataframe for dwellmeans
 Dwell = any(c("yt","color","sw","fs") %in% sequence$type) ###determine if dwelling times should be calculated
