@@ -150,7 +150,7 @@ for(i in 1:NofPeriods){
         sequence$lambda[i] = (t1-t2)/(t1+t2)
         if (sequence$contingency[i] == '2_4_Q'){sequence$lambda[i]=-sequence$lambda[i]}
         if(l==1){PIprofile[1,i]=sequence$lambda[i]}
-      } else if (sequence$type[i]=="yt" || sequence$type[i]=="sw_blue" || sequence$type[i]=="sw_green") #calculate torque PIs
+      } else if (sequence$type[i]=="yt" || sequence$type[i]=="sw") #calculate torque PIs
       {
         t2 = sum(temp$fly < 0)
         t1 = nrow(temp)-t2
