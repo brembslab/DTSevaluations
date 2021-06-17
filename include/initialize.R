@@ -5,7 +5,7 @@ grouped.PIcombined <- list()   #For categorical color coding of PIs
 grouped.periods <- list()      #Period designs in a list of length NofGroups
 grouped.spectra <- list()      #Power spectra in a list of length NofGroups
 grouphistdata <- list()        #list for histogram data
-exp_groups <- list()           #Individual fly names in each group for display in project evaluation
+exp_groups <- list()           #Individual fly names in each group for display in dataset evaluation
 grouped.OMdata <-list()        #Averaged optomotor data traces for each group
 grouped.OMparams <-list()      #Extracted optomotor parameters for each group
 grouped.OMdataBefore <-list()  #Averaged optomotor data traces for each group at start of experiment

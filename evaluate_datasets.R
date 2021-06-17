@@ -1,5 +1,5 @@
 #####################################################################################################################################
-################## R-script to read YAML DTS project files, visualize and statistically evaluate data. Reports in HTML ##############
+################## R-script to read YAML DTS dataset files, visualize and statistically evaluate data. Reports in HTML ##############
 #####################################################################################################################################
 
 setwd(dirname(parent.frame(2)$ofile)) #set working directory to source file location (allows loading of function files)
@@ -9,7 +9,7 @@ source("include/includes.R")
 source("include/importfunctions.R")
 source("include/plotfunctions.R")
 start.wd=getwd()
-## read single YAML project file and collect essential data from the project file for statistics and plots
+## read single YAML dataset file and collect essential data from the dataset file for statistics and plots
 source("include/readyamldata.R")
 
 #start busy animation and initialize progress bar
@@ -27,9 +27,9 @@ source("include/initialize.R")
 for(x in 1:NofGroups) #start main loop that colects data in each experimental group
 {
   #gather necessary data and variables
-  grp_title = project.data[["resources"]][[x]][["title"]] #collect title of the group
+  grp_title = dataset.data[["resources"]][[x]][["title"]] #collect title of the group
   grp_description = groupdescriptions[x] #collect description of the group
-  xml_list = paste(project.path, project.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
+  xml_list = paste(dataset.path, dataset.data[["resources"]][[x]][["data"]], sep = "/") #create list of file names
 
   #create/empty lists for collecting all single fly data by period
   period.data <- list()     #data grouped by period
@@ -57,7 +57,7 @@ for(x in 1:NofGroups) #start main loop that colects data in each experimental gr
       #### call RMarkdown for single fly evaluations ###############################################
       rmarkdown::render(paste(start.wd,"/rmarkdown/single_fly.Rmd", sep=""),                  ######
                         output_file = paste(flyname,"descr_anal.html", sep="_"),              ######
-                        output_dir = project.path)                                            ######
+                        output_dir = dataset.path)                                            ######
       #### end RMarkdown for single fly evaluations ################################################
       
       ##once created, move PIs and categories to multi-experiment data.frames
@@ -68,7 +68,7 @@ for(x in 1:NofGroups) #start main loop that colects data in each experimental gr
   
       ##add period data to grouped data
       grouped.data[[l]] <- period.data
-      xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in project evaluation
+      xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in dataset evaluation
       
       #open window with progress bar
       setWinProgressBar(pb, l, title=paste(round(l/length(xml_list)*100, 0), "% of",grp_title,"done"))
@@ -78,7 +78,7 @@ for(x in 1:NofGroups) #start main loop that colects data in each experimental gr
   #close progress bar window
   close(pb)
   
-  exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in project evaluation document
+  exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in dataset evaluation document
   
   ## derive means and SDs for optomotor data in the group and collect extracted OM parameters
   source("include/optomotor.R")
@@ -102,17 +102,17 @@ dwellrange=-round(1.5*max(dwellrange))
 dwellrange[2]=-dwellrange
 }
 
-## extract the PI learningscore values for the period specified in the project yaml file and create dataframes of PIs for plotting
+## extract the PI learningscore values for the period specified in the dataset yaml file and create dataframes of PIs for plotting
 source("include/extractlearningscores.R")
 
 ## if there are more than two groups, attempt to pool some PI data into two groups
 source("include/poolgroups.R")
 
-#### ----- call RMarkdown for project evaluations ----- ################################################
-rmarkdown::render(paste(start.wd,"/rmarkdown/project.Rmd", sep=""),                                #####
-                  output_file = paste(project.data$experiment$name,"html", sep = "."),             #####
-                  output_dir = project.path)                                                       #####
-#### ----- end RMarkdown for project evaluations ----- #################################################
+#### ----- call RMarkdown for dataset evaluations ----- ################################################
+rmarkdown::render(paste(start.wd,"/rmarkdown/dataset.Rmd", sep=""),                                #####
+                  output_file = paste(dataset.data$experiment$name,"html", sep = "."),             #####
+                  output_dir = dataset.path)                                                       #####
+#### ----- end RMarkdown for dataset evaluations ----- #################################################
 
 Progressbar = mtext(paste("Runtime was",(round(((Sys.time() - start_time)), 3)), " minutes in total"), side = 1, line = 1)
 

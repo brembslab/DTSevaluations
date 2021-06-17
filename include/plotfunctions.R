@@ -231,11 +231,11 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
   #compute effect size Cohen's D
   cohend = signif(cohen.d(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$estimate, 3)
   #calculate statistical power
-  alt = project.data[["statistics"]][["two.groups"]][["power"]]
+  alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
   power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
   #calculate Bayes Factor
   bayesF=extractBF(ttestBF(plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[1]], plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[2]]))
-  #calculate FPR for priors set in project file#
+  #calculate FPR for priors set in dataset file#
   #run first prior  
   prior=priorval[1]
   out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
