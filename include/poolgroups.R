@@ -5,8 +5,8 @@ if(NofGroups>2 & length(unique(groupdescriptions))==2){
   PoolGrps=TRUE #we have several groups, but only one control and one experimental group
   
   #find out which group belongs to which pool
-  pool1=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[1])])
-  pool2=unname(groupnames[which(sapply(project.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[2])])
+  pool1=unname(groupnames[which(sapply(dataset.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[1])])
+  pool2=unname(groupnames[which(sapply(dataset.data[["resources"]], function(x) x["description"])==unique(groupdescriptions)[2])])
   
   #create two new dataframe (one melted one not) with the pooled groups
   #melted df
