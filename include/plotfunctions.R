@@ -294,7 +294,7 @@ x1=OMdata$time[OMdata$time<=OMmidpoint]                     #time
 y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]  #mean right OM response
 y=rollapply(y, 100,mean, fill="extend")                     #apply rolling average of 100 data points (5s)
 xy <-sortedXyData(x1,y)                                     #create sortedXYdata object
-
+plot (xy)
 LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata right turning
 
 #uncomment for debugging
@@ -381,4 +381,222 @@ rownames(tempOMparams)[1]=as.character(flyname)                   #set row names
 
 return(tempOMparams)
 }
+
+
+
+
+###########################  further evaluations
+
+OMparamextract_new <- function(OMdata){
+  
+  
+ ########################################################  subset traces (right and left)
+  
+  OMmidpoint = OMdata$time[nrow(OMdata)]/2
+   
+  #right turning traces
+  x1=OMdata$time[OMdata$time<=OMmidpoint]                     #time
+  y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]  #mean right OM response                 
+  righttraces <-sortedXyData(x1,y)                                     #create sortedXYdata object
+
+  #left turning traces
+  
+  x1=OMdata$time[OMdata$time>OMmidpoint]                      #time
+  y=OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]   #mean left OM response
+  lefttraces <-sortedXyData(x1,y)                             #create sortedXYdata object
+  
+  #all traces
+  
+  xall = OMdata$time   #time
+  yall = OMdata[[as.character(flyname)]] # mean OM response
+ 
+  
+  Alltraces <- sortedXyData(xall,yall)   #create sortedXYdata object
+  
+
+  
+  #################################################################### Opto response Differences
+ 
+  
+  ##right
+  righttraces
+  
+  rightmidpoint = righttraces$x[nrow(righttraces)]/3   #divide traces in 3 time zones
+ 
+  
+  rightbegin <-subset(righttraces,x <=rightmidpoint)  #traces at begin
+  rightend <-subset(righttraces,x>=(rightmidpoint*2)) #traces at end
+  rightmid <-subset(righttraces,x>rightmidpoint & x<(rightmidpoint*2))  #traces at mid
+
+  
+  #plot(rightbegin)
+  #plot(rightend)
+  #plot(rightmid)
+  
+  
+  meanrbegin <-mean(rightbegin$y)    #mean response begin
+  meanrend <-mean(rightend$y)        #mean response end
+
+  diffresponseright <-diff(c(meanrbegin,meanrend))   # Differenz Response begin and end
+  
+
+  
+ ###left
+ 
+
+  lpoint <-as.numeric(rightmidpoint*4)   # left traces first third
+
+  leftbegin <-subset(lefttraces, x<=lpoint) #traces at begin
+  leftend <-subset(lefttraces,x>=(lpoint+rightmid)) #traces at end
+  leftmid <-subset(lefttraces,x>lpoint & x<(lpoint+rightmidpoint))  #traces at mid
+  
+  #plot(leftbegin)
+ # plot(leftend)
+  #plot(leftmid)
+  
+  meanlbegin <-mean(leftbegin$y)    #mean response begin
+  meanlend <-mean(leftend$y)        #mean response end
+  
+  diffresponserleft <-diff(c(meanlbegin,meanlend))   # Differenz Response begin and end
+  
+  diffresponse <- mean(c(abs(diffresponseright),abs(diffresponserleft)))     # mean Difference Optomotor Response
+  
+
+
+  ################################################################# Slope at begin 
+
+  ######## mean slope left and mid begin
+
+  lmslopemidright <- lm(y~x,data = rightbegin)    # lm for slope at begin right
+  slopemidright <-lmslopemidright$coefficients[2]  #slope begin right
+
+  
+ lmslopemidright <- lm(y~x,data = leftbegin)   # lm for slope at begin left
+  slopemidleft <-lmslopemidright$coefficients[2]  # slope begin left
+  
+  slopemid <-mean(c(abs(slopemidright),abs(slopemidleft)))  # mean slope begin left and right
+  
+  ################################################################# Decide between Models
+
+ 
+  
+  if (diffresponse<50 |slopemid<0.01|slopemidright<0|slopemidleft>0) {   #if OM, slope of lm too low, or slope for right traces negative, slope for left traces positive ->  take linear Model
+    ####################################linear Model
+    
+    ##right traces
+    linfitright <- lm(y~x,data = righttraces)      #fit linear Model
+    plot (righttraces)
+    abline(linfitright,col="blue")
+    
+    #linmagnright <-diff(range(linfitright$fitted.values))   # Opto Magnitude Right
+    linmagnright <- mean(righttraces$y)
+    linsloperight <-linfitright$coefficients[2]         # slope right
+  
+    ##left traces
+    linfitleft <- lm(y~x,data = lefttraces)  #fit linear Model
+    
+    plot (lefttraces)
+    abline(linfitleft,col="red")
+    
+    #linmagnleft <-diff(range(linfitleft$fitted.values))   # Opto Magnitude Right
+    linmagnleft <- mean(lefttraces$y)
+    linslopeleft <-linfitleft$coefficients[2]             #slope left
+    
+  
+    RK <- mean(c(abs(linsloperight),abs(linslopeleft)))      #mean slopes lin mod
+    OM <- abs(diff(c(linmagnright,linmagnleft)))                  # mean Opto mags lin mod
+  
+    ### Asymmetry index linear Model
+    
+    meanr <-mean(righttraces$y)   #mean Optoresponse right
+    meanl <-mean(lefttraces$y)    #mean Optorepsonse left
+    
+    AI <- (meanr+meanl)/(abs(meanr)+abs(meanl))   # normalised AI for linear Model
+    
+    
+    
+  } else {
+    
+    #################################  double sigmoidal Model
+    library("sicegar")
+    minval <- min(Alltraces$y)       #find lowes value all traces
+    minval
+    
+    transform <- abs(minval)      # constant to transform for only >=0 values
+    #################################
+    
+    
+    Alltraces_fit_pos_y <- Alltraces$y + transform # transform y values positive
+    
+    Alltraces_fit <-sortedXyData(Alltraces$x,Alltraces_fit_pos_y)   # transformed data
+    
+    colnames(Alltraces_fit) <- c("time", "intensity")   #change colnames
+    
+    fitObjall <- fitAndCategorize(Alltraces_fit, threshold_minimum_for_intensity_maximum  = 0.3,    # fit sigmoidal model
+                                  threshold_intensity_range=0.1,
+                                  threshold_t0_max_int = 0.05)
+    
+    DoubleSig <- figureModelCurves(dataInput = fitObjall$normalizedInput,
+                                   doubleSigmoidalFitVector = fitObjall$doubleSigmoidalModel,    # double sigmoid plot
+                                   showParameterRelatedLines = TRUE)
+    
+    
+    plot(DoubleSig)   #plot souble sigmoid line
+    
+    parameter_fit<- fitObjall$doubleSigmoidalModel    #parameter
+    
+    
+    #str(parameter_fit)
+    
+    ############################Extract Parameters
+    ### slopes
+    
+    asloperight <- parameter_fit$slope1    #slope right
+    aslopeleft <- parameter_fit$slope2     #slope left
+    
+    RK <- mean(c(abs(asloperight),abs(aslopeleft)))
+    
+    ### magnitudes
+    
+    aMaxasympright <- (parameter_fit$maximum_y)-transform   #Asymp  max right 
+    aMinasymp <- (parameter_fit$finalAsymptoteIntensity) -transform    #Asymp  min left
+    
+    
+    midpointx<-parameter_fit$midPoint1_x                        # midpoint first slope (Reactiontime)
+    subsetbegin <- subset(righttraces,x <= midpointx)          #subset data da midpoint
+    aMin_As_right_mean <-mean(subsetbegin$y)                 # mean value = Magnitude at Start
+  
+    
+    aMagright <- diff(c(aMin_As_right_mean,aMaxasympright))     # Opt Magnitutde right
+    aMagleft <- diff(c(aMaxasympright,aMinasymp))    # Opt Magnitutde right
+    
+    OM <- abs(diff(c(aMaxasympright,aMinasymp)))    # opt magnitude
+    
+  ######## Asymmetry Index sigmoidal Model
+    AI <- (aMaxasympright +aMinasymp)/(abs(aMaxasympright)+abs(aMinasymp))   #normalised AS for doublesigmoidal fit
+  
+  }
+
+ 
+
+  ##################################################################
+  allparameters <- c(OM,RK,AI)
+  
+  
+  
+ 
+  tempOMparams <- as.data.frame(rbind(as.numeric(allparameters)))      #convert to dataframe
+  names(tempOMparams) = c("OM","RK","AI")    #set column names
+  rownames(tempOMparams)[1]=as.character(flyname)                   #set row names to flynames
+  
+  return(tempOMparams)
+}
+
+
+
+################
+
+
+
+
 
