@@ -413,7 +413,7 @@ OMparamextract_new <- function(OMdata){
   
   Alltraces <- sortedXyData(xall,yall)   #create sortedXYdata object
   
-
+ 
   
   #################################################################### Opto response Differences
  
@@ -483,27 +483,29 @@ OMparamextract_new <- function(OMdata){
   if (diffresponse<50 |slopemid<0.01|slopemidright<0|slopemidleft>0) {   #if OM, slope of lm too low, or slope for right traces negative, slope for left traces positive ->  take linear Model
     ####################################linear Model
     
-    ##right traces
+  ###right traces
     linfitright <- lm(y~x,data = righttraces)      #fit linear Model
-    plot (righttraces)
-    abline(linfitright,col="blue")
-    
+  
     #linmagnright <-diff(range(linfitright$fitted.values))   # Opto Magnitude Right
     linmagnright <- mean(righttraces$y)
     linsloperight <-linfitright$coefficients[2]         # slope right
   
-    ##left traces
+  ###left traces
     linfitleft <- lm(y~x,data = lefttraces)  #fit linear Model
-    
-    plot (lefttraces)
-    abline(linfitleft,col="red")
-    
+  
     #linmagnleft <-diff(range(linfitleft$fitted.values))   # Opto Magnitude Right
     linmagnleft <- mean(lefttraces$y)
     linslopeleft <-linfitleft$coefficients[2]             #slope left
+  ### plot linear Model
+    linplot <- ggplot(data=Alltraces, aes(x=x, y=y)) + geom_point() +geom_vline(xintercept = 30000,size=1.5) + 
+      geom_smooth(method='lm', formula= y~x,data = righttraces,col ="blue")+
+      geom_smooth(method='lm', formula= y~x,data = lefttraces,col ="red")
+    plot(linplot)
     
+    
+  ### OM and Rk   
   
-    RK <- mean(c(abs(linsloperight),abs(linslopeleft)))      #mean slopes lin mod
+    RK <- mean(c(abs(linsloperight),abs(linslopeleft)))           #mean slopes lin mod
     OM <- abs(diff(c(linmagnright,linmagnleft)))                  # mean Opto mags lin mod
   
     ### Asymmetry index linear Model
@@ -580,6 +582,9 @@ OMparamextract_new <- function(OMdata){
  
 
   ##################################################################
+  OM
+  RK
+  AI
   allparameters <- c(OM,RK,AI)
   
   
@@ -595,7 +600,6 @@ OMparamextract_new <- function(OMdata){
 
 
 ################
-
 
 
 
