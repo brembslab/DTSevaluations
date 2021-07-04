@@ -418,83 +418,97 @@ OMparamextract_new <- function(OMdata){
   #################################################################### Opto response Differences
  
   
-  ##right
-  righttraces
+###right
   
-  rightmidpoint = righttraces$x[nrow(righttraces)]/3   #divide traces in 3 time zones
+  rightmidpoint = righttraces$x[nrow(righttraces)]/3   # right traces first third
  
-  
   rightbegin <-subset(righttraces,x <=rightmidpoint)  #traces at begin
   rightend <-subset(righttraces,x>=(rightmidpoint*2)) #traces at end
   rightmid <-subset(righttraces,x>rightmidpoint & x<(rightmidpoint*2))  #traces at mid
 
-  
-  #plot(rightbegin)
-  #plot(rightend)
-  #plot(rightmid)
-  
-  
   meanrbegin <-mean(rightbegin$y)    #mean response begin
   meanrend <-mean(rightend$y)        #mean response end
 
-  diffresponseright <-diff(c(meanrbegin,meanrend))   # Differenz Response begin and end
+  diffresponseright <-diff(c(meanrbegin,meanrend))   # Difference OM Response begin and end
   
-
-  
- ###left
+###left
  
-
   lpoint <-as.numeric(rightmidpoint*4)   # left traces first third
 
   leftbegin <-subset(lefttraces, x<=lpoint) #traces at begin
   leftend <-subset(lefttraces,x>=(lpoint+rightmid)) #traces at end
   leftmid <-subset(lefttraces,x>lpoint & x<(lpoint+rightmidpoint))  #traces at mid
   
-  #plot(leftbegin)
- # plot(leftend)
-  #plot(leftmid)
-  
   meanlbegin <-mean(leftbegin$y)    #mean response begin
   meanlend <-mean(leftend$y)        #mean response end
   
   diffresponserleft <-diff(c(meanlbegin,meanlend))   # Differenz Response begin and end
+## mean
   
   diffresponse <- mean(c(abs(diffresponseright),abs(diffresponserleft)))     # mean Difference Optomotor Response
   
-
-
   ################################################################# Slope at begin 
 
-  ######## mean slope left and mid begin
-
+######## slope first third
+  
   lmslopemidright <- lm(y~x,data = rightbegin)    # lm for slope at begin right
   slopemidright <-lmslopemidright$coefficients[2]  #slope begin right
 
   
- lmslopemidright <- lm(y~x,data = leftbegin)   # lm for slope at begin left
+  lmslopemidright <- lm(y~x,data = leftbegin)   # lm for slope at begin left
   slopemidleft <-lmslopemidright$coefficients[2]  # slope begin left
   
   slopemid <-mean(c(abs(slopemidright),abs(slopemidleft)))  # mean slope begin left and right
+  
+####### slope first half
+  
+  rightmid = righttraces$x[nrow(righttraces)]/2
+  rightfirsthalf <- subset(righttraces,x<=rightmid)
+  lmrightfirsthalf <- lm(y~x,data = rightfirsthalf)
+  sloperightfirsthalf <-lmrightfirsthalf$coefficients[2]
+  
+  
+  leftmid = rightmid *3
+  leftfirsthalf <- subset(lefttraces,x<=leftmid)
+  lmleftfirsthalf <- lm(y~x,data = leftfirsthalf)
+  slopeleftfirsthalf <-lmleftfirsthalf$coefficients[2]
+  
+  
+  slopefirsthalf <- mean(c(abs(sloperightfirsthalf),abs(slopeleftfirsthalf)))
+  ###################################################################### Plot Parameter
+  decidemod <-ggplot(data=Alltraces, aes(x=x, y=y)) + geom_point() +
+    geom_vline(xintercept = 30000,size=1.5)+
+    geom_segment(x = 0, y = meanrbegin, xend = rightmidpoint, yend = meanrbegin,col="blue")+
+    geom_segment(x = rightmidpoint, y = meanrend, xend = OMmidpoint, yend = meanrend,col="blue")+
+    geom_segment(x = rightmidpoint, y = meanrbegin, xend = rightmidpoint, yend = meanrend,col="red")+
+    geom_segment(x = OMmidpoint, y = meanlbegin, xend = lpoint, yend = meanlbegin,col="blue")+
+    geom_segment(x = lpoint, y = meanlend, xend = OMmidpoint*2, yend = meanlend,col="blue")+
+    geom_segment(x = lpoint, y = meanlbegin, xend = lpoint, yend = meanlend,col="red")+
+    
+    geom_smooth(method='lm', formula= y~x,data = rightfirsthalf,col ="orange")+
+    geom_smooth(method='lm', formula= y~x,data = leftfirsthalf,col ="orange")
+  
+  #plot(decidemod)
   
   ################################################################# Decide between Models
 
  
   
-  if (diffresponse<50 |slopemid<0.01|slopemidright<0|slopemidleft>0) {   #if OM, slope of lm too low, or slope for right traces negative, slope for left traces positive ->  take linear Model
+  if (diffresponse<50 |slopefirsthalf<0.01|sloperightfirsthalf<0|slopeleftfirsthalf>0) {   #if OM/Slope  low, or slope for right traces negative, slope for left traces positive ->  take linear Model
     ####################################linear Model
     
   ###right traces
     linfitright <- lm(y~x,data = righttraces)      #fit linear Model
   
     #linmagnright <-diff(range(linfitright$fitted.values))   # Opto Magnitude Right
-    linmagnright <- mean(righttraces$y)
+    linmagnright <- mean(righttraces$y)                 # mean OM response right
     linsloperight <-linfitright$coefficients[2]         # slope right
   
   ###left traces
     linfitleft <- lm(y~x,data = lefttraces)  #fit linear Model
   
     #linmagnleft <-diff(range(linfitleft$fitted.values))   # Opto Magnitude Right
-    linmagnleft <- mean(lefttraces$y)
+    linmagnleft <- mean(lefttraces$y)           # mean OM response left
     linslopeleft <-linfitleft$coefficients[2]             #slope left
   ### plot linear Model
     linplot <- ggplot(data=Alltraces, aes(x=x, y=y)) + geom_point() +geom_vline(xintercept = 30000,size=1.5) + 
@@ -502,22 +516,15 @@ OMparamextract_new <- function(OMdata){
       geom_smooth(method='lm', formula= y~x,data = lefttraces,col ="red")
     plot(linplot)
     
-    
   ### OM and Rk   
-  
     RK <- mean(c(abs(linsloperight),abs(linslopeleft)))           #mean slopes lin mod
     OM <- abs(diff(c(linmagnright,linmagnleft)))                  # mean Opto mags lin mod
   
-    ### Asymmetry index linear Model
+  ### Asymmetry index linear Model
+    AI_OM <- (linmagnright+linmagnleft)/(abs(linmagnright)+abs(linmagnleft))   # normalized AI OM for linear Model
+    AI_RK <- (linsloperight+linslopeleft)/(abs(linsloperight)+abs(linslopeleft)) #normalized AI RK for linear Model
     
-    meanr <-mean(righttraces$y)   #mean Optoresponse right
-    meanl <-mean(lefttraces$y)    #mean Optorepsonse left
-    
-    AI <- (meanr+meanl)/(abs(meanr)+abs(meanl))   # normalised AI for linear Model
-    
-    
-    
-  } else {
+  } else {           
     
     #################################  double sigmoidal Model
     library("sicegar")
@@ -543,14 +550,13 @@ OMparamextract_new <- function(OMdata){
                                    showParameterRelatedLines = TRUE)
     
     
-    plot(DoubleSig)   #plot souble sigmoid line
+    plot(DoubleSig)   #plot souble sigmoid model
     
-    parameter_fit<- fitObjall$doubleSigmoidalModel    #parameter
-    
-    
+    parameter_fit<- fitObjall$doubleSigmoidalModel    # parameter 
+  
     #str(parameter_fit)
     
-    ############################Extract Parameters
+    ############################Extract parameter
     ### slopes
     
     asloperight <- parameter_fit$slope1    #slope right
@@ -564,19 +570,18 @@ OMparamextract_new <- function(OMdata){
     aMinasymp <- (parameter_fit$finalAsymptoteIntensity) -transform    #Asymp  min left
     
     
-    midpointx<-parameter_fit$midPoint1_x                        # midpoint first slope (Reactiontime)
-    subsetbegin <- subset(righttraces,x <= midpointx)          #subset data da midpoint
-    aMin_As_right_mean <-mean(subsetbegin$y)                 # mean value = Magnitude at Start
+    #midpointx<-parameter_fit$midPoint1_x                        # midpoint first slope (Reactiontime)
+    #subsetbegin <- subset(righttraces,x <= midpointx)          #subset data da midpoint
+    #aMin_As_right_mean <-mean(subsetbegin$y)                 # mean value = Magnitude at Start
   
+    #aMagright <- diff(c(aMin_As_right_mean,aMaxasympright))     # Opt Magnitude right
+    #aMagleft <- diff(c(aMaxasympright,aMinasymp))    # Opt Magnitude right
     
-    aMagright <- diff(c(aMin_As_right_mean,aMaxasympright))     # Opt Magnitutde right
-    aMagleft <- diff(c(aMaxasympright,aMinasymp))    # Opt Magnitutde right
-    
-    OM <- abs(diff(c(aMaxasympright,aMinasymp)))    # opt magnitude
+    OM <- abs(diff(c(aMaxasympright,aMinasymp)))    # Opt magnitude
     
   ######## Asymmetry Index sigmoidal Model
-    AI <- (aMaxasympright +aMinasymp)/(abs(aMaxasympright)+abs(aMinasymp))   #normalised AS for doublesigmoidal fit
-  
+    AI_OM <- (aMaxasympright +aMinasymp)/(abs(aMaxasympright)+abs(aMinasymp))   #normalized AS OM for doublesigmoidal fit
+    AI_RK <- (asloperight +aslopeleft)/(abs(asloperight)+abs(aslopeleft))   #normalized AS OM for doublesigmoidal fit
   }
 
  
@@ -584,14 +589,15 @@ OMparamextract_new <- function(OMdata){
   ##################################################################
   OM
   RK
-  AI
-  allparameters <- c(OM,RK,AI)
+  AI_OM
+  AI_RK
+  allparameters <- c(OM,RK,AI_OM,AI_RK)
   
   
   
  
   tempOMparams <- as.data.frame(rbind(as.numeric(allparameters)))      #convert to dataframe
-  names(tempOMparams) = c("OM","RK","AI")    #set column names
+  names(tempOMparams) = c("OM","RK","AI (OM)", "AI (RK)")    #set column names
   rownames(tempOMparams)[1]=as.character(flyname)                   #set row names to flynames
   
   return(tempOMparams)
@@ -599,8 +605,7 @@ OMparamextract_new <- function(OMdata){
 
 
 
-################
-
+############################################################### Decide Model Parameter
 
 
 
