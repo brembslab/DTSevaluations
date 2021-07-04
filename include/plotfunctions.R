@@ -518,7 +518,7 @@ OMparamextract_new <- function(OMdata){
     
   ### OM and Rk   
     RK <- mean(c(abs(linsloperight),abs(linslopeleft)))           #mean slopes lin mod
-    OM <- abs(diff(c(linmagnright,linmagnleft)))                  # mean Opto mags lin mod
+    OM <- (abs(diff(c(linmagnright,linmagnleft)))/2)                  # mean Opto mags lin mod
   
   ### Asymmetry index linear Model
     AI_OM <- (linmagnright+linmagnleft)/(abs(linmagnright)+abs(linmagnleft))   # normalized AI OM for linear Model
@@ -543,7 +543,7 @@ OMparamextract_new <- function(OMdata){
     
     fitObjall <- fitAndCategorize(Alltraces_fit, threshold_minimum_for_intensity_maximum  = 0.3,    # fit sigmoidal model
                                   threshold_intensity_range=0.1,
-                                  threshold_t0_max_int = 0.05)
+                                  threshold_t0_max_int = 3000)
     
     DoubleSig <- figureModelCurves(dataInput = fitObjall$normalizedInput,
                                    doubleSigmoidalFitVector = fitObjall$doubleSigmoidalModel,    # double sigmoid plot
@@ -577,7 +577,7 @@ OMparamextract_new <- function(OMdata){
     #aMagright <- diff(c(aMin_As_right_mean,aMaxasympright))     # Opt Magnitude right
     #aMagleft <- diff(c(aMaxasympright,aMinasymp))    # Opt Magnitude right
     
-    OM <- abs(diff(c(aMaxasympright,aMinasymp)))    # Opt magnitude
+    OM <- (abs(diff(c(aMaxasympright,aMinasymp)))/2)    # Opt magnitude
     
   ######## Asymmetry Index sigmoidal Model
     AI_OM <- (aMaxasympright +aMinasymp)/(abs(aMaxasympright)+abs(aMinasymp))   #normalized AS OM for doublesigmoidal fit
