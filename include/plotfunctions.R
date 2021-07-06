@@ -283,102 +283,182 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
 }
 
 
-####fit nonlinear model for parameter estimation to optomotor traces #####
-# Find the midpoint in left and right turning in averaged traces (OMdata)
+####fit models for parameter estimation to optomotor traces #####
+
 OMparamextract <- function(OMdata){
+
+  if(experiment$meter_type=="Goetz"){ #adjust for differences in measuring devices
+  startOM=20
+  slopeduration=100
+  crit_diff=10
+  crit_slope=0.001
+  } else {
+    startOM=200
+    slopeduration=300
+    crit_diff=50
+    crit_slope=0.01
+  }
   
-OMmidpoint = OMdata$time[nrow(OMdata)]/2
+ ########################################################  subset traces (right and left)
+  
+  OMmidpoint = OMdata$time[nrow(OMdata)]/2
+   
+  #right turning traces
+  x1=OMdata$time[OMdata$time<=OMmidpoint]                     #time
+  y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]  #mean right OM response                 
+  righttraces <-sortedXyData(x1,y)                                     #create sortedXYdata object
 
-#right turning traces
-x1=OMdata$time[OMdata$time<=OMmidpoint]                     #time
-y=OMdata[[as.character(flyname)]][OMdata$time<=OMmidpoint]  #mean right OM response
-y=rollapply(y, 100,mean, fill="extend")                     #apply rolling average of 100 data points (5s)
-xy <-sortedXyData(x1,y)                                     #create sortedXYdata object
+  #left turning traces
+  
+  x1=OMdata$time[OMdata$time>OMmidpoint]                      #time
+  y=OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]   #mean left OM response
+  lefttraces <-sortedXyData(x1,y)                             #create sortedXYdata object
+  
+  #all traces
+  
+  xall = OMdata$time   #time
+  yall = OMdata[[as.character(flyname)]] # mean OM response
+ 
+  
+  AllOMtraces <- sortedXyData(xall,yall)   #create sortedXYdata object
+  
+ 
+  
+  #################################################################### Optomotor Differences start-end
+ 
+  
+###right
+  
+  rightbegin <-head(righttraces, startOM)  #beginning of OM
+  rightend <- tail(righttraces, 200) #traces at last 10s
 
-LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata right turning
+  meanrbegin <-mean(rightbegin$y)    #mean response begin
+  meanrend <-mean(rightend$y)        #mean response end
 
-#uncomment for debugging
-#plot(xy)
-#abline(LinMod)
-#LinMod$coefficients[2]
+  diffresponseright <-diff(c(meanrbegin,meanrend))   # Difference OM Response begin and end
+  
+###left
+ 
+  leftbegin <-head(lefttraces, startOM)  #beginning of OM
+  leftend <- tail(lefttraces, 200) #traces at last 10s
 
-if(abs(LinMod$coefficients[2])<0.0001){                     #if the linear model shows hardly any slope, set asymptote as mean of all values
-  right=c(b0=0, b1=mean(y), lrc=-1000)
-} else {
-  right<-tryCatch(                                          #extract the right turning coefficients into a vector. Set vector to zero for errors
-    expr = {
-      right<-NLSstAsymptotic(xy)
-    },
-    error = function(e){
-      right=c(b0=0, b1=0, lrc=-1000)                        #set logarithmic rate constant to -1000 so exp(lrc)=0
-      return(right)
-    },
-    warning = function(w){
-      right=c(b0=0, b1=0, lrc=-1000)                        #set logarithmic rate constant to -1000 so exp(lrc)=0
-      return(right)
-    },
-    finally = {}
-  )}
+  meanlbegin <-mean(leftbegin$y)    #mean response begin
+  meanlend <-mean(leftend$y)        #mean response end
+  
+  diffresponseleft <-diff(c(meanlbegin,meanlend))   # Differenz Response begin and end
+## mean
+  
+  diffresponse <- mean(c(abs(diffresponseright),abs(diffresponseleft)))     # mean Difference Optomotor Response
+  
+  ################################################################# Optomotor Slope
 
-#left turning traces
-x1=OMdata$time[OMdata$time>OMmidpoint]                      #time
-x1=x1-x1[1]                                                 #set time to start from zero
-y=OMdata[[as.character(flyname)]][OMdata$time>OMmidpoint]   #mean left OM response
-y=rollapply(y, 100,mean, fill="extend")                     #apply rolling average of 100 data points (5s)
-xy <-sortedXyData(x1,y)                                     #create sortedXYdata object
+  rightstart <-head(righttraces, 200)  #traces at first 10s
+  sloperight <- lm(y~x,data = rightstart)$coefficients[2]
 
-LinMod = lm(y ~ x1, data = xy)                              #fit linear model to OMdata left turning
+  
+  leftstart <-head(lefttraces, 200)  #traces at first 10s
+  slopeleft <- lm(y~x,data = leftstart)$coefficients[2]
+  
+  
+  slope <- mean(c(abs(sloperight),abs(slopeleft)))
+  ###################################################################### Plot Parameters for debugging and checking
+  decidemod <-ggplot(data=AllOMtraces, aes(x=x, y=y)) + geom_point() +
+    geom_vline(xintercept = 30000,size=1.5)+
+    geom_segment(x = 0, y = meanrbegin, xend = 5000, yend = meanrbegin,col="blue")+
+    geom_segment(x = 25000, y = meanrend, xend = OMmidpoint, yend = meanrend,col="blue")+
+    geom_segment(x = 25000, y = meanrbegin, xend = 25000, yend = meanrend,col="red")+
+    geom_segment(x = OMmidpoint, y = meanlbegin, xend = 35000, yend = meanlbegin,col="blue")+
+    geom_segment(x = 55000, y = meanlend, xend = OMmidpoint*2, yend = meanlend,col="blue")+
+    geom_segment(x = 35000, y = meanlbegin, xend = 35000, yend = meanlend,col="red")+
+    
+    geom_smooth(method='lm', formula= y~x,data = rightstart,col ="orange")+
+    geom_smooth(method='lm', formula= y~x,data = leftstart,col ="orange")
+  
+#  plot(decidemod)
+  
+  ################################################################# Decide between Models
 
-#uncomment for debugging
-#plot(xy)
-#abline(LinMod)
-#LinMod$coefficients[2]
+ 
+  
+  if (diffresponse<crit_diff | slope<crit_slope | sloperight<0 | slopeleft>0) {   #if OM/Slope  low, or slope for right traces negative, slope for left traces positive ->  take linear Model
+    
+    ####################################linear model
+    
+  ###right traces
+    linfitright <- lm(y~x,data = righttraces)      # fit linear model
+    linmagnright <- mean(righttraces$y)            # mean OM response right
+    linsloperight <-linfitright$coefficients[2]    # slope right
+  
+  ###left traces
+    linfitleft <- lm(y~x,data = lefttraces)        # fit linear Model
+    linmagnleft <- mean(lefttraces$y)              # mean OM response left
+    linslopeleft <-linfitleft$coefficients[2]      # slope left
 
-if(abs(LinMod$coefficients[2])<0.0001){                     #if the linear model shows hardly any slope, set asymptote as mean of all values
-  left=c(b0=0, b1=mean(y), lrc=-1000)
-} else {
-  left<-tryCatch(                                           #extract the left turning coefficients into a vector. Set vector to zero for errors
-    expr = {
-      left<-NLSstAsymptotic(xy)
-    },
-    error = function(e){
-      left=c(b0=0, b1=0, lrc=-1000)                         #set logarithmic rate constant to -1000 so exp(lrc)=0
-      return(left)
-    },
-    warning = function(w){
-      left=c(b0=0, b1=0, lrc=-1000)                         #set logarithmic rate constant to -1000 so exp(lrc)=0
-      return(left)
-    },
-    finally = {}
-  )}
+  ### plot linear Model for debugging and testing
+    linplot <- ggplot(data=AllOMtraces, aes(x=x, y=y)) + geom_point() +geom_vline(xintercept = 30000,size=1.5) + 
+      geom_smooth(method='lm', formula= y~x,data = righttraces,col ="blue")+
+      geom_smooth(method='lm', formula= y~x,data = lefttraces,col ="red")
+    plot(linplot)
+    
+  ### Optomotor magnnitude and slop   
+    OS <- mean(c(abs(linsloperight),abs(linslopeleft)))           # mean slopes lin mod
+    OM <- (abs(diff(c(linmagnright,linmagnleft)))/2)              # mean Opto mags lin mod
+  
+  ### Asymmetry index linear Model
+    AI_OM <- (linmagnright+linmagnleft)/(abs(linmagnright)+abs(linmagnleft))   # normalized AI OM for linear Model
+    AI_OS <- (linsloperight+linslopeleft)/(abs(linsloperight)+abs(linslopeleft)) #normalized AI OS for linear Model
+    
+  } else {           
+    
+    #################################  double sigmoidal Model
+    transform <- abs(min(AllOMtraces$y))      # find smallest value in OM traces for shifting to positive values
+    AllOMtraces$y <- AllOMtraces$y + transform # transform y values positive
+    
+    colnames(AllOMtraces) <- c("time", "intensity")   #change colnames
+    
+    fitObjall <- fitAndCategorize(AllOMtraces, threshold_minimum_for_intensity_maximum  = 0.3,    # fit sigmoidal model
+                                  threshold_intensity_range=0.1,
+                                  threshold_t0_max_int = 3000)
+    
+    DoubleSig <- figureModelCurves(dataInput = fitObjall$normalizedInput,
+                                   doubleSigmoidalFitVector = fitObjall$doubleSigmoidalModel,    # double sigmoid plot
+                                   showParameterRelatedLines = TRUE)
+    
+    
+    plot(DoubleSig)   #plot souble sigmoid model
+    
+    parameter_fit<- fitObjall$doubleSigmoidalModel    # parameter 
+  
+    #str(parameter_fit)
+    
+    ############################Extract parameter
+    ### slopes
+    
+    asloperight <- parameter_fit$slope1    #slope right
+    aslopeleft <- parameter_fit$slope2     #slope left
+    
+    OS <- mean(c(abs(asloperight),abs(aslopeleft)))
+    
+    ### magnitudes
+    
+    aMaxasympright <- (parameter_fit$maximum_y)-transform   #Asymp  max right 
+    aMinasymp <- (parameter_fit$finalAsymptoteIntensity)-transform    #Asymp  min left
+    
+    OM <- (abs(diff(c(aMaxasympright,aMinasymp)))/2)    # Opt magnitude
+    
+  ######## Asymmetry Index sigmoidal Model
+    AI_OM <- (aMaxasympright +aMinasymp)/(abs(aMaxasympright)+abs(aMinasymp))   #normalized AS OM for doublesigmoidal fit
+    AI_OS <- (asloperight +aslopeleft)/(abs(asloperight)+abs(aslopeleft))   #normalized AS OM for doublesigmoidal fit
+  }
 
-#uncomment for debugging
-#print("right: ")
-#print(right[1])
-#print(right[2])
-#print("<br>left: ")
-#print(left[1])
-#print(left[2])
-
-###calculate averages and asymmetries to three significant digits and put them into a vector
-rightasymp = right[1]+right[2]
-leftasymp = left[1]+left[2]
-#sanity checks
-if(!between(leftasymp, maxfly[1], maxfly[2])){leftasymp=0}
-if(!between(rightasymp, maxfly[1], maxfly[2])){rightasymp=0}
-
-if (leftasymp==0 & rightasymp==0){aveOMcoeff=c(0,0,0)
-} else {
-  aveOMcoeff=c(signif((abs(rightasymp)+abs(leftasymp))/2, 3),                                #mean asymptote
-               signif(((exp(right[3])+exp(left[3]))/2)*1000, 3),                             #mean rate constant [s]
-               signif((abs(rightasymp)-abs(leftasymp))/(abs(rightasymp)+abs(leftasymp)), 3)) #asymmetry index
+  allparameters <- c(OM,OS,AI_OM,AI_OS)
+  
+  
+  
+ 
+  tempOMparams <- as.data.frame(rbind(as.numeric(allparameters)))      #convert to dataframe
+  names(tempOMparams) = c("OM","OS","AI(OM)", "AI(OS)")    #set column names
+  rownames(tempOMparams)[1]=as.character(flyname)                   #set row names to flynames
+  
+  return(tempOMparams)
 }
-
-###make vector into a dataframe for easy exporting and plotting
-tempOMparams <- as.data.frame(rbind(as.numeric(aveOMcoeff)))      #convert to dataframe
-names(tempOMparams) = c("asymptote", "rate constant","AI")        #set column names
-rownames(tempOMparams)[1]=as.character(flyname)                   #set row names to flynames
-
-return(tempOMparams)
-}
-

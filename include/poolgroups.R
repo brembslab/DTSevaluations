@@ -1,7 +1,7 @@
 ### DTS script to attempt to pool some PI data into two groupsif there are more than two groups
 PoolGrps=FALSE
 
-if(NofGroups>2 & length(unique(groupdescriptions))==2){
+if(NofGroups>2 & length(unique(groupdescriptions))==2 & PIs_present){
   PoolGrps=TRUE #we have several groups, but only one control and one experimental group
   
   #find out which group belongs to which pool
