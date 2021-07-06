@@ -224,12 +224,12 @@ plotOMtracesMean(grouped.OMdataAfter) #call function to plot OM traces at end of
 
 plotOMparams=ldply(grouped.OMparams, data.frame)    #move the dataframes from each group into a single dataframe
 OMvariables = head(names(plotOMparams),-1)
-OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
+OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", "Asymmetry Index Slope")
 
 #for one group without statistics
-if(NofGroups==1|NofGroups>3)
+if(NofGroups==1|NofGroups>2)
   {
-        for (v in 1:3) {
+        for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
            print(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
               geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
@@ -243,7 +243,7 @@ if(NofGroups==1|NofGroups>3)
 #for two groups with statistics
 if(NofGroups==2)
   {
-        for (v in 1:3) {
+        for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
             utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$p.value, 3) #compare the two groups with a U-test and collect p-value
             w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$statistic, 3)
@@ -286,7 +286,7 @@ if(NofGroups==2)
                                        paste("FP risk, prior ",priorval[2]),
                                        "Likelihood Ratio")
             
-        # plot two PIs with asterisks
+        # plot two parameters with asterisks
           plots.2test<-list(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
               geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
               geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
@@ -302,6 +302,10 @@ if(NofGroups==2)
         } #for 
 }
 
+#for three groups with statistics
+if(NofGroups==3){
+  
+}
 
 
 ```
@@ -312,12 +316,12 @@ if(NofGroups==2)
 
 plotOMparamsBefore=ldply(grouped.OMparamsBefore, data.frame)    #move the dataframes from each group into a single dataframe
 OMvariables = head(names(plotOMparamsBefore),-1)
-OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
+OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", "Asymmetry Index Slope")
 
 #for one group without statistics
 if(NofGroups==1 | NofGroups > 3)
   {
-        for (v in 1:3) {
+        for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
            print(ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
               geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
@@ -331,7 +335,7 @@ if(NofGroups==1 | NofGroups > 3)
 #for two groups with statistics
 if(NofGroups==2)
   {
-        for (v in 1:3) {
+        for (v in 1:4) {
           cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
             plots.2test<-plotOMParamBox(v, plotOMparamsBefore, samplesizes, OMvariables, OMtitles) #call function to plot box/whisker diagram and calculate statistics
           grid.arrange(grobs = plots.2test, ncol=2)
@@ -354,7 +358,7 @@ if(NofGroups==3)
     }
   }
   PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
-  for (v in 1:3) {
+  for (v in 1:4) {
     cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
     utest1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$p.value, 3)
     utest2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$p.value, 3)#compare the two groups with a U-test and collect p-value
@@ -428,7 +432,7 @@ if(NofGroups==3)
                                paste("FP risk, prior ",priorval[2]),
                                "Likelihood Ratio")
     
-    # plot two PIs with asterisks
+    # plot three parameters with asterisks
 plotOMparamsBefore$group <- as.character(plotOMparamsBefore$group)
 plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=unique(plotOMparamsBefore$group))
       plots.2test<-ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
@@ -462,12 +466,12 @@ plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=unique(plotO
 
 plotOMparamsAfter=ldply(grouped.OMparamsAfter, data.frame)    #move the dataframes from each group into a single dataframe
 OMvariables = head(names(plotOMparamsAfter),-1)
-OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
+OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", "Asymmetry Index Slope")
 
 #for one group without statistics
 if(NofGroups==1 | NofGroups > 3)
   {
-        for (v in 1:3) {
+        for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
            print(ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
               geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
@@ -481,7 +485,7 @@ if(NofGroups==1 | NofGroups > 3)
 #for two groups with statistics
 if(NofGroups==2)
   {
-        for (v in 1:3) {
+        for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
             plots.2test<-plotOMParamBox(v, plotOMparamsAfter, samplesizes, OMvariables, OMtitles) #call function to plot box/whisker diagram and calculate statistics
           grid.arrange(grobs = plots.2test, ncol=2)
@@ -502,7 +506,7 @@ if(NofGroups==3){
     }
   }
   PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
-  for (v in 1:3) {
+  for (v in 1:4) {
     cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
     utest1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$p.value, 3)
     utest2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$p.value, 3)#compare the two groups with a U-test and collect p-value
@@ -578,7 +582,7 @@ if(NofGroups==3){
                                "Likelihood Ratio")
     
   
-    # plot two PIs with asterisks
+    # plot parameters with asterisks
 plotOMparamsAfter$group <- as.character(plotOMparamsAfter$group)
 plotOMparamsAfter$group <- factor(plotOMparamsAfter$group, levels=unique(plotOMparamsAfter$group))
     plots.2test<-ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
