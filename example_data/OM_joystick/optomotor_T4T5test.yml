@@ -1,0 +1,136 @@
+---
+experiment:
+    type: Joystick
+    id: none
+    name: optomotorT4T5Test
+    title: Optomotor test of of flies with blocked T4T5 neurons 
+    description: Optomotor test of of flies with blocked T4T5 neurons
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: simon-benmaamar
+    description: Simon Benmaamar
+    firstName: Simon
+    lastName: Benmaamar
+    id: none
+resources:
+- name: CS36 Tetox211
+  title: CS36 Tetox211
+  description: Control
+  data:
+  - CS36_Tetox211_1.xml
+  - CS36_Tetox211_2.xml
+  - CS36_Tetox211_3.xml
+  - CS36_Tetox211_4.xml
+  - CS36_Tetox211_5.xml
+  - CS36_Tetox211_6.xml
+  - CS36_Tetox211_7.xml
+  - CS36_Tetox211_8.xml
+  - CS36_Tetox211_9.xml
+  - CS36_Tetox211_10.xml
+  - CS36_Tetox211_11.xml
+  - CS36_Tetox211_12.xml
+  - CS36_Tetox211_13.xml
+  - CS36_Tetox211_14.xml
+  - CS36_Tetox211_15.xml
+  - CS36_Tetox211_16.xml
+  - CS36_Tetox211_17.xml
+  - CS36_Tetox211_18.xml
+  - CS36_Tetox211_19.xml
+  - CS36_Tetox211_20.xml
+  - CS36_Tetox211_21.xml
+  id: none
+  
+- name: T4T5 CS36
+  title: T4T5 CS36
+  description: Control
+  data:
+  - T4T5_CS36_1.xml
+  - T4T5_CS36_2.xml
+  - T4T5_CS36_3.xml
+  - T4T5_CS36_4.xml
+  - T4T5_CS36_5.xml
+  - T4T5_CS36_6.xml
+  - T4T5_CS36_8.xml
+  - T4T5_CS36_9.xml
+  - T4T5_CS36_10.xml
+  - T4T5_CS36_11.xml
+  - T4T5_CS36_12.xml
+  - T4T5_CS36_13.xml
+  - T4T5_CS36_14.xml
+  - T4T5_CS36_15.xml
+  - T4T5_CS36_16.xml
+  - T4T5_CS36_17.xml
+  - T4T5_CS36_19.xml
+  - T4T5_CS36_20.xml
+  - T4T5_CS36_21.xml
+  - T4T5_CS36_22.xml
+  - T4T5_CS36_23.xml
+  id: none
+  
+- name: Tetox211 T4T5 
+  title: Tetox211 T4T5
+  description: Experimental
+  data:
+  - Tetox211W_T4T5_1.xml
+  - Tetox211W_T4T5_2.xml
+  - Tetox211W_T4T5_3.xml
+  - Tetox211W_T4T5_4.xml
+  - Tetox211W_T4T5_5.xml
+  - Tetox211W_T4T5_6.xml
+  - Tetox211W_T4T5_7.xml
+  - Tetox211W_T4T5_8.xml
+  - Tetox211W_T4T5_9.xml
+  - Tetox211W_T4T5_10.xml
+  - Tetox211W_T4T5_11.xml
+  - Tetox211W_T4T5_12.xml
+  - Tetox211W_T4T5_13.xml
+  - Tetox211W_T4T5_14.xml
+  - Tetox211W_T4T5_15.xml
+  - Tetox211W_T4T5_16.xml
+  - Tetox211W_T4T5_17.xml
+  - Tetox211W_T4T5_18.xml
+  - Tetox211W_T4T5_19.xml
+  - Tetox211W_T4T5_20.xml
+  - Tetox211W_T4T5_21.xml
+  - Tetox211W_T4T5_22.xml
+  - Tetox211W_T4T5_23.xml
+  - Tetox211W_T4T5_24.xml
+  - Tetox211W_T4T5_25.xml
+  id: none
+      
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianred1
+    - plum3
+  learning-score:
+    title:
+    description:
+    data:
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 0 #no
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: two.sided #less, greater, two.sided
+    data: 0 #no
+  three.groups:
+    title: a pair of two-sided tests
+    description: Testing two controls against one experimental group
+    power: two.sided #two-sided test (alternatives: greater, two.sided)
+    data: 0 #no             
+mediatype: text/csv/xml
