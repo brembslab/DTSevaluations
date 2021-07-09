@@ -1,0 +1,141 @@
+---
+experiment:
+    type: Torquemeter
+    id: SCR_017276
+    name: PKCi final
+    title: PKCi manipulation
+    description: PKCi
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: andreas-ehweiner
+    description: Andreas Ehweiner
+    firstName: Andreas
+    lastName: Ehweiner
+    id: Na
+resources:
+- name: PKCi x FoxPiB
+  title: PKCi x FoxPiB
+  description: Exp
+  data:
+  #- PKCiFoxPiB0.xml #left
+  - PKCiFoxPiB1.xml #right
+  - PKCiFoxPiB2.xml #left
+  - PKCiFoxPiB3.xml #right
+  - PKCiFoxPiB4.xml #left
+  #- PKCiFoxPiB5.xml #right #sehr flugfaul
+  - PKCiFoxPiB6.xml #left
+  #- PKCiFoxPiB7.xml #right #ungleich
+  - PKCiFoxPiB8.xml #left
+  - PKCiFoxPiB9.xml #right 
+  - PKCiFoxPiB10.xml #left
+  - PKCiFoxPiB11.xml #right 
+  - PKCiFoxPiB12.xml #left
+  - PKCiFoxPiB13.xml #right 
+  - PKCiFoxPiB14.xml #left
+  - PKCiFoxPiB15.xml #right
+  #- PKCiFoxPiB16.xml #left #stark flugfaul discard
+  - PKCiFoxPiB17.xml #left
+  - PKCiFoxPiB18.xml #right 
+  - PKCiFoxPiB19.xml #leftl
+  - PKCiFoxPiB20.xml #right
+  #- PKCiFoxPiB21.xml #left #ungleich
+  - PKCiFoxPiB22.xml #right
+  - PKCiFoxPiB23.xml #left
+  - PKCiFoxPiB24.xml #right
+  id: FBst0
+  
+- name: PKCi x elavGAL4
+  title: PKCi x elavGAL4
+  description: Control1
+  data:
+  - PKCiElav0.xml #right
+  - PKCiElav1.xml #left
+  #- PKCiElav2.xml #right #stoped flying verwerfen
+  - PKCiElav3.xml #right
+  - PKCiElav4.xml #left
+  - PKCiElav5.xml #left 
+  - PKCiElav6.xml #right
+  #- PKCiElav7.xml #left #idel discard
+  - PKCiElav8.xml #right
+  - PKCiElav9.xml #left
+  - PKCiElav10.xml #right
+  - PKCiElav11.xml #right
+  - PKCiElav12.xml #left
+  - PKCiElav13.xml #right
+  #- PKCiElav14.xml #left
+  - PKCiElav15.xml #right
+  #- PKCiElav16.xml #left #schlechte vermeiung überprüfung stoped flying in the end
+  - PKCiElav17.xml #right
+  - PKCiElav18.xml #left
+  - PKCiElav19.xml #right
+  - PKCiElav20.xml #left
+  #- PKCiElav21.xml #left #überprüfen schelcehte vermeidung ungleich
+  - PKCiElav22.xml #right
+  - PKCiElav23.xml #left 
+  - PKCiElav24.xml #right
+  - PKCiElav25.xml #right 
+  id: FBst0
+  
+- name: PKCi x elavtubGal80GAL44h
+  title: PKCi x elavtubGal80GAL4 for 4h
+  description: Control
+  data:
+  - ElavtubGal80PKChscon10.xml #right 
+  - ElavtubGal80PKChscon11.xml #left  
+  - ElavtubGal80PKChscon12.xml #left
+  - ElavtubGal80PKChscon13.xml #right
+  - ElavtubGal80PKChscon14.xml #left
+  - ElavtubGal80PKChscon15.xml #right
+  - ElavtubGal80PKChscon16.xml #left
+  - ElavtubGal80PKChscon17.xml #right #error
+  - ElavtubGal80PKChscon18.xml #right
+  - ElavtubGal80PKChscon19.xml #left
+  - ElavtubGal80PKChscon20.xml #right
+  - ElavtubGal80PKChscon21.xml #left
+  #- ElavtubGal80PKChscon22.xml #right #unfinished
+  - ElavtubGal80PKChscon23.xml #right
+  - ElavtubGal80PKChscon24.xml #left
+  - ElavtubGal80PKChscon25.xml #right
+  #- ElavtubGal80PKChscon26.xml #left
+  - ElavtubGal80PKChscon27.xml #right
+  #- ElavtubGal80PKChscon28.xml #left #stoped flying discard
+  - ElavtubGal80PKChscon29.xml #left
+  - ElavtubGal80PKChscon30.xml #right
+  - ElavtubGal80PKChscon31.xml #left
+  id: FBst0
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianPink1
+    - plum3
+  learning-score:
+    title: PI12
+    description: First test after last training
+    data: 12
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #yes
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 1 #yes             
+mediatype: text/csv/xml
