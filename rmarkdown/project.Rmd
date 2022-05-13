@@ -707,7 +707,15 @@ for(x in 1:NofGroups)
   {
     PIprofile <- grouped.PIcombined[[x]] #get PIs with categories
     PIprofile$flyname = rep(flynames[,x][!is.na(flynames[,x])])
-
+    PIprofile$category[PIprofile$category=="0 right_torque"]<-"Right torque"
+    PIprofile$category[PIprofile$category=="0 left_torque"]<-"Left torque"
+    PIprofile$category[PIprofile$category=="7 right_torque"]<-"Green punished right"
+    PIprofile$category[PIprofile$category=="7 left_torque"]<-"Blue punished left"
+    PIprofile$category[PIprofile$category=="8 right_torque"]<-"Blue punished right"
+    PIprofile$category[PIprofile$category=="8 left_torque"]<-"Green punished left"
+    PIprofile$category[PIprofile$category=="1 right_torque"]<-"Right torque"
+    PIprofile$category[PIprofile$category=="1 left_torque"]<-"Left torque"
+    
     #plot graph
     PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
@@ -733,9 +741,6 @@ cat("\n## Performance Index box&dotplot without notches:\n")
 
 for(x in 1:NofGroups)
   {
-    PIprofile <- grouped.PIcombined[[x]] #get PIs with categories
-    PIprofile$flyname = rep(flynames[,x][!is.na(flynames[,x])])
-
     #plot graph
     PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
@@ -761,8 +766,6 @@ cat("\n## Performance Index Violin Plot:\n")
 
 for(x in 1:NofGroups)
   {
-  PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
-
     PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_violin(width = 1.1) +
@@ -783,6 +786,15 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```{r Wilcoxon, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n# Learning Score Statistics\n## Statistical tests of single groups against zero\n")
   
+PIstatCombined$category[PIstatCombined$category=="0 right_torque"]<-"Right torque"
+  PIstatCombined$category[PIstatCombined$category=="0 left_torque"]<-"Left torque"
+  PIstatCombined$category[PIstatCombined$category=="7 right_torque"]<-"Green punished right"
+  PIstatCombined$category[PIstatCombined$category=="7 left_torque"]<-"Blue punished left"
+  PIstatCombined$category[PIstatCombined$category=="8 right_torque"]<-"Blue punished right"
+  PIstatCombined$category[PIstatCombined$category=="8 left_torque"]<-"Green punished left"
+  PIstatCombined$category[PIstatCombined$category=="1 right_torque"]<-"Right torque"
+  PIstatCombined$category[PIstatCombined$category=="1 left_torque"]<-"Left torque"
+
   wilcoxon<-numeric()  
   for(x in 1:NofGroups){wilcoxon[x] = signif(wilcox.test(PIstat[[x]])$p.value, 3)} #test all groups against zero
   #compute Bayes Factor for single group 
