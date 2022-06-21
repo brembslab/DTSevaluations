@@ -19,6 +19,7 @@ resources:
   title: wild type Berlin
   description: control
   data:
+  - tlern-01.xml
   - wtb-01.xml
   #- wtb-02.xml #low data sampling
   - wtb-03.xml

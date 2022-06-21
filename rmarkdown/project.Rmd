@@ -350,7 +350,7 @@ if(NofGroups==3)
   Control=list()
   Exp=list()
   for (t in 1:NofGroups) {
-    if(grepl("test", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("experimental", tolower(grouped.OMparamsBefore[[t]]$desc))==TRUE){
+    if(any(grepl("test", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("experimental", tolower(grouped.OMparamsBefore[[t]]$desc)))==TRUE){
       Exp = na.omit(grouped.OMparamsBefore[[t]])
     } else {
       Control[[Count]] =na.omit(grouped.OMparamsBefore[[t]])
