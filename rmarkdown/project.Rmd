@@ -304,7 +304,7 @@ if(NofGroups==2)
 
 #for three groups with statistics
 if(NofGroups==3){
-  
+  ##to be coded!
 }
 
 
@@ -319,7 +319,7 @@ OMvariables = head(names(plotOMparamsBefore),-1)
 OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", "Asymmetry Index Slope")
 
 #for one group without statistics
-if(NofGroups==1 | NofGroups > 3)
+if(NofGroups==1 | (NofGroups >= 3 & !threegroupstats))
   {
         for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
@@ -344,7 +344,7 @@ if(NofGroups==2)
 
 #for three groups with statistics
 
-if(NofGroups==3)
+if(NofGroups==3 & threegroupstats)
 {
   Count=1
   Control=list()
@@ -469,7 +469,7 @@ OMvariables = head(names(plotOMparamsAfter),-1)
 OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", "Asymmetry Index Slope")
 
 #for one group without statistics
-if(NofGroups==1 | NofGroups > 3)
+if(NofGroups==1 | (NofGroups >= 3 & !threegroupstats))
   {
         for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
@@ -493,12 +493,12 @@ if(NofGroups==2)
 }
 
 #for three groups with statistics
-if(NofGroups==3){
+if(NofGroups==3 & threegroupstats){
   Count=1
   Control=list()
   Exp=list()
   for (t in 1:NofGroups) {
-    if(grepl("test", tolower(grouped.OMparamsAfter[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsAfter[[t]]$desc)) |      grepl("experimental", tolower(grouped.OMparamsAfter[[t]]$desc))==TRUE){
+    if(any(grepl("test", tolower(grouped.OMparamsAfter[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsAfter[[t]]$desc)) |      grepl("experimental", tolower(grouped.OMparamsAfter[[t]]$desc)))==TRUE){
       Exp = na.omit(grouped.OMparamsAfter[[t]])
     } else {
       Control[[Count]] =na.omit(grouped.OMparamsAfter[[t]])
