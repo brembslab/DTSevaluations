@@ -4,7 +4,7 @@
 
 fly_pos_traces <- function(temp)
 {
-  ##modify a_Pos to introduce gaps between -180° and 180°
+  ##modify a_Pos to introduce gaps between -180? and 180?
   pos <- temp$a_pos
   for(p in 2:nrow(temp))
   {
@@ -48,7 +48,7 @@ wilcox.annotate <- function(boxes, wilcoxon)
 {
   annotate("text",
               x=boxes,
-              y=+Inf, vjust = 1.5,
+              y=+Inf, vjust = 2.5,
               label=paste("p=",wilcoxon[boxes]))
 }
 
@@ -57,7 +57,7 @@ samplesizes.annotate <- function(boxes, samplesizes)
 {
   annotate("text",
            x=boxes,
-           y=-Inf, vjust = -0.5,
+           y=-Inf, vjust = -1.5,
            label=paste("N=", samplesizes[boxes]))
 }
 
