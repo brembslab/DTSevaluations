@@ -48,7 +48,7 @@ wilcox.annotate <- function(boxes, wilcoxon)
 {
   annotate("text",
               x=boxes,
-              y=+Inf, vjust = 2.5,
+              y=1.1,
               label=paste("p=",wilcoxon[boxes]))
 }
 
@@ -57,7 +57,7 @@ samplesizes.annotate <- function(boxes, samplesizes)
 {
   annotate("text",
            x=boxes,
-           y=-Inf, vjust = -1.5,
+           y=-1.1,
            label=paste("N=", samplesizes[boxes]))
 }
 
