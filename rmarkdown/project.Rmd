@@ -702,10 +702,11 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```{r PIbarsub, eval=PIs_present, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Performance Index bar plot - preference subtracted:\n")
 
-PIplots <- list()
 for(x in 1:NofGroups)
   {
     PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+    avgPretest = mean(subset(pretestPIs, group==groupnames[x])$category, na.rm=TRUE) #average pretest value
+    PIprofile$PIs=PIprofile$PIs-avgPretest
 
     # plot graph
      PIplots[[x]] <- ggplot(PIprofile, aes(x=period, y=PIs)) + 
