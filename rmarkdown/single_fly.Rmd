@@ -526,9 +526,10 @@ grid.arrange(grobs = dwellplots, ncol=2)
 ```{r PIs, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Learning and avoidance scores\n")
 
-      barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
+      b<-barplot(as.vector(na.omit(sequence$lambda)), main = paste("Performance Indices", flyname),
             xlab="Time [periods]",
             ylab="PI [rel. units]",
             space=0,
             col = as.vector(na.omit(sequence$color)))
+      text(x= b, y=0.03, label=as.character(round(sequence$lambda, digits=2)))
 ```
