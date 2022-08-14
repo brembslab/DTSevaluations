@@ -699,6 +699,30 @@ for(x in 1:NofGroups)
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
+```{r PIbarsub, eval=PIs_present, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Performance Index bar plot - preference subtracted:\n")
+
+PIplots <- list()
+for(x in 1:NofGroups)
+  {
+    PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+
+    # plot graph
+     PIplots[[x]] <- ggplot(PIprofile, aes(x=period, y=PIs)) + 
+              geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+              stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
+              stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              scale_y_continuous(breaks = seq(-1, 1, .2)) +
+              theme_light(base_size = 16) + 
+              theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.y = element_text(size=18))+ 
+              ylab("PI [rel. units]") + 
+              xlab("Experiment Sequence") +
+              theme(aspect.ratio=aspect_ratio)
+  }
+grid.arrange(grobs = PIplots, nrow=NofGroups)
+```
 
 ```{r BoxWithNotch, eval=PIs_present, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 10, comment=NA, results='asis'}
 cat("\n## Performance Index box&dotplot with notches:\n")
