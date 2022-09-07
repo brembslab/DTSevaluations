@@ -741,6 +741,16 @@ cat("\n## Performance Index box&dotplot without notches:\n")
 
 for(x in 1:NofGroups)
   {
+    PIprofile <- grouped.PIcombined[[x]] #get PIs with categories
+    PIprofile$flyname = rep(flynames[,x][!is.na(flynames[,x])])
+    PIprofile$category[PIprofile$category=="0 right_torque"]<-"Right torque"
+    PIprofile$category[PIprofile$category=="0 left_torque"]<-"Left torque"
+    PIprofile$category[PIprofile$category=="7 right_torque"]<-"Green punished right"
+    PIprofile$category[PIprofile$category=="7 left_torque"]<-"Blue punished left"
+    PIprofile$category[PIprofile$category=="8 right_torque"]<-"Blue punished right"
+    PIprofile$category[PIprofile$category=="8 left_torque"]<-"Green punished left"
+    PIprofile$category[PIprofile$category=="1 right_torque"]<-"Right torque"
+    PIprofile$category[PIprofile$category=="1 left_torque"]<-"Left torque"
     #plot graph
     PIplots[[x]] <- ggplot(PIprofile, aes(period, PIs)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
