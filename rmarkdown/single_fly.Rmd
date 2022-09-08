@@ -140,7 +140,7 @@ for(i in 1:NofPeriods){
       temp  <- rawdata[rawdata$period == i, ]
       keeps = c("a_pos","fly")
       
-      if((sequence$type[i]=="yt"||sequence$type[i]=="sw") & sequence$contingency[i]=="right_torque")   #inverse torque data for group histograms
+      if((sequence$type[i]=="yt"||sequence$type[i]=="sw") & sequence$contingency[i]=="right_torque") #inverse torque data for group histograms
       {
         temp_inv = temp
         temp_inv$fly = -temp_inv$fly # invert the torque values
@@ -148,8 +148,8 @@ for(i in 1:NofPeriods){
       } else if((sequence$type[i]=="fs"||sequence$type[i]=="color") & sequence$contingency[i]=="2_4_Q") #shift position data for group histograms
       {
         temp_shifted = temp
-        temp_shifted$a_pos = temp_shifted$a_pos + 900 #shift the position values by 90°
-        temp_shifted$a_pos[temp_shifted$a_pos>1796] = temp_shifted$a_pos[temp_shifted$a_pos>1796]-3600 #wrap the shifted 90° back around to -90°..-180°
+        temp_shifted$a_pos = temp_shifted$a_pos + 900 #shift all position values by 90°
+        temp_shifted$a_pos[temp_shifted$a_pos>1798] = temp_shifted$a_pos[temp_shifted$a_pos>1798]-3599 #wrap the excess 90° back around to -90°..-180°
         period.data[[i]] <- temp_shifted[keeps] #list only arena position and fly behavior data by period
       } else period.data[[i]] <- temp[keeps] #keep only arena position and fly behavior data by period
       

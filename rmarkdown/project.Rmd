@@ -115,12 +115,12 @@ for(x in 1:NofGroups)
     
   for (i in 1:NofPeriods){
       df = subset(grouphistdata[[x]], grouphistdata[[x]]$period == i)
-      hist(x = df$a_pos, breaks = 180,xlim = c(-1800,1800), xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), xaxt='n', yaxs="i") #plots histogram
+      hist(x = df$a_pos, breaks = 360,xlim = c(-1800,1800), xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), xaxt='n', yaxs="i") #plots histogram
     #add quadrant shading
       rect(-1800, 0, -1350, 8000, col=("lightgrey"))
       rect(-450, 0, 450, 8000, col=("lightgrey"))
       rect(1350, 0, 1800, 8000, col=("lightgrey"))
-      hist(x = df$a_pos, breaks = 180,xlim = c(-1800,1800), xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plots histogram again
+      hist(x = df$a_pos, breaks = 360,xlim = c(-1800,1800), xlab="", ylab = "", border= sequence$histocolor[i],  col = sequence$histocolor[i], main=paste("Period ", i), add = TRUE) #plots histogram again
       abline(v = 0, col="black", lwd=1, lty="dotted") # adds a line at 0
       abline(v = 900, col="black", lwd=1, lty="dotted") # adds a line at 90°  
       abline(v = -900, col="black", lwd=1, lty="dotted") # adds a line at -90° 
