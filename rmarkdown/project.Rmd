@@ -1,5 +1,5 @@
 ---
-title: "*Drosophila* Time Series - Dataset Evaluation Sheet"
+title: "*Drosophila* Time Series - Project Evaluation Sheet"
 output: 
   html_document:
     number_sections: true
@@ -22,17 +22,17 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r, setwd, eval=FALSE, echo=FALSE}
-setwd(dataset.path)
+setwd(project.path)
 ```
 
-<center><h2>for time series data set: "<b>`r paste(dataset.data$experiment$title)`</b>"</h2></center>
+<center><h2>for time series data set: "<b>`r paste(project.data$experiment$title)`</b>"</h2></center>
 <center>Rendered on `r format(Sys.time(), '%d %B %Y')`</center>
 
 # Metadata
 
-**Dataset file (YAML):** `r paste('<a href="', basename(dataset.file), '">', dataset.data$experiment$title, '</a>', sep = "")`  
-**Description:** `r paste(dataset.data$experiment$description)`  
-**Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', dataset.data$experiment$id, '">', dataset.data$experiment$id, '</a>', sep = "")`  
+**Project file (YAML):** `r paste('<a href="', basename(project.file), '">', project.data$experiment$title, '</a>', sep = "")`  
+**Description:** `r paste(project.data$experiment$description)`  
+**Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', project.data$experiment$id, '">', project.data$experiment$id, '</a>', sep = "")`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
 
@@ -53,7 +53,7 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
 ```
 
 ```{r Graphdim, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
-len = as.integer(lengths(dataset.data["resources"])*5)
+len = as.integer(lengths(project.data["resources"])*5)
 aspect_ratio = 4/nrow(sequence %>% na.omit())
 ```
 
@@ -84,7 +84,7 @@ reactable(exp_groups,
 
 for(x in 1:NofGroups)
   {
-    cat("<center><h4>",dataset.data[["resources"]][[x]][["title"]],"</h4></center>")
+    cat("<center><h4>",project.data[["resources"]][[x]][["title"]],"</h4></center>")
     par(mfrow=c(ceiling((NofPeriods+1)/3),3)) # sets the dimension of the multiplot, row x column
     old.par = par(mar = c(3, 4, 1, 2))
     grouphistdata[[x]]$period =as.factor(grouphistdata[[x]]$period)
@@ -108,7 +108,7 @@ for(x in 1:NofGroups)
 cat("\n## Arena Position Histograms\n")
 for(x in 1:NofGroups)
   {
-    cat("<center><h4>",dataset.data[["resources"]][[x]][["title"]],"</h4></center>")
+    cat("<center><h4>",project.data[["resources"]][[x]][["title"]],"</h4></center>")
     par(mfrow=c(round((NofPeriods+1)/2),2)) # sets the dimension of the multiplot, row x column
     old.par = par(mar = c(4, 4, 1, 2))
     grouphistdata[[x]]$period =as.factor(grouphistdata[[x]]$period)
@@ -217,19 +217,19 @@ plotOMtracesMean(grouped.OMdataAfter) #call function to plot OM traces at end of
 
 `r if (om | beforeafter) '## Optomotor Parameter Analysis'`
 
-```{r OMparams, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
+```{r OMparams, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 
-####### Do not separate optomotor parameters at all ##########
+####### Do not separate optomotor parameters at all: exclusively optomotor experiments only, no before/after ##########
 
 
 plotOMparams=ldply(grouped.OMparams, data.frame)    #move the dataframes from each group into a single dataframe
 OMvariables = head(names(plotOMparams),-1)
-OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
+OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", "Asymmetry Index Slope")
 
-#for one group without statistics
+#for one group or more than three groups without statistics
 if(NofGroups==1|NofGroups>3)
   {
-        for (v in 1:3) {
+        for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
            print(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
               geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
@@ -243,119 +243,30 @@ if(NofGroups==1|NofGroups>3)
 #for two groups with statistics
 if(NofGroups==2)
   {
-        for (v in 1:3) {
-           cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
-            utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$p.value, 3) #compare the two groups with a U-test and collect p-value
-            w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$statistic, 3)
-            #compute effect size Cohen's D
-            cohend = signif(cohen.d(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$estimate, 3)
-            #calculate statistical power
-            alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
-            power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
-            #calculate Bayes Factor
-            bayesF=extractBF(ttestBF(plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[1]], plotOMparams[[OMvariables[v]]][plotOMparams$group==groupnames[2]]))
-            #calculate FPR for priors set in dataset file#
-            #run first prior  
-              prior=priorval[1]
-              out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
-              fpz1=out[1]
-            #run second prior  
-              prior=priorval[2]
-              out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
-              fpz2=out[1]
-            #Power and likelihood ratio: NB for two sided test, need 2*y0
-              LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
-        
-              #make tidy table of results
-            results.utest<-data.frame(values=c(signif[1],
-                                               w.statistic,
-                                               cohend,
-                                               power,
-                                               signif(bayesF$bf, 3),
-                                               signif(bayesF$error, 3),
-                                               signif(fpz1, 3),
-                                               signif(fpz2, 3),
-                                               signif(LR, 3)))
-            rownames(results.utest)<-c("Significance level",
-                                       "MW U-Test, W",
-                                       "Cohen's D",
-                                       "stat. Power",
-                                       "Bayes Factor",
-                                       "Bayes Factor error",
-                                       paste("FP risk, prior ",priorval[1]),
-                                       paste("FP risk, prior ",priorval[2]),
-                                       "Likelihood Ratio")
-            
-        # plot two PIs with asterisks
-          plots.2test<-list(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
-              geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
-              ggtitle(paste("U-Test, p=", utest)) +
-              theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-              geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5) +
-              samplesizes.annotate(boxes, samplesizes))
-        
-          #add table with results and plot
-          plots.2test[[2]]<-tableGrob(results.utest)
-          grid.arrange(grobs = plots.2test, ncol=2)
-        } #for 
-}
-
-
-
-```
-
-```{r OMparamsBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
-
-######### Separate optomotor evaluations: optomotor parameters at the start of the experiment ###############
-
-plotOMparamsBefore=ldply(grouped.OMparamsBefore, data.frame)    #move the dataframes from each group into a single dataframe
-OMvariables = head(names(plotOMparamsBefore),-1)
-OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
-
-#for one group without statistics
-if(NofGroups==1 | NofGroups > 3)
-  {
-        for (v in 1:3) {
-           cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
-           print(ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
-              geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
-              geom_jitter(data = plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
-              theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-              theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-              samplesizes.annotate(boxes, samplesizes))
-        }
-}
-
-#for two groups with statistics
-if(NofGroups==2)
-  {
-        for (v in 1:3) {
-          cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
-            plots.2test<-plotOMParamBox(v, plotOMparamsBefore, samplesizes, OMvariables, OMtitles) #call function to plot box/whisker diagram and calculate statistics
+        for (v in 1:4) {
+          cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
+          plots.2test<-plotOMParamBox(v, plotOMparams, samplesizes, OMvariables, OMtitles) #call function to plot box/whisker diagram and calculate statistics
           grid.arrange(grobs = plots.2test, ncol=2)
         }
 }
 
 #for three groups with statistics
-
-if(NofGroups==3)
-{
-  Count=1
+if(NofGroups==3){
+Count=1
   Control=list()
   Exp=list()
   for (t in 1:NofGroups) {
-    if(grepl("test", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("experimental", tolower(grouped.OMparamsBefore[[t]]$desc))==TRUE){
-      Exp = na.omit(grouped.OMparamsBefore[[t]])
+    if(any(grepl("test", tolower(grouped.OMparams[[t]]$desc))) | any(grepl("exp", tolower(grouped.OMparams[[t]]$desc))) | any(grepl("experimental", tolower(grouped.OMparams[[t]]$desc)))==TRUE){
+      Exp = na.omit(grouped.OMparams[[t]])
     } else {
-      Control[[Count]] =na.omit(grouped.OMparamsBefore[[t]])
+      Control[[Count]] =na.omit(grouped.OMparams[[t]])
       Count=Count+1
     }
   }
+  gname<-t(as.data.frame(groupnames))
   PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
-  for (v in 1:3) {
-    cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
+  for (v in 1:4) {
+    cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
     utest1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$p.value, 3)
     utest2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$p.value, 3)#compare the two groups with a U-test and collect p-value
     w.statistic1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$statistic, 3)
@@ -364,7 +275,7 @@ if(NofGroups==3)
     cohend1 = signif(cohen.d(Exp[[v]], Control[[1]][[v]])$estimate, 3)
     cohend2 = signif(cohen.d(Exp[[v]], Control[[2]][[v]])$estimate, 3)
     #calculate statistical power
-    alt = dataset.data[["statistics"]][["three.groups"]][["power"]]
+    alt = project.data[["statistics"]][["three.groups"]][["power"]]
     power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, 
                                sig.level = signif[1])$power, 3)
     power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, 
@@ -372,7 +283,7 @@ if(NofGroups==3)
     #calculate Bayes Factor
     bayesF1=extractBF(ttestBF(Exp[[v]], Control[[1]][[v]]))
     bayesF2=extractBF(ttestBF(Exp[[v]], Control[[2]][[v]]))
-    #calculate FPR for priors set in dataset file#
+    #calculate FPR for priors set in project file#
     #run first prior  
     prior=priorval[1]
     out1=calc.FPR(samplesizes,utest1,prior,abs(cohend1))  #output=c(FPR,x0,y0,x1,y1)
@@ -428,7 +339,158 @@ if(NofGroups==3)
                                paste("FP risk, prior ",priorval[2]),
                                "Likelihood Ratio")
     
-    # plot two PIs with asterisks
+    # plot three parameters with asterisks
+plotOMparams$group <- as.character(plotOMparams$group)
+plotOMparams$group <- factor(plotOMparams$group, levels=unique(plotOMparams$group))
+      plots.2test<-ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
+      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+      geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+      geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]),
+                shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
+                panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA), 
+                legend.position = "top",legend.title = element_blank()) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
+      ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+      geom_signif(comparisons = list(c(gname[,1], gname[,2]), c(gname[,2], gname[,3])),
+                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                textsize=5, vjust=0.1) +
+      geom_signif(comparisons = list(c(gname[,1], gname[,3])),
+                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                textsize=5, vjust=0.1,margin_top=0.15) +
+      samplesizes.annotate(boxes, samplesizes)
+    #add table with results and plot
+    plots.2utest<-tableGrob(results.utest)
+    grid.arrange(plots.2test,plots.2utest, nrow = 1)
+  }  #for
+}
+
+
+```
+
+```{r OMparamsBefore, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
+
+######### Separate optomotor evaluations: optomotor parameters at the start of the experiment ###############
+
+plotOMparamsBefore=ldply(grouped.OMparamsBefore, data.frame)    #move the dataframes from each group into a single dataframe
+OMvariables = head(names(plotOMparamsBefore),-1)
+OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", "Asymmetry Index Slope")
+
+#for one group without statistics
+if(NofGroups==1 | NofGroups > 3)
+  {
+        for (v in 1:4) {
+           cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
+           print(ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
+              geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
+              geom_jitter(data = plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+              theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+              samplesizes.annotate(boxes, samplesizes))
+        }
+}
+
+#for two groups with statistics
+if(NofGroups==2)
+  {
+        for (v in 1:4) {
+          cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
+            plots.2test<-plotOMParamBox(v, plotOMparamsBefore, samplesizes, OMvariables, OMtitles) #call function to plot box/whisker diagram and calculate statistics
+          grid.arrange(grobs = plots.2test, ncol=2)
+        }
+}
+
+#for three groups with statistics
+
+if(NofGroups==3)
+{
+  Count=1
+  Control=list()
+  Exp=list()
+  for (t in 1:NofGroups) {
+    if(any(grepl("test", tolower(grouped.OMparamsBefore[[t]]$desc))) | any(grepl("exp", tolower(grouped.OMparamsBefore[[t]]$desc))) | any(grepl("experimental", tolower(grouped.OMparamsBefore[[t]]$desc)))==TRUE){
+      Exp = na.omit(grouped.OMparamsBefore[[t]])
+    } else {
+      Control[[Count]] =na.omit(grouped.OMparamsBefore[[t]])
+      Count=Count+1
+    }
+  }
+  PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
+  for (v in 1:4) {
+    cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
+    utest1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$p.value, 3)
+    utest2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$p.value, 3)#compare the two groups with a U-test and collect p-value
+    w.statistic1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$statistic, 3)
+    w.statistic2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$statistic, 3)
+    #compute effect size Cohen's D
+    cohend1 = signif(cohen.d(Exp[[v]], Control[[1]][[v]])$estimate, 3)
+    cohend2 = signif(cohen.d(Exp[[v]], Control[[2]][[v]])$estimate, 3)
+    #calculate statistical power
+    alt = project.data[["statistics"]][["three.groups"]][["power"]]
+    power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, 
+                               sig.level = signif[1])$power, 3)
+    power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, 
+                               sig.level = signif[1])$power, 3)
+    #calculate Bayes Factor
+    bayesF1=extractBF(ttestBF(Exp[[v]], Control[[1]][[v]]))
+    bayesF2=extractBF(ttestBF(Exp[[v]], Control[[2]][[v]]))
+    #calculate FPR for priors set in project file#
+    #run first prior  
+    prior=priorval[1]
+    out1=calc.FPR(samplesizes,utest1,prior,abs(cohend1))  #output=c(FPR,x0,y0,x1,y1)
+    fpz1=out1[1]
+    #run second prior  
+    prior=priorval[2]
+    out1=calc.FPR(samplesizes,utest1,prior,abs(cohend1))  #output=c(FPR,x0,y0,x1,y1)
+    fpz2=out1[1]
+    #run first prior  
+    prior=priorval[1]
+    out2=calc.FPR(samplesizes,utest2,prior,abs(cohend2))  #output=c(FPR,x0,y0,x1,y1)
+    fpz3=out2[1]
+    #run second prior
+    prior=priorval[2]
+    out2=calc.FPR(samplesizes,utest2,prior,abs(cohend2))  #output=c(FPR,x0,y0,x1,y1)
+    fpz4=out2[1]
+    #Power and likelihood ratio: NB for two sided test, need 2*y0
+    LR1=out1[5]/(2*out1[3])        #lik ratio (Hi1/H0) =y1/2*y0
+    LR2=out2[5]/(2*out2[3])
+    #make tidy table of results
+    results.utest<-data.frame(cbind(TestxCont1=c(signif[1],
+                                                 w.statistic1,
+                                                 utest1,
+                                                 cohend1,
+                                                 power1,
+                                                 signif(bayesF1$bf, 3),
+                                                 signif(bayesF1$error, 3),
+                                                 signif(fpz1, 3),
+                                                 signif(fpz2, 3),
+                                                 signif(LR1, 3)),
+                                    TestxCont2=c(signif[1],
+                                                 w.statistic2,
+                                                 utest2,
+                                                 cohend2,
+                                                 power2,
+                                                 signif(bayesF2$bf, 3),
+                                                 signif(bayesF2$error, 3),
+                                                 signif(fpz3, 3),
+                                                 signif(fpz4, 3),
+                                                 signif(LR2, 3))))
+    colnames(results.utest)<-c(paste(PIname[1], PIname[2], sep="\n"),paste(PIname[1], PIname[3], sep="\n"))  
+    
+    
+    
+    rownames(results.utest)<-c("Significance level",
+                               "MW U-Test, W",
+                               "U-Test p-value", 
+                               "Cohen's D",
+                               "stat. Power",
+                               "Bayes Factor",
+                               "Bayes Factor error",
+                               paste("FP risk, prior ",priorval[1]),
+                               paste("FP risk, prior ",priorval[2]),
+                               "Likelihood Ratio")
+    
+    # plot three parameters with asterisks
 plotOMparamsBefore$group <- as.character(plotOMparamsBefore$group)
 plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=unique(plotOMparamsBefore$group))
       plots.2test<-ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
@@ -462,12 +524,12 @@ plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=unique(plotO
 
 plotOMparamsAfter=ldply(grouped.OMparamsAfter, data.frame)    #move the dataframes from each group into a single dataframe
 OMvariables = head(names(plotOMparamsAfter),-1)
-OMtitles = c("Optomotor Magnitude", "Rate Constant", "Asymmetry Index")
+OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", "Asymmetry Index Slope")
 
 #for one group without statistics
 if(NofGroups==1 | NofGroups > 3)
   {
-        for (v in 1:3) {
+        for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
            print(ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
               geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
@@ -481,7 +543,7 @@ if(NofGroups==1 | NofGroups > 3)
 #for two groups with statistics
 if(NofGroups==2)
   {
-        for (v in 1:3) {
+        for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
             plots.2test<-plotOMParamBox(v, plotOMparamsAfter, samplesizes, OMvariables, OMtitles) #call function to plot box/whisker diagram and calculate statistics
           grid.arrange(grobs = plots.2test, ncol=2)
@@ -494,7 +556,7 @@ if(NofGroups==3){
   Control=list()
   Exp=list()
   for (t in 1:NofGroups) {
-    if(grepl("test", tolower(grouped.OMparamsAfter[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsAfter[[t]]$desc)) |      grepl("experimental", tolower(grouped.OMparamsAfter[[t]]$desc))==TRUE){
+    if(any(grepl("test", tolower(grouped.OMparamsAfter[[t]]$desc))) | any(grepl("exp", tolower(grouped.OMparamsAfter[[t]]$desc))) | any(grepl("experimental", tolower(grouped.OMparamsAfter[[t]]$desc)))==TRUE){
       Exp = na.omit(grouped.OMparamsAfter[[t]])
     } else {
       Control[[Count]] =na.omit(grouped.OMparamsAfter[[t]])
@@ -502,7 +564,7 @@ if(NofGroups==3){
     }
   }
   PIname<-c(unique(Exp$group), unique(Control[[1]]$group),unique(Control[[2]]$group))
-  for (v in 1:3) {
+  for (v in 1:4) {
     cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
     utest1 = signif(wilcox.test(Exp[[v]],Control[[1]][[v]])$p.value, 3)
     utest2 = signif(wilcox.test(Exp[[v]],Control[[2]][[v]])$p.value, 3)#compare the two groups with a U-test and collect p-value
@@ -512,7 +574,7 @@ if(NofGroups==3){
     cohend1 = signif(cohen.d(Exp[[v]], Control[[1]][[v]])$estimate, 3)
     cohend2 = signif(cohen.d(Exp[[v]], Control[[2]][[v]])$estimate, 3)
     #calculate statistical power
-    alt = dataset.data[["statistics"]][["three.groups"]][["power"]]
+    alt = project.data[["statistics"]][["three.groups"]][["power"]]
     power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, 
                                sig.level = signif[1])$power, 3)
     power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, 
@@ -520,7 +582,7 @@ if(NofGroups==3){
     #calculate Bayes Factor
     bayesF1=extractBF(ttestBF(Exp[[v]], Control[[1]][[v]]))
     bayesF2=extractBF(ttestBF(Exp[[v]], Control[[2]][[v]]))
-    #calculate FPR for priors set in dataset file#
+    #calculate FPR for priors set in project file#
     #run first prior  
     prior=priorval[1]
     out1=calc.FPR(samplesizes,utest1,prior,abs(cohend1))  #output=c(FPR,x0,y0,x1,y1)
@@ -578,7 +640,7 @@ if(NofGroups==3){
                                "Likelihood Ratio")
     
   
-    # plot two PIs with asterisks
+    # plot parameters with asterisks
 plotOMparamsAfter$group <- as.character(plotOMparamsAfter$group)
 plotOMparamsAfter$group <- factor(plotOMparamsAfter$group, levels=unique(plotOMparamsAfter$group))
     plots.2test<-ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
@@ -651,7 +713,7 @@ for(x in 1:NofGroups){
    stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
   geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
   geom_jitter(pch=21, colour="Black", size=2.3, width = 0.25)+
-  ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
+  ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
   theme_light(base_size = 16) +
   theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
         ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
@@ -683,7 +745,7 @@ for(x in 1:NofGroups)
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
               stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
-              ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .2)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -695,6 +757,31 @@ for(x in 1:NofGroups)
 grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```
 
+```{r PIbarsub, eval=PIs_present, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
+cat("\n## Performance Index bar plot - preference subtracted:\n")
+
+for(x in 1:NofGroups)
+  {
+    PIprofile <- grouped.PIcombined[[x]] #get PIs (categories not used)
+    avgPretest = mean(subset(pretestPIs, group==groupnames[x])$category, na.rm=TRUE) #average pretest value
+    PIprofile$PIs=PIprofile$PIs-avgPretest
+
+    # plot graph
+     PIplots[[x]] <- ggplot(PIprofile, aes(x=period, y=PIs)) + 
+              geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+              stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
+              stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              scale_y_continuous(breaks = seq(-1, 1, .2)) +
+              theme_light(base_size = 16) + 
+              theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.y = element_text(size=18))+ 
+              ylab("PI [rel. units]") + 
+              xlab("Experiment Sequence") +
+              theme(aspect.ratio=aspect_ratio)
+  }
+grid.arrange(grobs = PIplots, nrow=NofGroups)
+```
 
 ```{r BoxWithNotch, eval=PIs_present, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 10, comment=NA, results='asis'}
 cat("\n## Performance Index box&dotplot with notches:\n")
@@ -709,7 +796,7 @@ for(x in 1:NofGroups)
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
               geom_jitter_interactive(data = PIprofile, aes(period, PIs, fill=category) ,tooltip = PIprofile$flyname, data_id = PIprofile$flyname , col = "grey", pch=21, size=3.3, width = 0.25, alpha=0.7)+
-              ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -717,7 +804,7 @@ for(x in 1:NofGroups)
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
               theme(aspect.ratio=aspect_ratio) +
-              scale_fill_discrete(name = "Categories") #legend title for categories 
+              scale_fill_discrete(name = "Heat on:") #legend title for categories 
 
     }  
 girafe( ggobj = plot_grid(plotlist=PIplots, ncol = 1),options = list(opts_selection(type = "single",css = "fill:orange;stroke:gray;r:4pt;", only_shiny = FALSE)), width_svg = 4+(length(unique(PIprofile$period))), height_svg = 5*NofGroups)
@@ -737,7 +824,7 @@ for(x in 1:NofGroups)
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
               geom_jitter_interactive(data = PIprofile, aes(period, PIs, fill=category) ,tooltip = PIprofile$flyname, data_id = PIprofile$flyname , col = "grey", pch=21, size=3.3, width = 0.25, alpha=0.7)+
-              ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -745,7 +832,7 @@ for(x in 1:NofGroups)
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
               theme(aspect.ratio=aspect_ratio) +
-              scale_fill_discrete(name = "Categories") #legend title for categories 
+              scale_fill_discrete(name = "Heat on:") #legend title for categories 
 
     }        
 girafe( ggobj = plot_grid(plotlist=PIplots, ncol = 1),options = list(opts_selection(type = "single",css = "fill:orange;stroke:gray;r:4pt;", only_shiny = FALSE)), width_svg = 4+(length(unique(PIprofile$period))), height_svg = 5*NofGroups)
@@ -763,7 +850,7 @@ for(x in 1:NofGroups)
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_violin(width = 1.1) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), width = 0.1, outlier.color="darkred") +
-              ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -828,11 +915,11 @@ cat("\n## Statistical tests between two groups\n")
       cohend = signif((mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
     }
     #calculate statistical power
-    alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
+    alt = project.data[["statistics"]][["two.groups"]][["power"]]
     power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
     #calculate Bayes Factor
     bayesF=extractBF(ttestBF(na.omit(PIstat[[1]]), na.omit(PIstat[[2]])))
-    #calculate FPR for priors set in dataset file#
+    #calculate FPR for priors set in project file#
     #run first prior  
       prior=priorval[1]
       out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
@@ -894,7 +981,7 @@ print(plot(unpaired_median_diff)) #plot results
 ```{r splitviolins, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Split Violin Plot\n")
 
-PIstatCombined$learningscore=dataset.data$statistics$`learning-score`$title #add x-axis value for split violin plots
+PIstatCombined$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
 print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
@@ -922,15 +1009,15 @@ cat("\n## Statistical tests between three groups\n")
 PItype <- list() 
 for (x in 1:NofGroups){
   PItype[[x]] = melt(PIstat[[x]])
-  PItype[[x]]$desc = dataset.data$resources[[x]]$description
-  PItype[[x]]$name = dataset.data$resources[[x]]$name
+  PItype[[x]]$desc = project.data$resources[[x]]$description
+  PItype[[x]]$name = project.data$resources[[x]]$name
 }
 #groupe in experimental and driver groupe
 Count=1
 Control=list()
 Exp=list()
 for (t in 1:NofGroups) {
-  if(grepl("test", tolower(PItype[[t]]$desc)) | grepl("exp", tolower(PItype[[t]]$desc)) | grepl("experimental", tolower(PItype[[t]]$desc))==TRUE){
+  if(any(grepl("test", tolower(PItype[[t]]$desc))) | any(grepl("exp", tolower(PItype[[t]]$desc))) | any(grepl("experimental", tolower(PItype[[t]]$desc)))==TRUE){
     Exp = na.omit(PItype[[t]])
   } else {
     Control[[Count]] =na.omit(PItype[[t]])
@@ -951,13 +1038,13 @@ w.statistic2 = signif(wilcox.test(Exp,Control[[2]])$statistic, 3)
 cohend1 = signif(cohen.d(Exp, Control[[1]])$estimate, 3)
 cohend2 = signif(cohen.d(Exp, Control[[2]])$estimate, 3)
 #calculate statistical power
-alt = dataset.data[["statistics"]][["three.groups"]][["power"]]
+alt = project.data[["statistics"]][["three.groups"]][["power"]]
 power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, sig.level = signif[1])$power, 3)
 power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, sig.level = signif[1])$power, 3)
 #calculate Bayes Factor
 bayesF1=extractBF(ttestBF(Exp, Control[[1]]))
 bayesF2=extractBF(ttestBF(Exp, Control[[2]]))
-#calculate FPR for priors set in dataset file#
+#calculate FPR for priors set in project file#
 #run first prior  
 prior=priorval[1]
 out1=calc.FPR(samplesizes,utest1,prior,abs(cohend1))  #output=c(FPR,x0,y0,x1,y1)
@@ -1035,9 +1122,7 @@ plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
 
   #add table with results and plot
   plots.2utest<-tableGrob(results.utest)
-  #plot_grid(plots.2test, plots.2utest, ncol = 2)
   grid.arrange(plots.2test,plots.2utest, nrow = 1)
-  #ggarrange(plots.2test, plots.2utest, ncol = 2)
   
 
 ```
@@ -1066,11 +1151,11 @@ reactable(PooledGroups,
       cohend = signif((mean(na.omit(PIprofilePooled[[1]]))-mean(na.omit(PIprofilePooled[[2]])))/sqrt((sd(na.omit(PIprofilePooled[[1]]))^2+sd(na.omit(PIprofilePooled[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
     }
     #calculate statistical power
-    alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
+    alt = project.data[["statistics"]][["two.groups"]][["power"]]
     power=signif(pwr.t2n.test(n1 = samplesizesPooled[1], n2= samplesizesPooled[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
     #calculate Bayes Factor
     bayesF=extractBF(ttestBF(na.omit(PIprofilePooled[[1]]), na.omit(PIprofilePooled[[2]])))
-    #calculate FPR for priors set in dataset file#
+    #calculate FPR for priors set in project file#
     #run first prior  
       prior=priorval[1]
       out=calc.FPR(samplesizesPooled,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
@@ -1134,7 +1219,7 @@ reactable(PooledGroups,
 ```{r splitviolinspooled, eval=(PIs_present & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Split Violin Plot for pooled groups\n")
 
-PIstatPooled$learningscore=dataset.data$statistics$`learning-score`$title #add x-axis value for split violin plots
+PIstatPooled$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
 print(ggplot(PIstatPooled, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
