@@ -548,5 +548,14 @@ cat("\n# Learning and avoidance scores\n")
             ylab="PI [rel. units]",
             space=0,
             col = as.vector(na.omit(sequence$color)))
-      text(x= b, y=0.03, label=as.character(round(sequence$lambda, digits=2)))
+      text(x= b, y=0.03, label=as.character(round(na.omit(sequence$lambda), digits=2)))
+      
+PI_tab=t(sequence)
+      colnames(PI_tab)<-sprintf("Period %s",1:NofPeriods)
+      PI_tab<-as.data.frame((na.omit(PI_tab["lambda",])))
+      colnames(PI_tab)<- "PI"
+      reactable(setDT(as.data.frame(t(PI_tab)), keep.rownames = "property")[],
+                striped = TRUE, highlight = TRUE, bordered = TRUE,resizable = TRUE,
+                columns = list(property = colDef(style = list(position = "sticky", left = 0, background = "#fff", zIndex = 1),
+                headerStyle = list(position = "sticky", left = 0, background = "#fff", zIndex = 1))))
 ```
