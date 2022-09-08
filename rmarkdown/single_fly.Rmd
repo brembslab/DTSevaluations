@@ -109,6 +109,12 @@ for(i in 1:NofPeriods){
     if(cat=="0 left_torque" || cat=="1 left_torque"){
       cat="Left torque"
     }   
+    if(cat=="9 right_torque"){
+      cat="Right torque DL"
+    }
+    if(cat=="9 left_torque"){
+      cat="Left torque DL"
+    }       
     if(cat=="7 right_torque"){
       cat="Right & green"
     }
