@@ -1,5 +1,5 @@
 ---
-title: "*Drosophila* Time Series - Project Evaluation Sheet"
+title: "*Drosophila* Time Series - dataset Evaluation Sheet"
 output: 
   html_document:
     number_sections: true
@@ -22,17 +22,17 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r, setwd, eval=FALSE, echo=FALSE}
-setwd(project.path)
+setwd(dataset.path)
 ```
 
-<center><h2>for time series data set: "<b>`r paste(project.data$experiment$title)`</b>"</h2></center>
+<center><h2>for time series data set: "<b>`r paste(dataset.data$experiment$title)`</b>"</h2></center>
 <center>Rendered on `r format(Sys.time(), '%d %B %Y')`</center>
 
 # Metadata
 
-**Project file (YAML):** `r paste('<a href="', basename(project.file), '">', project.data$experiment$title, '</a>', sep = "")`  
-**Description:** `r paste(project.data$experiment$description)`  
-**Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', project.data$experiment$id, '">', project.data$experiment$id, '</a>', sep = "")`  
+**dataset file (YAML):** `r paste('<a href="', basename(dataset.file), '">', dataset.data$experiment$title, '</a>', sep = "")`  
+**Description:** `r paste(dataset.data$experiment$description)`  
+**Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', dataset.data$experiment$id, '">', dataset.data$experiment$id, '</a>', sep = "")`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
 
@@ -53,7 +53,7 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
 ```
 
 ```{r Graphdim, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
-len = as.integer(lengths(project.data["resources"])*5)
+len = as.integer(lengths(dataset.data["resources"])*5)
 aspect_ratio = 4/nrow(sequence %>% na.omit())
 ```
 
@@ -84,7 +84,7 @@ reactable(exp_groups,
 
 for(x in 1:NofGroups)
   {
-    cat("<center><h4>",project.data[["resources"]][[x]][["title"]],"</h4></center>")
+    cat("<center><h4>",dataset.data[["resources"]][[x]][["title"]],"</h4></center>")
     par(mfrow=c(ceiling((NofPeriods+1)/3),3)) # sets the dimension of the multiplot, row x column
     old.par = par(mar = c(3, 4, 1, 2))
     grouphistdata[[x]]$period =as.factor(grouphistdata[[x]]$period)
@@ -108,7 +108,7 @@ for(x in 1:NofGroups)
 cat("\n## Arena Position Histograms\n")
 for(x in 1:NofGroups)
   {
-    cat("<center><h4>",project.data[["resources"]][[x]][["title"]],"</h4></center>")
+    cat("<center><h4>",dataset.data[["resources"]][[x]][["title"]],"</h4></center>")
     par(mfrow=c(round((NofPeriods+1)/2),2)) # sets the dimension of the multiplot, row x column
     old.par = par(mar = c(4, 4, 1, 2))
     grouphistdata[[x]]$period =as.factor(grouphistdata[[x]]$period)
@@ -275,7 +275,7 @@ Count=1
     cohend1 = signif(cohen.d(Exp[[v]], Control[[1]][[v]])$estimate, 3)
     cohend2 = signif(cohen.d(Exp[[v]], Control[[2]][[v]])$estimate, 3)
     #calculate statistical power
-    alt = project.data[["statistics"]][["three.groups"]][["power"]]
+    alt = dataset.data[["statistics"]][["three.groups"]][["power"]]
     power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, 
                                sig.level = signif[1])$power, 3)
     power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, 
@@ -283,7 +283,7 @@ Count=1
     #calculate Bayes Factor
     bayesF1=extractBF(ttestBF(Exp[[v]], Control[[1]][[v]]))
     bayesF2=extractBF(ttestBF(Exp[[v]], Control[[2]][[v]]))
-    #calculate FPR for priors set in project file#
+    #calculate FPR for priors set in dataset file#
     #run first prior  
     prior=priorval[1]
     out1=calc.FPR(samplesizes,utest1,prior,abs(cohend1))  #output=c(FPR,x0,y0,x1,y1)
@@ -426,7 +426,7 @@ if(NofGroups==3)
     cohend1 = signif(cohen.d(Exp[[v]], Control[[1]][[v]])$estimate, 3)
     cohend2 = signif(cohen.d(Exp[[v]], Control[[2]][[v]])$estimate, 3)
     #calculate statistical power
-    alt = project.data[["statistics"]][["three.groups"]][["power"]]
+    alt = dataset.data[["statistics"]][["three.groups"]][["power"]]
     power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, 
                                sig.level = signif[1])$power, 3)
     power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, 
@@ -434,7 +434,7 @@ if(NofGroups==3)
     #calculate Bayes Factor
     bayesF1=extractBF(ttestBF(Exp[[v]], Control[[1]][[v]]))
     bayesF2=extractBF(ttestBF(Exp[[v]], Control[[2]][[v]]))
-    #calculate FPR for priors set in project file#
+    #calculate FPR for priors set in dataset file#
     #run first prior  
     prior=priorval[1]
     out1=calc.FPR(samplesizes,utest1,prior,abs(cohend1))  #output=c(FPR,x0,y0,x1,y1)
@@ -574,7 +574,7 @@ if(NofGroups==3){
     cohend1 = signif(cohen.d(Exp[[v]], Control[[1]][[v]])$estimate, 3)
     cohend2 = signif(cohen.d(Exp[[v]], Control[[2]][[v]])$estimate, 3)
     #calculate statistical power
-    alt = project.data[["statistics"]][["three.groups"]][["power"]]
+    alt = dataset.data[["statistics"]][["three.groups"]][["power"]]
     power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, 
                                sig.level = signif[1])$power, 3)
     power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, 
@@ -582,7 +582,7 @@ if(NofGroups==3){
     #calculate Bayes Factor
     bayesF1=extractBF(ttestBF(Exp[[v]], Control[[1]][[v]]))
     bayesF2=extractBF(ttestBF(Exp[[v]], Control[[2]][[v]]))
-    #calculate FPR for priors set in project file#
+    #calculate FPR for priors set in dataset file#
     #run first prior  
     prior=priorval[1]
     out1=calc.FPR(samplesizes,utest1,prior,abs(cohend1))  #output=c(FPR,x0,y0,x1,y1)
@@ -713,7 +713,7 @@ for(x in 1:NofGroups){
    stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
   geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
   geom_jitter(pch=21, colour="Black", size=2.3, width = 0.25)+
-  ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
+  ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
   theme_light(base_size = 16) +
   theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
         ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
@@ -745,7 +745,7 @@ for(x in 1:NofGroups)
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
               stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .2)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -771,7 +771,7 @@ for(x in 1:NofGroups)
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               stat_summary(geom = "bar", fun.y = mean, position = "dodge", fill=as.vector(na.omit(sequence$color)), colour="black", width=1) +
               stat_summary(geom = "errorbar", fun.data = mean_se, position = "dodge", width=0, size=2) +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .2)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.major.x = element_blank(),panel.grid.minor = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -796,7 +796,7 @@ for(x in 1:NofGroups)
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
               geom_jitter_interactive(data = PIprofile, aes(period, PIs, fill=category) ,tooltip = PIprofile$flyname, data_id = PIprofile$flyname , col = "grey", pch=21, size=3.3, width = 0.25, alpha=0.7)+
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -824,7 +824,7 @@ for(x in 1:NofGroups)
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
               geom_jitter_interactive(data = PIprofile, aes(period, PIs, fill=category) ,tooltip = PIprofile$flyname, data_id = PIprofile$flyname , col = "grey", pch=21, size=3.3, width = 0.25, alpha=0.7)+
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -850,7 +850,7 @@ for(x in 1:NofGroups)
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_violin(width = 1.1) +
               geom_boxplot(fill = as.vector(na.omit(sequence$color)), width = 0.1, outlier.color="darkred") +
-              ggtitle(paste(project.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
+              ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x])) +
               scale_y_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
@@ -915,11 +915,11 @@ cat("\n## Statistical tests between two groups\n")
       cohend = signif((mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
     }
     #calculate statistical power
-    alt = project.data[["statistics"]][["two.groups"]][["power"]]
+    alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
     power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
     #calculate Bayes Factor
     bayesF=extractBF(ttestBF(na.omit(PIstat[[1]]), na.omit(PIstat[[2]])))
-    #calculate FPR for priors set in project file#
+    #calculate FPR for priors set in dataset file#
     #run first prior  
       prior=priorval[1]
       out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
@@ -981,7 +981,7 @@ print(plot(unpaired_median_diff)) #plot results
 ```{r splitviolins, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Split Violin Plot\n")
 
-PIstatCombined$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
+PIstatCombined$learningscore=dataset.data$statistics$`learning-score`$title #add x-axis value for split violin plots
 print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
@@ -1009,8 +1009,8 @@ cat("\n## Statistical tests between three groups\n")
 PItype <- list() 
 for (x in 1:NofGroups){
   PItype[[x]] = melt(PIstat[[x]])
-  PItype[[x]]$desc = project.data$resources[[x]]$description
-  PItype[[x]]$name = project.data$resources[[x]]$name
+  PItype[[x]]$desc = dataset.data$resources[[x]]$description
+  PItype[[x]]$name = dataset.data$resources[[x]]$name
 }
 #groupe in experimental and driver groupe
 Count=1
@@ -1038,13 +1038,13 @@ w.statistic2 = signif(wilcox.test(Exp,Control[[2]])$statistic, 3)
 cohend1 = signif(cohen.d(Exp, Control[[1]])$estimate, 3)
 cohend2 = signif(cohen.d(Exp, Control[[2]])$estimate, 3)
 #calculate statistical power
-alt = project.data[["statistics"]][["three.groups"]][["power"]]
+alt = dataset.data[["statistics"]][["three.groups"]][["power"]]
 power1=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[1]]), d = cohend1, alternative = alt, sig.level = signif[1])$power, 3)
 power2=signif(pwr.t2n.test(n1 = length(Exp), n2= length(Control[[2]]), d = cohend2, alternative = alt, sig.level = signif[1])$power, 3)
 #calculate Bayes Factor
 bayesF1=extractBF(ttestBF(Exp, Control[[1]]))
 bayesF2=extractBF(ttestBF(Exp, Control[[2]]))
-#calculate FPR for priors set in project file#
+#calculate FPR for priors set in dataset file#
 #run first prior  
 prior=priorval[1]
 out1=calc.FPR(samplesizes,utest1,prior,abs(cohend1))  #output=c(FPR,x0,y0,x1,y1)
@@ -1151,11 +1151,11 @@ reactable(PooledGroups,
       cohend = signif((mean(na.omit(PIprofilePooled[[1]]))-mean(na.omit(PIprofilePooled[[2]])))/sqrt((sd(na.omit(PIprofilePooled[[1]]))^2+sd(na.omit(PIprofilePooled[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
     }
     #calculate statistical power
-    alt = project.data[["statistics"]][["two.groups"]][["power"]]
+    alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
     power=signif(pwr.t2n.test(n1 = samplesizesPooled[1], n2= samplesizesPooled[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
     #calculate Bayes Factor
     bayesF=extractBF(ttestBF(na.omit(PIprofilePooled[[1]]), na.omit(PIprofilePooled[[2]])))
-    #calculate FPR for priors set in project file#
+    #calculate FPR for priors set in dataset file#
     #run first prior  
       prior=priorval[1]
       out=calc.FPR(samplesizesPooled,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
@@ -1219,7 +1219,7 @@ reactable(PooledGroups,
 ```{r splitviolinspooled, eval=(PIs_present & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n## Split Violin Plot for pooled groups\n")
 
-PIstatPooled$learningscore=project.data$statistics$`learning-score`$title #add x-axis value for split violin plots
+PIstatPooled$learningscore=dataset.data$statistics$`learning-score`$title #add x-axis value for split violin plots
 print(ggplot(PIstatPooled, aes(learningscore, PIs, fill = group)) + scale_fill_manual(values=boxcolors) + geom_split_violin()) #plot spit violin plot
 
 ```
