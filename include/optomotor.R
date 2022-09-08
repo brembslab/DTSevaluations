@@ -31,6 +31,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){    ###determine if there are o
     grouped.OMdata[[x]] <- OMdata #save optomotor data to groupwise list
     rm(OMdata) #remove the optomotor data frame so it can be generated again for the next group
     OMparams$group=project.data[["resources"]][[x]][["name"]]
+    OMparams$desc=project.data[["resources"]][[x]][["description"]]
     grouped.OMparams[[x]] <- OMparams #save extracted optomotor parameters to groupwise list
     rm(OMparams) #remove the optomotor parameters dataframe so it can be generated again for the next group
   }
