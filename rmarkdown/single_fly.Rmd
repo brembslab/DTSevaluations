@@ -97,20 +97,31 @@ for(i in 1:NofPeriods){
     sequence$color[i]="orange"
     sequence$histocolor[i]="orange"
   }
-  if(sequence$outcome[i]==0){
-    sequence$color[i]="lightyellow"
-    sequence$histocolor[i]="darkgreen"
-  } else {
-    sequence$color[i]="orange"
-    sequence$histocolor[i]="orange"
-  }
   if(sequence$contingency[i]==""){
     sequence$color[i]=NA
     sequence$histocolor[i]="red"
     sequence$category[i]=NA
- }
-  if(sequence$contingency[i]!=""){
-    sequence$category[i] <- paste(sequence$pattern[i],sequence$contingency[i])
+  } else {
+    cat=paste(sequence$pattern[i],sequence$contingency[i])
+    if(cat=="0 right_torque" || cat=="1 right_torque"){
+      cat="Right torque"
+    }
+    if(cat=="0 left_torque" || cat=="1 left_torque"){
+      cat="Left torque"
+    }   
+    if(cat=="7 right_torque"){
+      cat="Right & green"
+    }
+    if(cat=="7 left_torque"){
+      cat="Left & blue"
+    }
+    if(cat=="8 right_torque"){
+      cat="Right & blue"
+    }
+    if(cat=="8 left_torque")
+      cat="Left & green"
+  }
+    sequence$category[i] <- cat
   } 
 #add training/test to the graphs
 
