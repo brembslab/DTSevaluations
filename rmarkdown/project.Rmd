@@ -350,7 +350,7 @@ if(NofGroups==3)
   Control=list()
   Exp=list()
   for (t in 1:NofGroups) {
-    if(grepl("test", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsBefore[[t]]$desc)) | grepl("experimental", tolower(grouped.OMparamsBefore[[t]]$desc))==TRUE){
+    if(any(grepl("test", tolower(grouped.OMparamsBefore[[t]]$desc))) | any(grepl("exp", tolower(grouped.OMparamsBefore[[t]]$desc))) | any(grepl("experimental", tolower(grouped.OMparamsBefore[[t]]$desc)))==TRUE){
       Exp = na.omit(grouped.OMparamsBefore[[t]])
     } else {
       Control[[Count]] =na.omit(grouped.OMparamsBefore[[t]])
@@ -498,7 +498,7 @@ if(NofGroups==3){
   Control=list()
   Exp=list()
   for (t in 1:NofGroups) {
-    if(grepl("test", tolower(grouped.OMparamsAfter[[t]]$desc)) | grepl("exp", tolower(grouped.OMparamsAfter[[t]]$desc)) |      grepl("experimental", tolower(grouped.OMparamsAfter[[t]]$desc))==TRUE){
+    if(any(grepl("test", tolower(grouped.OMparamsAfter[[t]]$desc))) | any(grepl("exp", tolower(grouped.OMparamsAfter[[t]]$desc))) | any(grepl("experimental", tolower(grouped.OMparamsAfter[[t]]$desc)))==TRUE){
       Exp = na.omit(grouped.OMparamsAfter[[t]])
     } else {
       Control[[Count]] =na.omit(grouped.OMparamsAfter[[t]])
@@ -746,7 +746,7 @@ for(x in 1:NofGroups)
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
               theme(aspect.ratio=aspect_ratio) +
-              scale_fill_discrete(name = "Categories") #legend title for categories 
+              scale_fill_discrete(name = "Heat on:") #legend title for categories 
 
     }  
 girafe( ggobj = plot_grid(plotlist=PIplots, ncol = 1),options = list(opts_selection(type = "single",css = "fill:orange;stroke:gray;r:4pt;", only_shiny = FALSE)), width_svg = 4+(length(unique(PIprofile$period))), height_svg = 5*NofGroups)
@@ -774,7 +774,7 @@ for(x in 1:NofGroups)
               ylab("PI [rel. units]")+ 
               xlab("Experiment Sequence") + 
               theme(aspect.ratio=aspect_ratio) +
-              scale_fill_discrete(name = "Categories") #legend title for categories 
+              scale_fill_discrete(name = "Heat on:") #legend title for categories 
 
     }        
 girafe( ggobj = plot_grid(plotlist=PIplots, ncol = 1),options = list(opts_selection(type = "single",css = "fill:orange;stroke:gray;r:4pt;", only_shiny = FALSE)), width_svg = 4+(length(unique(PIprofile$period))), height_svg = 5*NofGroups)
@@ -959,7 +959,7 @@ Count=1
 Control=list()
 Exp=list()
 for (t in 1:NofGroups) {
-  if(grepl("test", tolower(PItype[[t]]$desc)) | grepl("exp", tolower(PItype[[t]]$desc)) | grepl("experimental", tolower(PItype[[t]]$desc))==TRUE){
+  if(any(grepl("test", tolower(PItype[[t]]$desc))) | any(grepl("exp", tolower(PItype[[t]]$desc))) | any(grepl("experimental", tolower(PItype[[t]]$desc)))==TRUE){
     Exp = na.omit(PItype[[t]])
   } else {
     Control[[Count]] =na.omit(PItype[[t]])

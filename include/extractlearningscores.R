@@ -21,9 +21,9 @@ if(PIs_present & !is.null(learningscore)){
   PIstatCombined = na.omit(PIstatCombined)                                          #delete NA rows
 }
 
-#Compute average pretest values and create dataframe for 2x2 repeated measures raincloudplot
-if(PIs_present & twogroupstats &NofGroups==2){
-  pretestPIs <- list()
+#Compute average pretest values and create dataframe
+if(PIs_present){
+pretestPIs <- list()
   for(x in 1:NofGroups){
     pretestPIs[[x]] <- grouped.PIprofiles[[x]][pretestperiods]     #extract the PIs into a temporary list
     pretestPIs[[x]] <- rowMeans(pretestPIs[[x]])
@@ -31,9 +31,11 @@ if(PIs_present & twogroupstats &NofGroups==2){
   pretestPIs <- as.data.frame(t(plyr::ldply(pretestPIs, rbind)))                    #convert PI list to a temproary data.frame
   colnames(pretestPIs) <- unlist(sapply(project.data[["resources"]], '[', 'name'))  #add group names as column names to PItemp
   pretestPIs <- melt(pretestPIs, measure.vars = names(pretestPIs), variable.name = "group", value.name = "category") #melt categories into dataframe with group as id-variable
+}
 
-#Create the raincloudplot dataframe
-rcp.PIs <- data_2x2(
+#Create raincloudplot dataframe for 2x2 raincloud plots
+if(PIs_present & twogroupstats & NofGroups==2){
+  rcp.PIs <- data_2x2(
   array_1 = pretestPIs$category[pretestPIs$group==groupnames[1]],
   array_2 = pretestPIs$category[pretestPIs$group==groupnames[2]],
   array_3 = PIstat.rcp$PIs[PIstat.rcp$group==groupnames[1]],
