@@ -12,10 +12,10 @@ start.wd=getwd()
 
 ## read a single XML data file
 xml_name <- file.choose()
-project.path = dirname(xml_name)
+dataset.path = dirname(xml_name)
 
 #make sure the evaluations are written in a subfolder of the data folder
-evaluation.path = paste(project.path,"evaluations", sep = "/")
+evaluation.path = paste(dataset.path,"evaluations", sep = "/")
 dir.create(evaluation.path, showWarnings = FALSE)
 
 #create/set variables to remain compatible with single_fly.Rmd

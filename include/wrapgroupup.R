@@ -51,9 +51,9 @@ colnames(spectemp)[1]<-"freq" #label the first x-axis as frequency
 spectemp$freq <- spectemp$freq*1000 #convert kHz to Hz
 spectemp <- spectemp[, -grep("x", colnames(spectemp))] #drop all x-axes exept the one now labelled "freq"
 spectemp[length(spectemp)+1] <- rowMeans(spectemp[, grep("y", colnames(spectemp))]) #calculate the mean power spectrum in the group
-spectemp[length(spectemp)+1] <- rowSds(spectemp[, grep("y", colnames(spectemp))])/sqrt(length(project.data[["resources"]][[x]][["data"]])) #calculate the standard deviation in the group
+spectemp[length(spectemp)+1] <- rowSds(spectemp[, grep("y", colnames(spectemp))])/sqrt(length(dataset.data[["resources"]][[x]][["data"]])) #calculate the standard deviation in the group
 spectemp[, grep("y", colnames(spectemp))] <- NULL #drop all raw data for summary data
-spectemp$group <- as.factor(rep(paste(project.data[["resources"]][[x]][["name"]], ", N=", length(project.data[["resources"]][[x]][["data"]]), sep = ""), nrow(spectemp))) #add grouping variable for later plotting
+spectemp$group <- as.factor(rep(paste(dataset.data[["resources"]][[x]][["name"]], ", N=", length(dataset.data[["resources"]][[x]][["data"]]), sep = ""), nrow(spectemp))) #add grouping variable for later plotting
 colnames(spectemp)[2] <- "mean"
 colnames(spectemp)[3] <- "sd"
 grouped.spectra[[x]] = spectemp #save group mean/sd

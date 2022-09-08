@@ -502,7 +502,7 @@ for (i in nonOMperiods) {
     if(is.null(unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["1"]))){dwelldata$punished[[i]]=as.integer(0) #if no data points, set to zero seconds
     } else{dwelldata$punished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["1"])}  #punished dwelling times
 
-#calculate mean dwelling times and add them to the list used in project evaluations    
+#calculate mean dwelling times and add them to the list used in dataset evaluations    
     dwellmeans$unpunished[l,i] =  mean(dwelldata$unpunished[[i]])
     dwellmeans$punished[l,i] =  mean(dwelldata$punished[[i]])
 
