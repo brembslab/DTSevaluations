@@ -22,8 +22,6 @@ resources:
   #- PKCiFoxPiB0.xml #left
   - PKCiFoxPiB1.xml #right
   - PKCiFoxPiB2.xml #left
-  - PKCiFoxPiB3.xml #right
-  - PKCiFoxPiB4.xml #left
   id: FBst0
   
 - name: PKCi x elavGAL4
@@ -34,9 +32,7 @@ resources:
   - PKCiElav1.xml #left
   #- PKCiElav2.xml #right #stoped flying verwerfen
   - PKCiElav3.xml #right
-  - PKCiElav4.xml #left
-  - PKCiElav5.xml #left 
-  - PKCiElav6.xml #right
+
   id: FBst0
   
 - name: PKCi x elavtubGal80GAL44h
@@ -46,9 +42,6 @@ resources:
   - ElavtubGal80PKChscon10.xml #right 
   - ElavtubGal80PKChscon11.xml #left  
   - ElavtubGal80PKChscon12.xml #left
-  - ElavtubGal80PKChscon13.xml #right
-  - ElavtubGal80PKChscon14.xml #left
-  - ElavtubGal80PKChscon15.xml #right
   id: FBst0
 statistics:
   significance-levels:
