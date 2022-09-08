@@ -219,14 +219,14 @@ plotOMtracesMean(grouped.OMdataAfter) #call function to plot OM traces at end of
 
 ```{r OMparams, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 
-####### Do not separate optomotor parameters at all ##########
+####### Do not separate optomotor parameters at all: exclusively optomotor experiments only, no before/after ##########
 
 
 plotOMparams=ldply(grouped.OMparams, data.frame)    #move the dataframes from each group into a single dataframe
 OMvariables = head(names(plotOMparams),-1)
 OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", "Asymmetry Index Slope")
 
-#for one group without statistics
+#for one group or more than three groups without statistics
 if(NofGroups==1|NofGroups>3)
   {
         for (v in 1:4) {
