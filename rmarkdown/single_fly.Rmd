@@ -124,7 +124,7 @@ for(i in 1:NofPeriods){
     if(cat=="8 right_torque"){
       cat="Right & blue"
     }
-    if(cat=="8 left_torque")
+    if(cat=="8 left_torque"){
       cat="Left & green"
   }
     sequence$category[i] <- cat
