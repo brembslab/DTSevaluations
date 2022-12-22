@@ -1,5 +1,5 @@
 ---
-title: "Single Fly Descriptive Data Evaluation Sheet"
+title: "*Drosophila* Time Series - Single Fly Quality Control Report Sheet"
 output: 
   html_document:
     number_sections: true
@@ -43,7 +43,7 @@ sampleratecondition <- round(real_sample_rate)>20
 cat("<b>Actual samplingrate: </b>", paste(signif(real_sample_rate,4)), " Hz; <b>Downsampled sampling rate (target 20 Hz):</b> ", paste(signif(down_sample_rate,4)), " Hz")
 ```
 
-# Experimental Design
+# Experimental Sequence
 ```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 3, fig.width = (NofPeriods+1)}
     #plot table of period sequence
     periods=t(sequence)
@@ -126,7 +126,13 @@ for(i in 1:NofPeriods){
     }
     if(cat=="8 left_torque"){
       cat="Left & green"
-  }
+    }
+    if(cat=="4 1_3_Q"){
+      cat="ꓔ"
+    }
+    if(cat=="4 2_4_Q"){
+      cat="ꓕ"
+    }
     sequence$category[i] <- cat
   } 
 #add training/test to the graphs
