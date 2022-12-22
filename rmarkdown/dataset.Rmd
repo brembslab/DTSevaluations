@@ -25,7 +25,7 @@ knitr::opts_chunk$set(echo = TRUE)
 setwd(dataset.path)
 ```
 
-<center><h2>for time series data set: "<b>`r paste(dataset.data$experiment$title)`</b>"</h2></center>
+<center><h2>for time series dataset: "<b>`r paste(dataset.data$experiment$title)`</b>"</h2></center>
 <center>Rendered on `r format(Sys.time(), '%d %B %Y')`</center>
 
 # Metadata
@@ -349,7 +349,8 @@ plotOMparams$group <- factor(plotOMparams$group, levels=unique(plotOMparams$grou
                 shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                 panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA), 
-                legend.position = "top",legend.title = element_blank()) +
+                legend.position = "top") +
+      scale_fill_discrete(name = "Heat on:") + #legend title for categories
       theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
       ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
       geom_signif(comparisons = list(c(gname[,1], gname[,2]), c(gname[,2], gname[,3])),
@@ -500,7 +501,8 @@ plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=unique(plotO
                 shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                 panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA), 
-                legend.position = "top",legend.title = element_blank()) +
+                legend.position = "top") +
+      scale_fill_discrete(name = "Heat on:")+ #legend title for categories
       theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
       ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))),
@@ -649,7 +651,8 @@ plotOMparamsAfter$group <- factor(plotOMparamsAfter$group, levels=unique(plotOMp
       geom_jitter(data = plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]]), position=position_jitter(0.3),                       shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                 panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA), 
-                legend.position = "top",legend.title = element_blank()) +
+                legend.position = "top") +
+      scale_fill_discrete(name = "Heat on:")+ #legend title for categories
       theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
       ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))),
@@ -684,7 +687,6 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
         guides(colour = guide_legend(override.aes = list(size=3))) +
         theme_light(base_size = 16) + theme(legend.justification=c(1,0),
                                             legend.position=c(0.94,0.60), 
-                                            legend.title=element_blank(), 
                                             legend.key.size = unit(2, 'lines'),
                                             legend.key = element_rect(size = 6),
                                             legend.box.background = element_rect(fill="white"),
@@ -892,7 +894,8 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     geom_boxplot(fill = boxcolors, notch = FALSE, outlier.color=NA, width=0.8, size=0.6) +
     geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
     scale_y_continuous(breaks = seq(-1, 1, .2)) +
-    theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal", legend.title = element_blank()) +
+    theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
+    scale_fill_discrete(name = "Heat on:")+ #legend title for categories
     theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ theme(aspect.ratio=3/NofGroups)+
     samplesizes.annotate(boxes, samplesizes) +
     wilcox.annotate(boxes, wilcoxon)
@@ -901,7 +904,7 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     grid.arrange(grobs = plots.singles, ncol=1, nrow=2, heights=c(0.2,1))
 ```
 
-```{r Utest, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
+```{r Utest, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 5, comment=NA, results='asis'}
 cat("\n## Statistical tests between two groups\n")
 
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
@@ -935,6 +938,7 @@ cat("\n## Statistical tests between two groups\n")
       #make tidy table of results
     results.utest<-data.frame(values=c(signif[1],
                                        w.statistic,
+                                       utest,
                                        cohend,
                                        power,
                                        signif(bayesF$bf, 3),
@@ -944,6 +948,7 @@ cat("\n## Statistical tests between two groups\n")
                                        signif(LR, 3)))
     rownames(results.utest)<-c("Significance level",
                                "MW U-Test, W",
+                               "MW U-Test p",
                                "Cohen's D",
                                "stat. Power",
                                "Bayes Factor",
@@ -951,25 +956,27 @@ cat("\n## Statistical tests between two groups\n")
                                paste("FP risk, prior ",priorval[1]),
                                paste("FP risk, prior ",priorval[2]),
                                "Likelihood Ratio")
-    
+
+#prepare Grob with results table
+  plots.2test<-list(tableGrob(results.utest))
+        
 # plot two PIs with asterisks
-  plots.2test<-list(ggplot(PIstatCombined, aes(group, PIs)) +
+  plots.2test[[2]]<-ggplot(PIstatCombined, aes(group, PIs)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
       geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
-      ggtitle(paste("U-Test, p=", utest)) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
-      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal", legend.title = element_blank()) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=4/NofGroups)+
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=8, vjust=0.5) +
-      samplesizes.annotate(boxes, samplesizes))
+      samplesizes.annotate(boxes, samplesizes)
   
 
   #add table with results and plot
-  plots.2test[[2]]<-tableGrob(results.utest)
-  grid.arrange(grobs = plots.2test, ncol=2)
+
+  grid.arrange(grobs = plots.2test, ncol=1, nrow=2)
 
 ```
 
@@ -1004,8 +1011,8 @@ print(raincloud_2x2_repmes(
 
 ```
 
-```{r UtestG3, eval=(PIs_present & threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
-cat("\n## Statistical tests between three groups\n")
+```{r UtestG3, eval=(PIs_present & threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 6, comment=NA, results='asis'}
+cat("\n## Dyadic statistical tests with three groups\n")
 #creating a list with PIs and condition in on list
 PItype <- list() 
 for (x in 1:NofGroups){
@@ -1092,7 +1099,7 @@ colnames(results.utest) = c(paste(PIname[1], PIname[2], sep="\n"),paste(PIname[1
 
 rownames(results.utest)<-c("Significance level",
                                "MW U-Test, W",
-                               "U-Test p-value", 
+                               "U-Test, p", 
                                "Cohen's D",
                                "stat. Power",
                                "Bayes Factor",
@@ -1101,18 +1108,19 @@ rownames(results.utest)<-c("Significance level",
                                paste("FP risk, prior ",priorval[2]),
                                "Likelihood Ratio")
     
-# plot two PIs with asterisks
+# plot PIs with asterisks
 plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
                     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
                     geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
                     geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), 
-                                position=position_jitter(0.3), shape=21, size=3) +
+                                position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
+                    scale_y_continuous(breaks = seq(-1, 1, .2)) +
                     theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                                                         panel.border = element_rect(size = 0.5, linetype = "solid", 
-                                                        colour = "black", fill=NA), legend.position = "top", 
-                                                        legend.title = element_blank()) +
-                    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+ 
-                    ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+                                                        colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
+                    scale_fill_discrete(name = "Heat on:")+ #legend title for categories
+                    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18), axis.title.x=element_blank())+ 
+                    ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ theme(aspect.ratio=3/NofGroups)+
                     geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
                                 map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                                 textsize=5, vjust=0.1) +
@@ -1123,12 +1131,12 @@ plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
 
   #add table with results and plot
   plots.2utest<-tableGrob(results.utest)
-  grid.arrange(plots.2test,plots.2utest, nrow = 1)
+  grid.arrange(plots.2utest,plots.2test, ncol=1, nrow=2)
   
 
 ```
 
-```{r Utestpooled, eval=(PIs_present & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
+```{r Utestpooled, eval=(PIs_present & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 6, comment=NA, results='asis'}
 cat("\n## Statistical tests between pooled groups\n")
 
   cat("The following experimental groups were pooled into two groups:\n")
@@ -1171,6 +1179,7 @@ reactable(PooledGroups,
       #make tidy table of results
     results.utest<-data.frame(values=c(signif[1],
                                        w.statistic,
+                                       utest,
                                        cohend,
                                        power,
                                        signif(bayesF$bf, 3),
@@ -1180,6 +1189,7 @@ reactable(PooledGroups,
                                        signif(LR, 3)))
     rownames(results.utest)<-c("Significance level",
                                "MW U-Test, W",
+                               "MW U-Test, p",
                                "Cohen's D",
                                "stat. Power",
                                "Bayes Factor",
@@ -1187,25 +1197,27 @@ reactable(PooledGroups,
                                paste("FP risk, prior ",priorval[1]),
                                paste("FP risk, prior ",priorval[2]),
                                "Likelihood Ratio")
-    
+
+#prepare Grob with results table
+  plots.2test<-list(tableGrob(results.utest))
+        
 # plot two PIs with asterisks
-  plots.2test<-list(ggplot(PIstatPooled, aes(group, PIs)) +
+  plots.2test[[2]]<-ggplot(PIstatPooled, aes(group, PIs)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors[1:2], notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data=PIstatPooled, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3) +
-      ggtitle(paste("U-Test, p=", utest)) +
+      geom_jitter(data=PIstatPooled, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
       scale_y_continuous(breaks = seq(-1, 1, .2)) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom") +
-      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=1)+
+      scale_fill_discrete(name = "Heat on:")+ #legend title for categories
+      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ theme(aspect.ratio=1)+
       geom_signif(comparisons = list(c(colnames(PIprofilePooled[1]), colnames(PIprofilePooled[2]))), 
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=8, vjust=0.5) +
-      samplesizes.annotate(boxes[1:2], samplesizesPooled))
+      samplesizes.annotate(boxes[1:2], samplesizesPooled)
   
 
-  #add table with results and plot
-  plots.2test[[2]]<-tableGrob(results.utest)
-  grid.arrange(grobs = plots.2test, ncol=2)
+  #plot
+  grid.arrange(grobs = plots.2test, ncol=1, nrow=2)
 
 ```
 

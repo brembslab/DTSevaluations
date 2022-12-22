@@ -56,7 +56,7 @@ for(x in 1:NofGroups) #start main loop that colects data in each experimental gr
       
       #### call RMarkdown for single fly evaluations ###############################################
       rmarkdown::render(paste(start.wd,"/rmarkdown/single_fly.Rmd", sep=""),                  ######
-                        output_file = paste(flyname,"descr_anal.html", sep="_"),              ######
+                        output_file = paste(flyname,"qc.html", sep="_"),                      ######
                         output_dir = dataset.path)                                            ######
       #### end RMarkdown for single fly evaluations ################################################
       
@@ -68,7 +68,7 @@ for(x in 1:NofGroups) #start main loop that colects data in each experimental gr
   
       ##add period data to grouped data
       grouped.data[[l]] <- period.data
-      xml_list[[l]] = paste('<a href="',flyname,'_descr_anal.html">', flyname,'</a>', sep = '')  #create link to each single fly evaluation HTML document to be used in dataset evaluation
+      xml_list[[l]] = paste('<a href="',flyname,'_qc.html">', flyname,'</a>', sep = '')  #create link to each single fly quality control HTML document to be used in dataset evaluation
       
       #open window with progress bar
       setWinProgressBar(pb, l, title=paste(round(l/length(xml_list)*100, 0), "% of",grp_title,"done"))

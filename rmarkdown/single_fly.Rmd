@@ -126,7 +126,13 @@ for(i in 1:NofPeriods){
     }
     if(cat=="8 left_torque"){
       cat="Left & green"
-  }
+    }
+    if(cat=="4 1_3_Q"){
+      cat="ꓔ"
+    }
+    if(cat=="4 2_4_Q"){
+      cat="ꓕ"
+    }
     sequence$category[i] <- cat
   } 
 #add training/test to the graphs
