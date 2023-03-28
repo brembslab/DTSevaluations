@@ -904,6 +904,51 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     grid.arrange(grobs = plots.singles, ncol=1, nrow=2, heights=c(0.2,1))
 ```
 
+```{r WilcoxonRaincloud, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 7, fig.width = 6, comment=NA, results='asis'}
+cat("\n## Statistical tests of single groups against zero - raincloudplots\n")
+  
+  wilcoxon<-numeric()  
+  for(x in 1:NofGroups){wilcoxon[x] = signif(wilcox.test(PIstat[[x]])$p.value, 3)} #test all groups against zero
+  #compute Bayes Factor for single group 
+  if(NofGroups==1){
+    results.bayes=extractBF(ttestBF(na.omit(PIstat[[1]])))
+    results.bayes <- results.bayes[-c(3,4)] # drop the date and code columns
+    row.names(results.bayes) <- groupnames #group name as row name
+    results.bayes <- signif(results.bayes, digits=3) # reduce results to 3 significant digits
+    } else { #compute Bayes Factors for several groups
+          results.bayes<-list()
+          for(x in 1:NofGroups){results.bayes[[x]]=extractBF(ttestBF(na.omit(PIstat[[x]])))} #extract BayesFactors for all groups
+          results.bayes<-do.call("rbind", results.bayes) #fuse all Bayes results into one dataframe
+          results.bayes <- results.bayes[-c(3,4)]# drop the date and code columns
+          row.names(results.bayes) <- groupnames #group name as row name
+          results.bayes <- signif(results.bayes, digits=3) # reduce results to 3 significant digits
+    }
+
+#prepare Grob with Bayes results table
+    plots.singles<-list(tableGrob(results.bayes))
+    
+# plot PI box plot test against zero
+  plots.singles[[2]]<-ggplot(PIstatCombined, aes(group, PIs, fill=group)) +
+    geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+    geom_rain(cov = "category",
+              point.args = list(size = 3),
+              point.args.pos = list(position = position_jitter(width = 0.1)),
+              boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=0.9),
+              boxplot.args.pos = list(position = ggpp::position_dodgenudge(x = .22), width = 0.15),
+              violin.args.pos = list(side = "r", width = 0.7, position = position_nudge(x = 0.22))) +
+    stat_summary(fun.y="mean", color=boxcolors, shape="-", size = 4, fill=boxcolors, position = position_nudge(0.22))+
+    theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
+    scale_fill_discrete(name = "Heat on:")+ #legend title for categories
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ theme(aspect.ratio=3/NofGroups)+
+    scale_fill_manual(values=boxcolors) +
+#  scale_color_manual(values=c("green", "red")) +
+    samplesizes.annotate(boxes, samplesizes) +
+    wilcox.annotate(boxes, wilcoxon)
+  
+#plots Bayes table and boxplot  
+    grid.arrange(grobs = plots.singles, ncol=1, nrow=2, heights=c(0.2,1))
+```
+
 ```{r Utest, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 5, comment=NA, results='asis'}
 cat("\n## Statistical tests between two groups\n")
 
@@ -996,7 +1041,7 @@ print(ggplot(PIstatCombined, aes(learningscore, PIs, fill = group)) + scale_fill
 ```
 
 ```{r raincloudplots, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
-cat("\n## Raincloudplot\n")
+cat("\n## Raincloudplot pre/post\n")
 
 print(raincloud_2x2_repmes(
   data = na.omit(rcp.PIs),
