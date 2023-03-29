@@ -926,22 +926,29 @@ cat("\n## Statistical tests of single groups against zero - raincloudplots\n")
 
 #prepare Grob with Bayes results table
     plots.singles<-list(tableGrob(results.bayes))
+#create variable for plotting    
+    HeatOn=as.integer(levels(as.factor(PIstatCombined$category)))
     
 # plot PI box plot test against zero
-  plots.singles[[2]]<-ggplot(PIstatCombined, aes(group, PIs, fill=group)) +
+  plots.singles[[2]]<-ggplot(PIstatCombined, aes(group, PIs, fill=group, color=group)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
     geom_rain(cov = "category",
-              point.args = list(size = 3),
-              point.args.pos = list(position = position_jitter(width = 0.1)),
+              point.args = list(size = 6, shape=PIstatCombined$category),
+              point.args.pos = list(position = position_jitter(width = 0.09)),
               boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=0.9),
               boxplot.args.pos = list(position = ggpp::position_dodgenudge(x = .22), width = 0.15),
+              violin.args = list(color = NA, alpha = .8),
               violin.args.pos = list(side = "r", width = 0.7, position = position_nudge(x = 0.22))) +
-    stat_summary(fun.y="mean", color=boxcolors, shape="-", size = 4, fill=boxcolors, position = position_nudge(0.22))+
-    theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
-    scale_fill_discrete(name = "Heat on:")+ #legend title for categories
-    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ theme(aspect.ratio=3/NofGroups)+
-    scale_fill_manual(values=boxcolors) +
-#  scale_color_manual(values=c("green", "red")) +
+    stat_summary(fun.y="mean", color="grey", shape="—", size = 2.5, fill=boxcolors, position = position_nudge(0.22))+
+    stat_summary(fun.y="median", color="black", shape="—", size = 2.5, fill=boxcolors, position = position_nudge(0.22))+
+    scale_fill_manual(values = boxcolors) + #color of the violin plot
+    scale_color_manual(values = boxcolors) + #color of the points
+    #scale_shape_manual(values = c(1,16))+ #shape of the points
+    guides(fill = 'none', color = guide_legend(title = "Heat on:"))+ # remove legend for groups, add legend title for categories
+    theme_light(base_size = 16) + 
+    theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+
+    theme(aspect.ratio=3/NofGroups)+
     samplesizes.annotate(boxes, samplesizes) +
     wilcox.annotate(boxes, wilcoxon)
   
@@ -962,7 +969,7 @@ cat("\n## Statistical tests between two groups\n")
       cohend = signif(cohen.d(PIstatCombined$PIs, PIstatCombined$group, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
     }else{
       cohend = signif((mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
-    }
+  }
     #calculate statistical power
     alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
     power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
