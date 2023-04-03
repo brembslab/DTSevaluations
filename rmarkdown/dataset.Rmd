@@ -927,13 +927,12 @@ cat("\n## Statistical tests of single groups against zero - raincloudplots\n")
 #prepare Grob with Bayes results table
     plots.singles<-list(tableGrob(results.bayes))
 #create variable for plotting    
-    HeatOn=as.integer(levels(as.factor(PIstatCombined$category)))
+    HeatOn=gsub(1, "◄", gsub(2, "►", as.integer(as.factor(PIstatCombined$category)))) #Still needs to be made general to fit all categories!!
     
 # plot PI box plot test against zero
   plots.singles[[2]]<-ggplot(PIstatCombined, aes(group, PIs, fill=group, color=group)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-    geom_rain(cov = "category",
-              point.args = list(size = 6, shape=PIstatCombined$category),
+    geom_rain(point.args = list(size = 6, shape=HeatOn, alpha=(as.integer(as.factor(PIstatCombined$category))/2)),
               point.args.pos = list(position = position_jitter(width = 0.09)),
               boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=0.9),
               boxplot.args.pos = list(position = ggpp::position_dodgenudge(x = .22), width = 0.15),
@@ -944,7 +943,7 @@ cat("\n## Statistical tests of single groups against zero - raincloudplots\n")
     scale_fill_manual(values = boxcolors) + #color of the violin plot
     scale_color_manual(values = boxcolors) + #color of the points
     #scale_shape_manual(values = c(1,16))+ #shape of the points
-    guides(fill = 'none', color = guide_legend(title = "Heat on:"))+ # remove legend for groups, add legend title for categories
+    guides(fill = 'none', color = 'none')+ # remove legends
     theme_light(base_size = 16) + 
     theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+
