@@ -927,22 +927,22 @@ cat("\n## Statistical tests of single groups against zero - raincloudplots\n")
 #prepare Grob with Bayes results table
     plots.singles<-list(tableGrob(results.bayes))
 #create variable for plotting    
-    HeatOn=gsub(1, "◄", gsub(2, "►", as.integer(as.factor(PIstatCombined$category)))) #Still needs to be made general to fit all categories!!
+    HeatOn=gsub(1, "■", gsub(2, "●", as.integer(as.factor(PIstatCombined$category)))) #Still needs to be made general to fit all categories!!
     
 # plot PI box plot test against zero
   plots.singles[[2]]<-ggplot(PIstatCombined, aes(group, PIs, fill=group, color=group)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
     geom_rain(point.args = list(size = 6, shape=HeatOn, alpha=(as.integer(as.factor(PIstatCombined$category))/2)),
-              point.args.pos = list(position = position_jitter(width = 0.09)),
-              boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=0.9),
-              boxplot.args.pos = list(position = ggpp::position_dodgenudge(x = .22), width = 0.15),
+              point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.25, nudge.from = "jittered")),
+              boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=1.1),
+              boxplot.args.pos = list(width = 0.12),
               violin.args = list(color = NA, alpha = .8),
-              violin.args.pos = list(side = "r", width = 0.7, position = position_nudge(x = 0.22))) +
-    stat_summary(fun.y="mean", color="grey", shape="—", size = 2.5, fill=boxcolors, position = position_nudge(0.22))+
-    stat_summary(fun.y="median", color="black", shape="—", size = 2.5, fill=boxcolors, position = position_nudge(0.22))+
+              violin.args.pos = list(side = "r", width = 1)) +
+    stat_summary(fun.y = mean, color = "darkgrey", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
+    stat_summary(fun.y=median, color="black", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
     scale_fill_manual(values = boxcolors) + #color of the violin plot
     scale_color_manual(values = boxcolors) + #color of the points
-    #scale_shape_manual(values = c(1,16))+ #shape of the points
+    scale_y_continuous(breaks = seq(-1, 1, .2)) +
     guides(fill = 'none', color = 'none')+ # remove legends
     theme_light(base_size = 16) + 
     theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
@@ -1022,8 +1022,96 @@ cat("\n## Statistical tests between two groups\n")
       theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=4/NofGroups)+
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                  textsize=8, vjust=0.5) +
+                  textsize=4, vjust=0.1) +
       samplesizes.annotate(boxes, samplesizes)
+  
+
+  #add table with results and plot
+
+  grid.arrange(grobs = plots.2test, ncol=1, nrow=2)
+
+```
+
+```{r UtestRain, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 5, comment=NA, results='asis'}
+cat("\n## Statistical tests between two groups - Raincloudplots\n")
+
+    utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
+    w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)
+    #compute effect size Cohen's D
+    if(samplesizes[1]==samplesizes[2]){equalN=TRUE}else{equalN=FALSE}   #determine if the samplesizes are identical
+    if(fligner.test(PIstatCombined$PIs,PIstatCombined$group)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
+    if(equalN & hv){hedges=FALSE}else{hedges=TRUE}                      #test if we need to apply Hedge's correction
+    if(hedges){
+      cohend = signif(cohen.d(PIstatCombined$PIs, PIstatCombined$group, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
+    }else{
+      cohend = signif((mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
+  }
+    #calculate statistical power
+    alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
+    power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
+    #calculate Bayes Factor
+    bayesF=extractBF(ttestBF(na.omit(PIstat[[1]]), na.omit(PIstat[[2]])))
+    #calculate FPR for priors set in dataset file#
+    #run first prior  
+      prior=priorval[1]
+      out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      fpz1=out[1]
+    #run second prior  
+      prior=priorval[2]
+      out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      fpz2=out[1]
+    #Power and likelihood ratio: NB for two sided test, need 2*y0
+      LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
+
+      #make tidy table of results
+    results.utest<-data.frame(values=c(signif[1],
+                                       w.statistic,
+                                       utest,
+                                       cohend,
+                                       power,
+                                       signif(bayesF$bf, 3),
+                                       signif(bayesF$error, 3),
+                                       signif(fpz1, 3),
+                                       signif(fpz2, 3),
+                                       signif(LR, 3)))
+    rownames(results.utest)<-c("Significance level",
+                               "MW U-Test, W",
+                               "MW U-Test p",
+                               "Cohen's D",
+                               "stat. Power",
+                               "Bayes Factor",
+                               "Bayes Factor error",
+                               paste("FP risk, prior ",priorval[1]),
+                               paste("FP risk, prior ",priorval[2]),
+                               "Likelihood Ratio")
+
+#prepare Grob with results table
+  plots.2test<-list(tableGrob(results.utest))
+        
+# plot two PIs with asterisks
+  plots.2test[[2]]<-ggplot(PIstatCombined, aes(group, PIs, fill=group, color=group)) +
+    geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+    geom_rain(point.args = list(size = 6, shape=HeatOn, alpha=(as.integer(as.factor(PIstatCombined$category))/2)),
+              point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.25, nudge.from = "jittered")),
+              boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=1.1),
+              boxplot.args.pos = list(width = 0.12),
+              violin.args = list(color = NA, alpha = .8),
+              violin.args.pos = list(side = "r", width = 1)) +
+    stat_summary(fun.y = mean, color = "darkgrey", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
+    stat_summary(fun.y=median, color="black", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
+    scale_fill_manual(values = boxcolors) + #color of the violin plot
+    scale_color_manual(values = boxcolors) + #color of the points
+    scale_y_continuous(breaks = seq(-1, 1, .2)) +
+    guides(fill = 'none', color = 'none')+ # remove legends
+    theme_light(base_size = 16) + 
+    theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18)) + ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+
+    theme(aspect.ratio=3/NofGroups)+
+    geom_signif(color="black",
+      comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
+                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                textsize=4, vjust=0.1) +
+    samplesizes.annotate(boxes, samplesizes)
   
 
   #add table with results and plot
