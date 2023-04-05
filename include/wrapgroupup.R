@@ -2,6 +2,7 @@
 #### -- Period sequence design meta-data -- ####
 #### -- Dwelling times -- ####
 #### -- Performance Indices -- ####
+#### -- Categories for plotting -- ####
 #### -- Power spectra -- ####
 
 
