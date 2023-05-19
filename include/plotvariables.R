@@ -15,16 +15,16 @@ if(length(unique(PIstatCombined$category))==2){    #if there are only two catego
   HeatOn=case_when(
     PIstatCombined$category == "Right torque" ~ "►",
     PIstatCombined$category == "Left torque"~ "◄",
-    TRUE ~ NA
+    TRUE ~ as.character(HeatOn)
   )
   HeatOn=case_when(
     PIstatCombined$category == "Right torque DL" ~ "►",
     PIstatCombined$category == "Left torque DL"~ "◄",
-    TRUE ~ NA
+    TRUE ~ as.character(HeatOn)
   )
   HeatOn=case_when(
     PIstatCombined$category == "upright T"~"ꓔ",
     PIstatCombined$category == "inverted T" ~ "ꓕ",
-    TRUE ~ NA
+    TRUE ~ as.character(HeatOn)
   )
 }
