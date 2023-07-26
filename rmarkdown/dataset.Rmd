@@ -942,7 +942,7 @@ cat("\n## Statistical tests of single groups against zero - raincloudplots\n")
               boxplot.args.pos = list(width = 0.12),
               violin.args = list(color = NA, alpha = .8),
               violin.args.pos = list(side = "r", width = 1))} +
-    {if(typeof(HeatOn)!="double") #if the shapes are assigned to specuific categories, no black outlines
+    {if(typeof(HeatOn)!="double") #if the shapes are assigned to specific categories, no black outlines
     geom_rain(point.args = list(size = 5, shape=HeatOn, alpha=as.integer(as.factor(PIstatCombined$category))/max(as.integer(as.factor(PIstatCombined$category)))),
               point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
               boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=1.1),
@@ -1111,7 +1111,7 @@ cat("\n## Statistical tests between two groups - Raincloudplots\n")
               boxplot.args.pos = list(width = 0.12),
               violin.args = list(color = NA, alpha = .8),
               violin.args.pos = list(side = "r", width = 1))} +
-    {if(typeof(HeatOn)!="double") #if the shapes are assigned to specuific categories, no black outlines
+    {if(typeof(HeatOn)!="double") #if the shapes are assigned to specific categories, no black outlines
     geom_rain(point.args = list(size = 5, shape=HeatOn, alpha=as.integer(as.factor(PIstatCombined$category))/max(as.integer(as.factor(PIstatCombined$category)))),
               point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
               boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=1.1),

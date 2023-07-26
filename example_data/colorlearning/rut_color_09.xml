@@ -31,7 +31,7 @@
 		<type>color</type>
 		<duration>120</duration>
 		<outcome>0</outcome>
-		<pattern>4</pattern>
+		<pattern>5</pattern>
 		<coup_coeff>11</coup_coeff>
 		<contingency>1_3_Q</contingency>
 	</period>
@@ -39,7 +39,7 @@
 		<type>color</type>
 		<duration>120</duration>
 		<outcome>0</outcome>
-		<pattern>4</pattern>
+		<pattern>5</pattern>
 		<coup_coeff>11</coup_coeff>
 		<contingency>1_3_Q</contingency>
 	</period>
@@ -47,7 +47,7 @@
 		<type>color</type>	
 		<duration>120</duration>
 		<outcome>1</outcome>
-		<pattern>4</pattern>
+		<pattern>5</pattern>
 		<coup_coeff>11</coup_coeff>
 		<contingency>1_3_Q</contingency>
 	</period>
@@ -55,7 +55,7 @@
 		<type>color</type>	
 		<duration>120</duration>
 		<outcome>1</outcome>
-		<pattern>4</pattern>
+		<pattern>5</pattern>
 		<coup_coeff>11</coup_coeff>
 		<contingency>1_3_Q</contingency>
 	</period>	
@@ -63,7 +63,7 @@
 		<type>color</type>	
 		<duration>120</duration>
 		<outcome>0</outcome>
-		<pattern>4</pattern>
+		<pattern>5</pattern>
 		<coup_coeff>11</coup_coeff>
 		<contingency>1_3_Q</contingency>
 	</period>
@@ -71,7 +71,7 @@
 		<type>color</type>	
 		<duration>120</duration>
 		<outcome>1</outcome>
-		<pattern>4</pattern>
+		<pattern>5</pattern>
 		<coup_coeff>11</coup_coeff>
 		<contingency>1_3_Q</contingency>
 	</period>
@@ -79,7 +79,7 @@
 		<type>color</type>	
 		<duration>120</duration>
 		<outcome>1</outcome>
-		<pattern>4</pattern>
+		<pattern>5</pattern>
 		<coup_coeff>11</coup_coeff>
 		<contingency>1_3_Q</contingency>
 	</period>
@@ -87,7 +87,7 @@
 		<type>color</type>	
 		<duration>120</duration>
 		<outcome>0</outcome>
-		<pattern>4</pattern>
+		<pattern>5</pattern>
 		<coup_coeff>11</coup_coeff>
 		<contingency>1_3_Q</contingency>
 	</period>
@@ -95,7 +95,7 @@
 		<type>color</type>	
 		<duration>120</duration>
 		<outcome>0</outcome>
-		<pattern>4</pattern>
+		<pattern>5</pattern>
 		<coup_coeff>11</coup_coeff>
 		<contingency>1_3_Q</contingency>
 	</period>	

@@ -27,4 +27,12 @@ if(length(unique(PIstatCombined$category))==2){    #if there are only two catego
     PIstatCombined$category == "inverted T" ~ "ꓕ",
     TRUE ~ as.character(HeatOn)
   )
+#  HeatOn=case_when(
+#    PIstatCombined$category == "green"~"ꓔ",
+#    PIstatCombined$category == "blue" ~ "ꓕ",
+#    TRUE ~ as.character(HeatOn)
+#  )
+  if(typeof(HeatOn)=="character" && (HeatOn[1]=="21" || HeatOn[1]=="22")){
+    HeatOn=as.double(HeatOn)
+  }
 }

@@ -134,6 +134,12 @@ for(i in 1:NofPeriods){
     if(cat=="4 2_4_Q"){
       cat="inverted T"
     }
+    if(cat=="5 1_3_Q"){
+      cat="green"
+    }
+    if(cat=="5 2_4_Q"){
+      cat="blue"
+    }
     sequence$category[i] <- cat
   } 
 #add training/test to the graphs
