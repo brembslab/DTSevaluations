@@ -83,10 +83,11 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
 
 ```{r PeriodTraces, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10}
 
-#add columns for PIs and categories to sequence data
+#add columns for PIs, categories and shapes (for plotting) to sequence data
 sequence$lambda <- NA
-sequence$category <- NA
-  training = NA
+sequence$category <- NA #what was heated
+training = NA
+
 for(i in 1:NofPeriods){
   
   #save colors for later plotting
@@ -101,7 +102,7 @@ for(i in 1:NofPeriods){
     sequence$color[i]=NA
     sequence$histocolor[i]="red"
     sequence$category[i]=NA
-  } else {
+  } else {  #determine categories
     cat=paste(sequence$pattern[i],sequence$contingency[i])
     if(cat=="0 right_torque" || cat=="1 right_torque"){
       cat="Right torque"
@@ -128,10 +129,16 @@ for(i in 1:NofPeriods){
       cat="Left & green"
     }
     if(cat=="4 1_3_Q"){
-      cat="ꓔ"
+      cat="upright T"
     }
     if(cat=="4 2_4_Q"){
-      cat="ꓕ"
+      cat="inverted T"
+    }
+    if(cat=="5 1_3_Q"){
+      cat="green"
+    }
+    if(cat=="5 2_4_Q"){
+      cat="blue"
     }
     sequence$category[i] <- cat
   } 

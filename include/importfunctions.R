@@ -27,7 +27,7 @@ flyDataImport <- function(xml_name) {
     rawdata <- read.table(text=xmlSApply(flyDataXMLtop[['timeseries']][['csv_data']], xmlValue), col.names=variables$type)
   ##reset periods to start from 1 of they start from 0
     if (rawdata$period[1]==0){rawdata$period=rawdata$period+1}
-  ##reset position data to +/-180° [-1800..1796] for torquemeter experiments
+  ##reset position data to +/-180? [-1800..1796] for torquemeter experiments
     if (tolower(ExpType)=="torquemeter"){
     if (tolower(experiment$arena_type)=="lightguides"){rawdata$a_pos = rawdata$a_pos-1800}
     if (tolower(experiment$arena_type)=="motor"){rawdata$a_pos = round(rawdata$a_pos*0.87890625)}
@@ -133,7 +133,7 @@ flyMetaDataImport <- function(xml_name) {
 #### make sure all flies in a group have the identical experimental design ####
 MultiFlyDataVerification <- function(xml_list)
 {
-  print("Verifying meta-data integrity:", quote=FALSE)
+  writeLines("Verifying meta-data integrity:")
   pb <- txtProgressBar(min = 0, max = length(xml_list), style = 3, char = "=")
 for (l in 1:length(xml_list)) 
   {
@@ -168,7 +168,7 @@ for (l in 1:length(xml_list))
 #### make sure there are no duplicated fly behavior traces in the list ####
 MultiFlyDuplicateCheck <- function(xml_list)
 {
-  print("Searching for data duplications:", quote=FALSE)
+  writeLines("Searching for data duplications:")
   pb <- txtProgressBar(min = 0, max = length(xml_list), style = 3, char = "=")
   for (l in 1:length(xml_list)) 
   {
@@ -235,9 +235,9 @@ downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods, NofDatap
     f=round(approx(subset(rawdata$fly, rawdata$period==index), n=table(periodDownsampled)[index])$y)
     flyDownsampled=c(flyDownsampled, f)
     p=round(approx(subset(rawdata$a_pos, rawdata$period==index), n=table(periodDownsampled)[index])$y)
-    #create a position trace where the +/-180° point is shifted by 90°
-    p_s=rawdata$a_pos+900 #make a copy of position trace and shift the values by 90°
-    p_s[p_s>1796] = p_s[p_s>1796]-3600 #wrap the shifted 90° back around to -90°..-180°
+    #create a position trace where the +/-180? point is shifted by 90?
+    p_s=rawdata$a_pos+900 #make a copy of position trace and shift the values by 90?
+    p_s[p_s>1796] = p_s[p_s>1796]-3600 #wrap the shifted 90? back around to -90?..-180?
     p_s=round(approx(subset(p_s, rawdata$period==index), n=table(periodDownsampled)[index])$y)
     p[p_s %in% -1000:-800] <- p_s[p_s %in% -1000:-800]-900 #replace values with shifted values
     p[p < -1800]=p[p < -1800] + 3600 #wrap the too small values around
@@ -259,7 +259,7 @@ weightedDownsample20Hz <- function(rawdata, sequence, experiment, NofPeriods) {
   rawdata$weight <- 1/(1+abs(rawdata$time-rawdata$group_num)) # calculate distance from measurement point
   rawdata$norm <-ave(rawdata$weight,rawdata$group_num,FUN=function(x) x/sum(x)) #apply weights according to distance from bin center
   rawdata$fly2 <- rawdata$fly*rawdata$norm
-  rawdata$a_pos2 <- rawdata$a_pos*rawdata$norm #needs more work because of values at +/-180°!!!
+  rawdata$a_pos2 <- rawdata$a_pos*rawdata$norm #needs more work because of values at +/-180?!!!
   rawdata$period2 <- rawdata$period*rawdata$norm
   
   # create the vectors in which to save the downsampled data
@@ -284,11 +284,11 @@ weightedDownsample20Hz <- function(rawdata, sequence, experiment, NofPeriods) {
        #mark the last data point of each offending period (assuming we're only one data point off!)
        if (length(diff_periods)!=0){
          rawdataDown$last = NA
-         rawdataDown$last = with(rawdataDown, ave(last, match(rawdataDown$period, diff_periods), FUN = function(x) ifelse(seq_along(x) == length(x), 1, x))) # "1" marking the last data püoint in an offending period
+         rawdataDown$last = with(rawdataDown, ave(last, match(rawdataDown$period, diff_periods), FUN = function(x) ifelse(seq_along(x) == length(x), 1, x))) # "1" marking the last data p?oint in an offending period
          #mark the last data points of periods with missing data points
          if (length(rownames(difference)[difference$deviation==-1])!=0){ #if there are periods with too few data points, duplicate the last
             negative_periods=rownames(difference)[difference$deviation==-1] #find the periods with missing values
-            rawdataDown$last = with(rawdataDown, ave(last, match(rawdataDown$period, negative_periods), FUN = function(x) ifelse(seq_along(x) == length(x), 2, x))) # "2" marking the last data püoint in an offending period
+            rawdataDown$last = with(rawdataDown, ave(last, match(rawdataDown$period, negative_periods), FUN = function(x) ifelse(seq_along(x) == length(x), 2, x))) # "2" marking the last data p?oint in an offending period
             copy = as.vector(rawdataDown[is.element(rawdataDown$last, 2),])
             copy$last=NA
             for (z in 1:length(negative_periods)) {
