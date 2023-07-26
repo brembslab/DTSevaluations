@@ -94,14 +94,6 @@ for(x in 1:NofGroups) #start main loop that colects data in each experimental gr
   
 } #for nofGroups
 
-## generate important variables for later plotting and annotation
-boxes<-c(1:NofGroups)
-boxcolors = c(colorrange[1:NofGroups])
-if(Dwell){
-dwellrange=-round(1.5*max(dwellrange))
-dwellrange[2]=-dwellrange
-}
-
 ## extract the PI learningscore values for the period specified in the dataset yaml file and create dataframes of PIs for plotting
 source("include/extractlearningscores.R")
 
