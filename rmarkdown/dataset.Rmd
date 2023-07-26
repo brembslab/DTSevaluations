@@ -403,7 +403,9 @@ if(NofGroups==2)
 
 #for three groups with statistics
 
-if(NofGroups==3)
+groupings=c("test","exp","experimental") # only do statistics if the user has specified which groups are which
+
+if(NofGroups==3 & any(groupings %in% groupdescriptions))
 {
   Count=1
   Control=list()
@@ -553,7 +555,10 @@ if(NofGroups==2)
 }
 
 #for three groups with statistics
-if(NofGroups==3){
+groupings=c("test","exp","experimental") # only do statistics if the user has specified which groups are which
+
+if(NofGroups==3 & any(groupings %in% groupdescriptions))
+{
   Count=1
   Control=list()
   Exp=list()
