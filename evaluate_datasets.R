@@ -105,11 +105,11 @@ dwellrange[2]=-dwellrange
 ## extract the PI learningscore values for the period specified in the dataset yaml file and create dataframes of PIs for plotting
 source("include/extractlearningscores.R")
 
-## if there are three groups
-source("include/three_groups.R")
-
 ## generate important variables for later plotting and annotation
 source("include/plotvariables.R")
+
+## if there are three groups
+source("include/three_groups.R")
 
 ## if there are more than two groups, attempt to pool some PI data into two groups
 source("include/poolgroups.R")
