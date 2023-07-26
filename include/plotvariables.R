@@ -28,6 +28,6 @@ if(length(unique(PIstatCombined$category))==2){    #if there are only two catego
     TRUE ~ as.character(HeatOn)
   )
   if(typeof(HeatOn)=="character" && (HeatOn[1]=="21" || HeatOn[1]=="22")){
-    HeatOn=as.double(HeatOn)
+    HeatOn=as.double(HeatOn) #case_when changes type of variable to 'character', even if no match is found, duh!
   }
 }
