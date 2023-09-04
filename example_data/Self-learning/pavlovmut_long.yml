@@ -1,0 +1,161 @@
+---
+experiment:
+    type: Torquemeter
+    id: SCR_017276
+    name: torquelearning_mutants
+    title: Torque Learning with Learning Mutants
+    description: Standard length torque learning with eight minutes training; comparing rutabaga and radish mutants with Canton S controls
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: bjoern-brembs
+    description: Björn Brembs
+    firstName: Björn
+    lastName: Brembs
+    id: 0000-0001-7824-7650
+resources:
+- name: wtb
+  title: WTBerlin
+  description: wild type Berlin
+  data:
+  - wtb-0.xml
+  - wtb-1.xml
+  - wtb-2.xml
+  - wtb-3.xml
+  - wtb-4.xml
+  - wtb-5.xml
+  - wtb-6.xml
+  - wtb-7.xml
+  - wtb-8.xml
+  - wtb-9.xml
+  - wtb-10.xml
+  - wtb-11.xml
+  - wtb-12.xml
+  - wtb-13.xml
+  - wtb-14.xml
+  - wtb-15.xml
+  - wtb-16.xml
+  - wtb-17.xml
+  - wtb-18.xml
+  - wtb-19.xml
+  - wtb-20.xml #many long pauses, reluctant to fly, stopped flying during OM after!
+  - wtb-21.xml #adjusted torque down in 1st period
+  - wtb-22.xml
+  - wtb-23.xml
+  - wtb-24.xml
+  - wtb-25.xml #strong pos. preference, hardly any heat
+  - wtb-26.xml #18-07: hot day, no learning
+  - wtb-27.xml #18-07: hot day, no learning
+  - wtb-28.xml #18-07: hot day, no learning
+  - wtb-29.xml #18-07: hot day, no learning
+  - wtb-30.xml #19-07: hot day, no learning
+  - wtb-31.xml #19-07: hot day, no learning
+  - wtb-32.xml #19-07: hot day, no learning
+#  - wtb-33.xml #many pauses  #19-07: hot day, no learning
+  - wtb-34.xml
+  - wtb-35.xml
+  - wtb-36.xml
+  - wtb-37.xml
+  - wtb-38.xml
+  - wtb-39.xml
+  - wtb-40.xml
+  - wtb-41.xml
+  - wtb-42.xml
+#  - wtb-43.xml #totally abnormal OM before, weird avoidance
+- name: rut
+  title: rutabaga
+  description: learning mutant rutabaga
+  data:
+  - rut-0.xml
+  - rut-1.xml
+  - rut-2.xml #many pauses
+  - rut-3.xml
+  - rut-4.xml
+  - rut-5.xml
+  - rut-6.xml
+  - rut-7.xml
+#  - rut-8.xml #stopped flying in OM after
+  - rut-9.xml
+  - rut-10.xml
+  - rut-11.xml
+  - rut-12.xml
+  - rut-13.xml
+  - rut-14.xml
+  - rut-15.xml
+  - rut-16.xml
+  - rut-17.xml
+#  - rut-18.xml # stopped flying in OM after
+  - rut-19.xml
+#  - rut-20.xml  # stopped flying in OM after
+#  - rut-21.xml  # stopped flying in OM after
+  - rut-22.xml #18-07: hot day, no learning in controls
+  - rut-23.xml #long (?) pause in pretest? No flight in OM after
+  - rut-24.xml #check pauses!
+  - rut-25.xml
+#  - rut-26.xml #strong positive scores, hardly any heat
+#  - rut-27.xml
+- name: rsh
+  title: radish
+  description: learning mutant radish
+  data:
+  - rsh-0.xml
+  - rsh-1.xml
+#  - rsh-2.xml #long pause in pretest
+  - rsh-3.xml
+#  - rsh-4.xml #hardly any heat?
+  - rsh-5.xml
+  - rsh-6.xml
+  - rsh-7.xml
+  - rsh-8.xml #very weak, many pauses
+#  - rsh-9.xml #only weakly beating wings, hardly any torque fluctuations, hardly any OM after
+  - rsh-10.xml #many pauses
+  - rsh-11.xml
+  - rsh-12.xml
+  - rsh-13.xml
+  - rsh-14.xml #strange OM before response
+  - rsh-15.xml
+#  - rsh-16.xml #no flight in OM after
+  - rsh-17.xml #consistently flying into heat
+  - rsh-18.xml #many pauses in pretest
+  - rsh-19.xml
+  - rsh-20.xml #18-07: hot day, no learning in controls
+  - rsh-21.xml #19-07: hot day, no learning in controls
+  - rsh-22.xml #strong pos preference test
+  - rsh-23.xml #verly little torque fluctuations
+  - rsh-24.xml
+#  - rsh-25.xml
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - khaki
+    - olivedrab3
+    - cornflowerblue
+    - goldenrod1
+    - indianred1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 12
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #yes
+  two.groups:
+    title: Testing two groups against each other
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: two.sided #testing both directions (alternatives: less, greater, two.sided)
+    data: 0 #no
+  three.groups:
+    title: tests of pairs of groups
+    description: Dyadic pairs of tests
+    power: two.sided #two-sided test (alternatives: less, greater, two.sided)
+    data: 1 #yes   
+mediatype: text/csv/xml
