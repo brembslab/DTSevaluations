@@ -840,32 +840,32 @@ plotOMparamsAfter[plotOMparamsBefore$group=="right",]$AI.OM.=-plotOMparamsAfter[
 OMPIcorr <- data.frame(plotOMparamsBefore$AI.OM., pretestPIs$category, plotOMparamsAfter$AI.OM., postPIs$category, postPIs$group)
 
 CorrPlots <- list()
-CorrPlots[[1]] <- ggplot(OMPIcorr, aes(plotOMparamsBefore.AI.OM., pretestPIs.category)) +           
+CorrPlots[[1]] <- ggplot(OMPIcorr, aes(pretestPIs.category, plotOMparamsBefore.AI.OM.)) +
               geom_point() +
               stat_poly_line() +
               stat_poly_eq(use_label(c("eq", "adj.R2", "f", "p", "n"))) +
               ggtitle(paste("Correlation before training")) +
-              scale_y_continuous(breaks = seq(-1, 1, .4), limits = c(-1,1.2)) +
-              scale_x_continuous(breaks = seq(-1, 1, .4), limits = c(-1,1.2)) +
+              scale_y_continuous(breaks = seq(-1, 1, .4), limits = c(-1,1)) +
+              scale_x_continuous(breaks = seq(-1, 1, .4), limits = c(-1,1)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ 
-              ylab("Learning [rel. units]")+ 
-              xlab("OM Asymmetry [rel. units]") + 
+              ylab("OM Asymmetry [rel. units]")+ 
+              xlab("Torque preference [rel. units]") + 
               theme(aspect.ratio=aspect_ratio)
 
-CorrPlots[[2]] <- ggplot(OMPIcorr, aes(plotOMparamsAfter.AI.OM., postPIs.category)) +           
+CorrPlots[[2]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM.)) +
               geom_point() +
               stat_poly_line() +
               stat_poly_eq(use_label(c("eq", "adj.R2", "f", "p", "n"))) +
               ggtitle(paste("Correlation after training")) +
-              scale_y_continuous(breaks = seq(-1, 1, .4)) +
-              scale_x_continuous(breaks = seq(-1, 1, .4), limits = c(-1,1.2)) +
+              scale_y_continuous(breaks = seq(-1, 1, .4), limits = c(-1,1)) +
+              scale_x_continuous(breaks = seq(-1, 1, .4)) +
               theme_light(base_size = 16) + 
               theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank() ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.y = element_text(size=18))+ 
-              ylab("Learning [rel. units]")+ 
-              xlab("OM Asymmetry [rel. units]") + 
+              ylab("OM Asymmetry [rel. units]")+ 
+              xlab("Torque preference [rel. units]") + 
               theme(aspect.ratio=aspect_ratio)
 
 grid.arrange(grobs = CorrPlots, nrow=2)
