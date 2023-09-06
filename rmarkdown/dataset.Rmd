@@ -391,102 +391,104 @@ if(NofGroups==2)
 }
 
 #for three groups with statistics
-if(NofGroups==3 & length(unique(groupdescriptions))==2) {
+if(NofGroups==3){
+  if(length(unique(groupdescriptions))==2) { #if there are two identical group descriptions
   OMparamsBeforeSingleton <- na.omit(grouped.OMparamsBefore[[grep(singleton[1], grouped.OMparamsBefore)]])
   OMparamsBeforeDoubleton1 <- na.omit(grouped.OMparamsBefore[[grep(doubleton[1], grouped.OMparamsBefore)[1]]])
   OMparamsBeforeDoubleton2 <- na.omit(grouped.OMparamsBefore[[grep(doubleton[1], grouped.OMparamsBefore)[2]]])
   PIname<-c(unique(OMparamsBeforeSingleton$group), unique(OMparamsBeforeDoubleton1$group),unique(OMparamsBeforeDoubleton2$group))
   
-  for (v in 1:4) {
-    cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
-    TestxCont1 = statistical_test(OMparamsBeforeSingleton[[v]], OMparamsBeforeDoubleton1[[v]])
-    TestxCont2 = statistical_test(OMparamsBeforeSingleton[[v]], OMparamsBeforeDoubleton2[[v]])
-    results.test<-data.frame(cbind(TestxCont1, TestxCont2))
-    colnames(results.test)<-c(paste(PIname[1], PIname[2], sep="\n"),paste(PIname[1], PIname[3], sep="\n"))  
-    rownames(results.test)<-c("Significance level",
-                               "MW U-Test, W",
-                               "U-Test p-value", 
-                               "Cohen's D",
-                               "stat. Power",
-                               "Bayes Factor",
-                               "Bayes Factor error",
-                               paste("FP risk, prior ",priorval[1]),
-                               paste("FP risk, prior ",priorval[2]),
-                               "Likelihood Ratio")
-    plotOMparamsBefore$group <- as.character(plotOMparamsBefore$group)
-    plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=unique(plotOMparamsBefore$group))
-          plots.2test<-ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
-          geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-          geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-          geom_jitter(data = plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]]),
-                    shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
-          theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
-                    panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA), 
-                    legend.position = "top",legend.title = element_blank()) +
-          theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
-          ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-          geom_signif(comparisons = list(c(unique(OMparamsBeforeSingleton$group), unique(OMparamsBeforeDoubleton1$group))),
-                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                    textsize=5, vjust=0.1) +
-          geom_signif(comparisons = list(c(unique(OMparamsBeforeSingleton$group), unique(OMparamsBeforeDoubleton2$group))),
-                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                    textsize=5, vjust=0.1, margin_top=0.15) +
-          samplesizes.annotate(boxes, samplesizes)
-        #add table with results and plot
-        plots.2utest<-tableGrob(results.test)
-        grid.arrange(plots.2test,plots.2utest, nrow = 1)
-  } 
-} else {
-  OMparamsBefore_1 <- na.omit(grouped.OMparamsBefore[[1]])
-  OMparamsBefore_2 <- na.omit(grouped.OMparamsBefore[[2]])
-  OMparamsBefore_3 <- na.omit(grouped.OMparamsBefore[[3]])
-  PIname<-c(unique(OMparamsBefore_1$group), unique(OMparamsBefore_2$group),unique(OMparamsBefore_3$group))
-  for (v in 1:4) {
-    TestxCont1 = statistical_test(OMparamsBefore_1[[v]], OMparamsBefore_2[[v]])
-    TestxCont2 = statistical_test(OMparamsBefore_1[[v]], OMparamsBefore_3[[v]])
-    TestxCont3 = statistical_test(OMparamsBefore_2[[v]], OMparamsBefore_3[[v]])
-    results.test<-data.frame(cbind(TestxCont1, TestxCont2, TestxCont3))
-    colnames(results.test)<-c(paste(PIname[1], PIname[2], sep="\n"), 
-                               paste(PIname[1], PIname[3], sep="\n"),
-                               paste(PIname[2], PIname[3], sep="\n"))  
-    
-    rownames(results.test)<-c("Significance level",
-                               "MW U-Test, W",
-                               "U-Test p-value", 
-                               "Cohen's D",
-                               "stat. Power",
-                               "Bayes Factor",
-                               "Bayes Factor error",
-                               paste("FP risk, prior ",priorval[1]),
-                               paste("FP risk, prior ",priorval[2]),
-                               "Likelihood Ratio")
-    
-    # plot three parameters with asterisks
-    plotOMparamsBefore$group <- as.character(plotOMparamsBefore$group)
-    plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=unique(plotOMparamsBefore$group))
-          plots.2test<-ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
-          geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-          geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-          geom_jitter(data = plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]]),
-                    shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
-          theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
-                    panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA), 
-                    legend.position = "top",legend.title = element_blank()) +
-          theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
-          ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-          geom_signif(comparisons = list(c(unique(OMparamsBefore_1$group), unique(OMparamsBefore_2$group))),
-                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                    textsize=5, vjust=0.1, margin_top=0.1) +
-          geom_signif(comparisons = list(c(unique(OMparamsBefore_1$group), unique(OMparamsBefore_3$group))),
-                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                    textsize=5, vjust=0.1,margin_top=0.2) +
-          geom_signif(comparisons = list(c(unique(OMparamsBefore_2$group), unique(OMparamsBefore_3$group))),
-                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                    textsize=5, vjust=0.1,margin_top=0.1) +
-          samplesizes.annotate(boxes, samplesizes)
-        #add table with results and plot
-        plots.2utest<-tableGrob(results.test)
-        grid.arrange(plots.2test,plots.2utest, nrow = 1)
+    for (v in 1:4) {
+      cat(paste("\n\n## ", OMtitles[v], " at start of experiment\n\n", sep = ""))
+      TestxCont1 = statistical_test(OMparamsBeforeSingleton[[v]], OMparamsBeforeDoubleton1[[v]])
+      TestxCont2 = statistical_test(OMparamsBeforeSingleton[[v]], OMparamsBeforeDoubleton2[[v]])
+      results.test<-data.frame(cbind(TestxCont1, TestxCont2))
+      colnames(results.test)<-c(paste(PIname[1], PIname[2], sep="\n"),paste(PIname[1], PIname[3], sep="\n"))  
+      rownames(results.test)<-c("Significance level",
+                                 "MW U-Test, W",
+                                 "U-Test p-value", 
+                                 "Cohen's D",
+                                 "stat. Power",
+                                 "Bayes Factor",
+                                 "Bayes Factor error",
+                                 paste("FP risk, prior ",priorval[1]),
+                                 paste("FP risk, prior ",priorval[2]),
+                                 "Likelihood Ratio")
+      plotOMparamsBefore$group <- as.character(plotOMparamsBefore$group)
+      plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=unique(plotOMparamsBefore$group))
+            plots.2test<-ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
+            geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+            geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+            geom_jitter(data = plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]]),
+                      shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+            theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
+                      panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA), 
+                      legend.position = "top",legend.title = element_blank()) +
+            theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
+            ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+            geom_signif(comparisons = list(c(unique(OMparamsBeforeSingleton$group), unique(OMparamsBeforeDoubleton1$group))),
+                      map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                      textsize=5, vjust=0.1) +
+            geom_signif(comparisons = list(c(unique(OMparamsBeforeSingleton$group), unique(OMparamsBeforeDoubleton2$group))),
+                      map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                      textsize=5, vjust=0.1, margin_top=0.15) +
+            samplesizes.annotate(boxes, samplesizes)
+          #add table with results and plot
+          plots.2utest<-tableGrob(results.test)
+          grid.arrange(plots.2test,plots.2utest, nrow = 1)
+    } 
+  } else { #if there are more than two group descriptions (what if there is only one?)
+    OMparamsBefore_1 <- na.omit(grouped.OMparamsBefore[[1]])
+    OMparamsBefore_2 <- na.omit(grouped.OMparamsBefore[[2]])
+    OMparamsBefore_3 <- na.omit(grouped.OMparamsBefore[[3]])
+    PIname<-c(unique(OMparamsBefore_1$group), unique(OMparamsBefore_2$group),unique(OMparamsBefore_3$group))
+    for (v in 1:4) {
+      TestxCont1 = statistical_test(OMparamsBefore_1[[v]], OMparamsBefore_2[[v]])
+      TestxCont2 = statistical_test(OMparamsBefore_1[[v]], OMparamsBefore_3[[v]])
+      TestxCont3 = statistical_test(OMparamsBefore_2[[v]], OMparamsBefore_3[[v]])
+      results.test<-data.frame(cbind(TestxCont1, TestxCont2, TestxCont3))
+      colnames(results.test)<-c(paste(PIname[1], PIname[2], sep="\n"), 
+                                 paste(PIname[1], PIname[3], sep="\n"),
+                                 paste(PIname[2], PIname[3], sep="\n"))  
+      
+      rownames(results.test)<-c("Significance level",
+                                 "MW U-Test, W",
+                                 "U-Test p-value", 
+                                 "Cohen's D",
+                                 "stat. Power",
+                                 "Bayes Factor",
+                                 "Bayes Factor error",
+                                 paste("FP risk, prior ",priorval[1]),
+                                 paste("FP risk, prior ",priorval[2]),
+                                 "Likelihood Ratio")
+      
+      # plot three parameters with asterisks
+      plotOMparamsBefore$group <- as.character(plotOMparamsBefore$group)
+      plotOMparamsBefore$group <- factor(plotOMparamsBefore$group, levels=unique(plotOMparamsBefore$group))
+            plots.2test<-ggplot(plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]])) +
+            geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+            geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+            geom_jitter(data = plotOMparamsBefore, aes(group, plotOMparamsBefore[[OMvariables[v]]]),
+                      shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+            theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
+                      panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA), 
+                      legend.position = "top",legend.title = element_blank()) +
+            theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
+            ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+            geom_signif(comparisons = list(c(unique(OMparamsBefore_1$group), unique(OMparamsBefore_2$group))),
+                      map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                      textsize=5, vjust=0.1, margin_top=0.1) +
+            geom_signif(comparisons = list(c(unique(OMparamsBefore_1$group), unique(OMparamsBefore_3$group))),
+                      map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                      textsize=5, vjust=0.1,margin_top=0.2) +
+            geom_signif(comparisons = list(c(unique(OMparamsBefore_2$group), unique(OMparamsBefore_3$group))),
+                      map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                      textsize=5, vjust=0.1,margin_top=0.1) +
+            samplesizes.annotate(boxes, samplesizes)
+          #add table with results and plot
+          plots.2utest<-tableGrob(results.test)
+          grid.arrange(plots.2test,plots.2utest, nrow = 1)
+    }
   }
 }
 ```
@@ -524,7 +526,8 @@ if(NofGroups==2)
 }
 
 #for three groups with statistics
-if(NofGroups==3 & length(unique(groupdescriptions))==2){
+if(NofGroups==3){
+  if(length(unique(groupdescriptions))==2) { #if there are two identical group descriptions
   OMparamsAfterSingleton <- na.omit(grouped.OMparamsAfter[[grep(singleton[1], grouped.OMparamsAfter)]])
   OMparamsAfterDoubleton1 <- na.omit(grouped.OMparamsAfter[[grep(doubleton[1], grouped.OMparamsAfter)[1]]])
   OMparamsAfterDoubleton2 <- na.omit(grouped.OMparamsAfter[[grep(doubleton[1], grouped.OMparamsAfter)[2]]])
@@ -552,7 +555,7 @@ if(NofGroups==3 & length(unique(groupdescriptions))==2){
     plots.2test<-ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data = plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]]), position=position_jitter(0.3),                       shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+      geom_jitter(data = plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                 panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA),
                 legend.position = "top",legend.title = element_blank()) +
@@ -571,62 +574,63 @@ if(NofGroups==3 & length(unique(groupdescriptions))==2){
 
     grid.arrange(plots.2test,plots.2utest, nrow = 1)
   }
-} else {
-  OMparamsAfter_1 <- na.omit(grouped.OMparamsAfter[[1]])
-  OMparamsAfter_2 <- na.omit(grouped.OMparamsAfter[[2]])
-  OMparamsAfter_3 <- na.omit(grouped.OMparamsAfter[[3]])
-  PIname<-c(unique(OMparamsBefore_1$group), unique(OMparamsBefore_2$group),unique(OMparamsBefore_3$group))
-  for (v in 1:4) {
-    cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
-    test1 = statistical_test(OMparamsAfter_1[[v]], OMparamsAfter_2[[v]])
-    test2 = statistical_test(OMparamsAfter_1[[v]], OMparamsAfter_3[[v]])
-    test3 = statistical_test(OMparamsAfter_2[[v]], OMparamsAfter_3[[v]])
-    results.test<-data.frame(cbind(test1, test2, test3))
-    colnames(results.test)<-c(paste(PIname[1], PIname[2], sep="\n"), 
-                               paste(PIname[1], PIname[3], sep="\n"),
-                               paste(PIname[2], PIname[3], sep="\n"))  
-    
-    rownames(results.test)<-c("Significance level",
-                               "MW U-Test, W",
-                               "U-Test p-value", 
-                               "Cohen's D",
-                               "stat. Power",
-                               "Bayes Factor",
-                               "Bayes Factor error",
-                               paste("FP risk, prior ",priorval[1]),
-                               paste("FP risk, prior ",priorval[2]),
-                               "Likelihood Ratio")
-
-
-    # plot parameters with asterisks
-  plotOMparamsAfter$group <- as.character(plotOMparamsAfter$group)
-  plotOMparamsAfter$group <- factor(plotOMparamsAfter$group, levels=unique(plotOMparamsAfter$group))
-    plots.2test<-ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
-      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-      geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data = plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]]), position=position_jitter(0.3),                       shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
-      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
-                panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA),
-                legend.position = "top",legend.title = element_blank()) +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
-      ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-      geom_signif(comparisons = list(c(unique(OMparamsAfter_1$group), unique(OMparamsAfter_2$group))),
-                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                textsize=5, vjust=0.1, margin_top=0.1) +
-      geom_signif(comparisons = list(c(unique(OMparamsAfter_1$group), unique(OMparamsAfter_3$group))),
-                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                textsize=5, vjust=0.1, margin_top=0.2) +
-      geom_signif(comparisons = list(c(unique(OMparamsAfter_2$group), unique(OMparamsAfter_3$group))),
-                map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                textsize=5, vjust=0.1, margin_top=0.1) +
-      samplesizes.annotate(boxes, samplesizes)
-
-    #add table with results and plot
-    plots.2utest<-tableGrob(results.test)
-
-    grid.arrange(plots.2test,plots.2utest, nrow = 1)
-
-  }
+      } else {
+        OMparamsAfter_1 <- na.omit(grouped.OMparamsAfter[[1]])
+        OMparamsAfter_2 <- na.omit(grouped.OMparamsAfter[[2]])
+        OMparamsAfter_3 <- na.omit(grouped.OMparamsAfter[[3]])
+        PIname<-c(unique(OMparamsBefore_1$group), unique(OMparamsBefore_2$group),unique(OMparamsBefore_3$group))
+        for (v in 1:4) {
+          cat(paste("\n\n## ", OMtitles[v], " at end of experiment\n\n", sep = ""))
+          test1 = statistical_test(OMparamsAfter_1[[v]], OMparamsAfter_2[[v]])
+          test2 = statistical_test(OMparamsAfter_1[[v]], OMparamsAfter_3[[v]])
+          test3 = statistical_test(OMparamsAfter_2[[v]], OMparamsAfter_3[[v]])
+          results.test<-data.frame(cbind(test1, test2, test3))
+          colnames(results.test)<-c(paste(PIname[1], PIname[2], sep="\n"), 
+                                     paste(PIname[1], PIname[3], sep="\n"),
+                                     paste(PIname[2], PIname[3], sep="\n"))  
+          
+          rownames(results.test)<-c("Significance level",
+                                     "MW U-Test, W",
+                                     "U-Test p-value", 
+                                     "Cohen's D",
+                                     "stat. Power",
+                                     "Bayes Factor",
+                                     "Bayes Factor error",
+                                     paste("FP risk, prior ",priorval[1]),
+                                     paste("FP risk, prior ",priorval[2]),
+                                     "Likelihood Ratio")
+      
+      
+          # plot parameters with asterisks
+        plotOMparamsAfter$group <- as.character(plotOMparamsAfter$group)
+        plotOMparamsAfter$group <- factor(plotOMparamsAfter$group, levels=unique(plotOMparamsAfter$group))
+          plots.2test<-ggplot(plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]])) +
+            geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+            geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+            geom_jitter(data = plotOMparamsAfter, aes(group, plotOMparamsAfter[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
+            theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
+                      panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black",fill=NA),
+                      legend.position = "top",legend.title = element_blank()) +
+            theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
+            ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+            geom_signif(comparisons = list(c(unique(OMparamsAfter_1$group), unique(OMparamsAfter_2$group))),
+                      map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                      textsize=5, vjust=0.1, margin_top=0.1) +
+            geom_signif(comparisons = list(c(unique(OMparamsAfter_1$group), unique(OMparamsAfter_3$group))),
+                      map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                      textsize=5, vjust=0.1, margin_top=0.2) +
+            geom_signif(comparisons = list(c(unique(OMparamsAfter_2$group), unique(OMparamsAfter_3$group))),
+                      map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                      textsize=5, vjust=0.1, margin_top=0.1) +
+            samplesizes.annotate(boxes, samplesizes)
+      
+          #add table with results and plot
+          plots.2utest<-tableGrob(results.test)
+      
+          grid.arrange(plots.2test,plots.2utest, nrow = 1)
+      
+        }
+      }
 }
 ```
 
@@ -1129,6 +1133,9 @@ print(raincloud_2x2_repmes(
 ```{r UtestG3, eval=(PIs_present & threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height=12, comment=NA, results='asis'}
 cat("\n## Dyadic statistical tests with three groups\n")
 #creating a list with PIs and condition in on list
+
+if(NofGroups == 3) { #just to be extra-sure :-)
+
 PItype <- list() 
 for (x in 1:NofGroups){
   PItype[[x]] = melt(PIstat[[x]])
@@ -1136,7 +1143,7 @@ for (x in 1:NofGroups){
   PItype[[x]]$name = dataset.data$resources[[x]]$name
 }
 
-if(NofGroups == 3 & length(unique(groupdescriptions))==2 & PIs_present) {
+if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descriptions are identical
    PItypeSingleton <- na.omit(PItype[[grep(singleton[1], PItype)]])
    PItypeDoubleton1 <- na.omit(PItype[[grep(doubleton[1], PItype)[1]]])
    PItypeDoubleton2 <- na.omit(PItype[[grep(doubleton[1], PItype)[2]]])
@@ -1180,55 +1187,56 @@ if(NofGroups == 3 & length(unique(groupdescriptions))==2 & PIs_present) {
     #add table with results and plot
     plots.2utest<-tableGrob(results.test)
     grid.arrange(plots.2test,plots.2utest, nrow = 1)
-} else {
-  PItype_1 <- na.omit(PItype[[1]])
-  PItype_2 <- na.omit(PItype[[2]])
-  PItype_3 <- na.omit(PItype[[3]])
-  PIname<-c(unique(PItype_1$name), unique(PItype_2$name), unique(PItype_3$name))
+  } else { #if there are less or more than two unique group descriptions
+    PItype_1 <- na.omit(PItype[[1]])
+    PItype_2 <- na.omit(PItype[[2]])
+    PItype_3 <- na.omit(PItype[[3]])
+    PIname<-c(unique(PItype_1$name), unique(PItype_2$name), unique(PItype_3$name))
+    
+    test1 = statistical_test(PItype_1$value, PItype_2$value)
+    test2 = statistical_test(PItype_1$value, PItype_3$value)
+    test3 = statistical_test(PItype_2$value, PItype_3$value)
+    results.test <- data.frame(cbind(test1, test2, test3))
+    colnames(results.test) = c(paste(PIname[1], PIname[2], sep="\n"),
+                                paste(PIname[1], PIname[3], sep="\n"),
+                                paste(PIname[2], PIname[3], sep="\n"))
+    rownames(results.test) <- c("Significance level",
+                                    "MW U-Test, W",
+                                    "U-Test p-value", 
+                                    "Cohen's D",
+                                    "stat. Power",
+                                    "Bayes Factor",
+                                    "Bayes Factor error",
+                                    paste("FP risk, prior ",priorval[1]),
+                                    paste("FP risk, prior ",priorval[2]),
+                                    "Likelihood Ratio")
+  #plot two PIs with asterisks
+    plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
+                        geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+                        geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+                        geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
+                                    position=position_jitter(0.3), shape=21, size=3) +
+                        theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
+                                                            panel.border = element_rect(size = 0.5, linetype = "solid",
+                                                            colour = "black", fill=NA), legend.position = "top",
+                                                            legend.title = element_blank()) +
+                        theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
+                        ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+                        geom_signif(comparisons = list(c(unique(PItype_1$name), unique(PItype_2$name))),
+                                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                    textsize=5, vjust=0.1, margin_top = 0.1) +
+                        geom_signif(comparisons = list(c(unique(PItype_1$name), unique(PItype_3$name))),
+                                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                    textsize=5, vjust=0.1, margin_top=0.2) +
+                        geom_signif(comparisons = list(c(unique(PItype_2$name), unique(PItype_3$name))),
+                                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                    textsize=5, vjust=0.1, margin_top=0.1) +
+                        samplesizes.annotate(boxes, samplesizes)
   
-  test1 = statistical_test(PItype_1$value, PItype_2$value)
-  test2 = statistical_test(PItype_1$value, PItype_3$value)
-  test3 = statistical_test(PItype_2$value, PItype_3$value)
-  results.test <- data.frame(cbind(test1, test2, test3))
-  colnames(results.test) = c(paste(PIname[1], PIname[2], sep="\n"),
-                              paste(PIname[1], PIname[3], sep="\n"),
-                              paste(PIname[2], PIname[3], sep="\n"))
-  rownames(results.test) <- c("Significance level",
-                                  "MW U-Test, W",
-                                  "U-Test p-value", 
-                                  "Cohen's D",
-                                  "stat. Power",
-                                  "Bayes Factor",
-                                  "Bayes Factor error",
-                                  paste("FP risk, prior ",priorval[1]),
-                                  paste("FP risk, prior ",priorval[2]),
-                                  "Likelihood Ratio")
-#plot two PIs with asterisks
-  plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
-                      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-                      geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-                      geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
-                                  position=position_jitter(0.3), shape=21, size=3) +
-                      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
-                                                          panel.border = element_rect(size = 0.5, linetype = "solid",
-                                                          colour = "black", fill=NA), legend.position = "top",
-                                                          legend.title = element_blank()) +
-                      theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
-                      ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-                      geom_signif(comparisons = list(c(unique(PItype_1$name), unique(PItype_2$name))),
-                                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                                  textsize=5, vjust=0.1, margin_top = 0.1) +
-                      geom_signif(comparisons = list(c(unique(PItype_1$name), unique(PItype_3$name))),
-                                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                                  textsize=5, vjust=0.1, margin_top=0.2) +
-                      geom_signif(comparisons = list(c(unique(PItype_2$name), unique(PItype_3$name))),
-                                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                                  textsize=5, vjust=0.1, margin_top=0.1) +
-                      samplesizes.annotate(boxes, samplesizes)
-
-    #add table with results and plot
-    plots.2utest<-tableGrob(results.test)
-    grid.arrange(plots.2test, plots.2utest, nrow = 1)
+      #add table with results and plot
+      plots.2utest<-tableGrob(results.test)
+      grid.arrange(plots.2test, plots.2utest, nrow = 1)
+  }
 }
 
 ```
