@@ -30,7 +30,19 @@ pretestPIs <- list()
   }
   pretestPIs <- as.data.frame(t(plyr::ldply(pretestPIs, rbind)))                    #convert PI list to a temproary data.frame
   colnames(pretestPIs) <- unlist(sapply(dataset.data[["resources"]], '[', 'name'))  #add group names as column names to PItemp
-  pretestPIs <- melt(pretestPIs, measure.vars = names(pretestPIs), variable.name = "group", value.name = "category") #melt categories into dataframe with group as id-variable
+  pretestPIs <- melt(pretestPIs, measure.vars = names(pretestPIs), variable.name = "group", value.name = "category", na.rm = TRUE) #melt categories into dataframe with group as id-variable
+}
+
+#Compute average post-training values and create dataframe
+if(PIs_present){
+  postPIs <- list()
+  for(x in 1:NofGroups){
+    postPIs[[x]] <- grouped.PIprofiles[[x]][postperiods]     #extract the PIs into a temporary list
+    postPIs[[x]] <- rowMeans(postPIs[[x]])
+  }
+  postPIs <- as.data.frame(t(plyr::ldply(postPIs, rbind)))                    #convert PI list to a temproary data.frame
+  colnames(postPIs) <- unlist(sapply(dataset.data[["resources"]], '[', 'name'))  #add group names as column names to PItemp
+  postPIs <- melt(postPIs, measure.vars = names(postPIs), variable.name = "group", value.name = "category", na.rm = TRUE) #melt categories into dataframe with group as id-variable
 }
 
 #Create raincloudplot dataframe for 2x2 raincloud plots
