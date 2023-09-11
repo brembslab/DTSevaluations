@@ -843,7 +843,7 @@ plotOMparamsAfter[plotOMparamsBefore$group=="right",]$AI.OM.=-plotOMparamsAfter[
 OMPIcorr <- data.frame(plotOMparamsBefore$AI.OM., pretestPIs$category, plotOMparamsAfter$AI.OM., postPIs$category, postPIs$group)
 
 CorrPlots <- list()
-CorrPlots[[1]] <- ggplot(OMPIcorr, aes(pretestPIs.category, plotOMparamsBefore.AI.OM.)) +
+CorrPlots[[1]] <- ggplot(OMPIcorr, aes(pretestPIs.category, plotOMparamsBefore.AI.OM.)) +           #plot the correlation between PIs and OM asymmetry before training
               geom_point(aes(colour = postPIs.group, shape = postPIs.group), size=4) +
               scale_shape_manual(values = c("◄","►")) + #shape of the points
               scale_color_manual(values = boxcolors) + #color of the points
@@ -865,7 +865,36 @@ CorrPlots[[1]] <- ggplot(OMPIcorr, aes(pretestPIs.category, plotOMparamsBefore.A
               theme(legend.position = "none") +  
               theme(aspect.ratio=aspect_ratio)
 
-CorrPlots[[2]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM.)) +
+mOMPIbefore=subset(melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", "pretestPIs.category")) # melt dataframes with values before training for rainclodplots
+levels(mOMPIbefore$postPIs.group)[match("right",levels(mOMPIbefore$postPIs.group))] <- "►" #replace group description
+levels(mOMPIbefore$postPIs.group)[match("left",levels(mOMPIbefore$postPIs.group))] <- "◄" #replace group description
+
+#raincloudplots of indices before training
+CorrPlots[[2]] <- ggplot(mOMPIbefore, aes(variable, value, fill=variable, color=variable)) +
+              geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+              geom_rain(point.args = list(size = 5,
+                                          shape=as.character(mOMPIbefore$postPIs.group),
+                                          alpha=as.integer(as.factor(mOMPIbefore$postPIs.group))/max(as.integer(as.factor(mOMPIbefore$postPIs.group)))),
+                      point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
+                      boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=1.1),
+                      boxplot.args.pos = list(width = 0.12),
+                      violin.args = list(color = NA, alpha = .8),
+                      violin.args.pos = list(side = "r", width = 1)) +
+              stat_summary(fun.y = mean, color = "darkgrey", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
+              stat_summary(fun.y=median, color="black", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
+              scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
+              scale_fill_manual(values = boxcolors) + #color of the violin plot
+              scale_color_manual(values = boxcolors) + #color of the points
+              guides(fill = 'none', color = 'none')+ # remove legends
+              theme_light(base_size = 16) + 
+              theme(panel.grid.minor = element_blank(), 
+                    panel.grid.major.x = element_blank(), 
+                    axis.title.x=element_blank(), 
+                    panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10)) + ylab(paste("Indices [rel. units]"))+
+              scale_x_discrete(labels=c("optomotor", "torque"))
+
+CorrPlots[[3]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM.)) +          #plot the correlation between PIs and OM asymmetry after training
               geom_point(aes(colour = postPIs.group, shape = postPIs.group), size=4) +
               scale_shape_manual(values = c("◄","►")) + #shape of the points
               scale_color_manual(values = boxcolors) + #color of the points
@@ -886,68 +915,37 @@ CorrPlots[[2]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM
               theme(legend.position = "none") +
               theme(aspect.ratio=aspect_ratio)
 
+mOMPIafter=subset(melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "postPIs.category"))  # melt dataframes with values after training for rainclodplots
+levels(mOMPIafter$postPIs.group)[match("right",levels(mOMPIafter$postPIs.group))] <- "►" #replace group description
+levels(mOMPIafter$postPIs.group)[match("left",levels(mOMPIafter$postPIs.group))] <- "◄" #replace group description
+
+#raincloudplots of indices after training
+CorrPlots[[4]] <- ggplot(mOMPIafter, aes(variable, value, fill=variable, color=variable)) +
+              geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+              geom_rain(point.args = list(size = 5,
+                                          shape=as.character(mOMPIbefore$postPIs.group),
+                                          alpha=as.integer(as.factor(mOMPIbefore$postPIs.group))/max(as.integer(as.factor(mOMPIbefore$postPIs.group)))),
+                      point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
+                      boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=1.1),
+                      boxplot.args.pos = list(width = 0.12),
+                      violin.args = list(color = NA, alpha = .8),
+                      violin.args.pos = list(side = "r", width = 1)) +
+              stat_summary(fun.y = mean, color = "darkgrey", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
+              stat_summary(fun.y=median, color="black", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
+              scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
+              scale_fill_manual(values = boxcolors) + #color of the violin plot
+              scale_color_manual(values = boxcolors) + #color of the points
+              guides(fill = 'none', color = 'none')+ # remove legends
+              theme_light(base_size = 16) + 
+              theme(panel.grid.minor = element_blank(), 
+                    panel.grid.major.x = element_blank(), 
+                    axis.title.x=element_blank(), 
+                    panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+              theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10)) + ylab(paste("Indices [rel. units]"))+
+              scale_x_discrete(labels=c("optomotor", "torque"))
+
 grid.arrange(grobs = CorrPlots, nrow=2)
 
-###############################################################################testing###########################################################
-mOMPIbefore=subset(melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", "pretestPIs.category"))
-
-levels(mOMPIbefore$postPIs.group)[match("right",levels(mOMPIbefore$postPIs.group))] <- "►"
-levels(mOMPIbefore$postPIs.group)[match("left",levels(mOMPIbefore$postPIs.group))] <- "◄"
-
-typeof(mOMPIbefore$postPIs.group)
-
-mOMPIafter=subset(melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "postPIs.category"))
-
-levels(mOMPIafter$postPIs.group)[match("right",levels(mOMPIafter$postPIs.group))] <- "►"
-levels(mOMPIafter$postPIs.group)[match("left",levels(mOMPIafter$postPIs.group))] <- "◄"
-
-#plot before indices
-ggplot(mOMPIbefore, aes(variable, value, fill=variable, color=variable)) +
-      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-      geom_rain(point.args = list(size = 5,
-                                  shape=as.character(mOMPIbefore$postPIs.group),
-                                  alpha=as.integer(as.factor(mOMPIbefore$postPIs.group))/max(as.integer(as.factor(mOMPIbefore$postPIs.group)))),
-              point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
-              boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=1.1),
-              boxplot.args.pos = list(width = 0.12),
-              violin.args = list(color = NA, alpha = .8),
-              violin.args.pos = list(side = "r", width = 1)) +
-      stat_summary(fun.y = mean, color = "darkgrey", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
-      stat_summary(fun.y=median, color="black", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
-      scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
-      scale_fill_manual(values = boxcolors) + #color of the violin plot
-      scale_color_manual(values = boxcolors) + #color of the points
-      guides(fill = 'none', color = 'none')+ # remove legends
-      theme_light(base_size = 16) + 
-      theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
-      theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10)) + ylab(paste("Indices [rel. units]"))+
-      scale_x_discrete(labels=c("optomotor", "torque"))
-
-#plot after indices
-ggplot(mOMPIafter, aes(variable, value, fill=variable, color=variable)) +
-      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-      geom_rain(point.args = list(size = 5,
-                                  shape=as.character(mOMPIbefore$postPIs.group),
-                                  alpha=as.integer(as.factor(mOMPIbefore$postPIs.group))/max(as.integer(as.factor(mOMPIbefore$postPIs.group)))),
-              point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
-              boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=1.1),
-              boxplot.args.pos = list(width = 0.12),
-              violin.args = list(color = NA, alpha = .8),
-              violin.args.pos = list(side = "r", width = 1)) +
-      stat_summary(fun.y = mean, color = "darkgrey", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
-      stat_summary(fun.y=median, color="black", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
-      scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
-      scale_fill_manual(values = boxcolors) + #color of the violin plot
-      scale_color_manual(values = boxcolors) + #color of the points
-      guides(fill = 'none', color = 'none')+ # remove legends
-      theme_light(base_size = 16) + 
-      theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), axis.title.x=element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom", legend.direction = "horizontal") +
-      theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10)) + ylab(paste("Indices [rel. units]"))+
-      scale_x_discrete(labels=c("optomotor", "torque"))
-
-
-
-###############################################################################/testing##########################################################
 
 # change sign of asymmetry index OM back to original, just to be sure
 if("right" %in% plotOMparamsBefore$group){
