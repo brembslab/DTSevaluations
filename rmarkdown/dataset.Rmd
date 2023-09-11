@@ -849,7 +849,6 @@ CorrPlots[[1]] <- ggplot(OMPIcorr, aes(pretestPIs.category, plotOMparamsBefore.A
               scale_color_manual(values = boxcolors) + #color of the points
               stat_poly_line() +
               stat_poly_eq(label.y=1, use_label(c("eq", "adj.R2", "f", "p", "n"))) +
-              ggtitle(paste("Before training")) +
               scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
               scale_x_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 0.5) +
@@ -863,7 +862,7 @@ CorrPlots[[1]] <- ggplot(OMPIcorr, aes(pretestPIs.category, plotOMparamsBefore.A
               ylab("OM Asymmetry [rel. units]")+ 
               xlab("Torque preference [rel. units]") + 
               theme(legend.position = "none") +  
-              theme(aspect.ratio=aspect_ratio)
+              theme(aspect.ratio=1/1.4)
 
 mOMPIbefore=subset(melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", "pretestPIs.category")) # melt dataframes with values before training for rainclodplots
 levels(mOMPIbefore$postPIs.group)[match("right",levels(mOMPIbefore$postPIs.group))] <- "►" #replace group description
@@ -872,7 +871,7 @@ levels(mOMPIbefore$postPIs.group)[match("left",levels(mOMPIbefore$postPIs.group)
 #raincloudplots of indices before training
 CorrPlots[[2]] <- ggplot(mOMPIbefore, aes(variable, value, fill=variable, color=variable)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_rain(point.args = list(size = 5,
+              geom_rain(point.args = list(size = 3,
                                           shape=as.character(mOMPIbefore$postPIs.group),
                                           alpha=as.integer(as.factor(mOMPIbefore$postPIs.group))/max(as.integer(as.factor(mOMPIbefore$postPIs.group)))),
                       point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
@@ -892,7 +891,8 @@ CorrPlots[[2]] <- ggplot(mOMPIbefore, aes(variable, value, fill=variable, color=
                     axis.title.x=element_blank(), 
                     panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10)) + ylab(paste("Indices [rel. units]"))+
-              scale_x_discrete(labels=c("optomotor", "torque"))
+              scale_x_discrete(labels=c("optomotor", "torque")) +
+              theme(aspect.ratio=2/1.2)
 
 CorrPlots[[3]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM.)) +          #plot the correlation between PIs and OM asymmetry after training
               geom_point(aes(colour = postPIs.group, shape = postPIs.group), size=4) +
@@ -900,7 +900,6 @@ CorrPlots[[3]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM
               scale_color_manual(values = boxcolors) + #color of the points
               stat_poly_line() +
               stat_poly_eq(label.y=1, use_label(c("eq", "adj.R2", "f", "p", "n"))) +
-              ggtitle(paste("After training")) +
               scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
               scale_x_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 0.5) +
@@ -913,7 +912,7 @@ CorrPlots[[3]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM
               ylab("OM Asymmetry [rel. units]")+ 
               xlab("Torque preference [rel. units]") + 
               theme(legend.position = "none") +
-              theme(aspect.ratio=aspect_ratio)
+              theme(aspect.ratio=1/1.4)
 
 mOMPIafter=subset(melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "postPIs.category"))  # melt dataframes with values after training for rainclodplots
 levels(mOMPIafter$postPIs.group)[match("right",levels(mOMPIafter$postPIs.group))] <- "►" #replace group description
@@ -922,7 +921,7 @@ levels(mOMPIafter$postPIs.group)[match("left",levels(mOMPIafter$postPIs.group))]
 #raincloudplots of indices after training
 CorrPlots[[4]] <- ggplot(mOMPIafter, aes(variable, value, fill=variable, color=variable)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_rain(point.args = list(size = 5,
+              geom_rain(point.args = list(size = 3,
                                           shape=as.character(mOMPIbefore$postPIs.group),
                                           alpha=as.integer(as.factor(mOMPIbefore$postPIs.group))/max(as.integer(as.factor(mOMPIbefore$postPIs.group)))),
                       point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
@@ -942,9 +941,10 @@ CorrPlots[[4]] <- ggplot(mOMPIafter, aes(variable, value, fill=variable, color=v
                     axis.title.x=element_blank(), 
                     panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10)) + ylab(paste("Indices [rel. units]"))+
-              scale_x_discrete(labels=c("optomotor", "torque"))
+              scale_x_discrete(labels=c("optomotor", "torque"))+
+              theme(aspect.ratio=2/1.2)
 
-grid.arrange(grobs = CorrPlots, nrow=2)
+grid.arrange(grobs = CorrPlots, nrow=2, widths=2:1)
 
 
 # change sign of asymmetry index OM back to original, just to be sure
