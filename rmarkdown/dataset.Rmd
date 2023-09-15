@@ -829,7 +829,8 @@ grid.arrange(grobs = PIplots, nrow=NofGroups)
 ```{r OMPI_correlation, eval=(PIs_present & beforeafter & any(sequence$type=="yt") & NofGroups==2), echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height = 9, fig.width = 9, comment=NA, results='asis'}
 cat("\n# Correlation between Performance Index and Optomotor Asymmetry\n")
 
-#this code expects the dataset to be divided into two groups: one punished on right torque, the other on left torque  
+#WARNING! This code expects the dataset to be divided into two groups: one punished on right torque, the other on left torque  
+#WARNING! This code still needs to be generalized such that it works properly with any kind of group setup.
 
 # change sign of asymmetry index OM for flies punished on the right, as they should shift negative, but we need positive values to indicate learning
 # not all experiments will be set up like this, so let's make this step conditional (would be nice not to have to do this)
@@ -868,7 +869,13 @@ mOMPIbefore=subset(melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", 
 levels(mOMPIbefore$postPIs.group)[match("right",levels(mOMPIbefore$postPIs.group))] <- "►" #replace group description
 levels(mOMPIbefore$postPIs.group)[match("left",levels(mOMPIbefore$postPIs.group))] <- "◄" #replace group description
 
-#raincloudplots of indices before training
+####statistics and raincloudplots of indices before training###   education[which(education$Region == 2)
+#statistics
+  wilcoxon<-numeric() 
+  wilcoxon[1] = signif(wilcox.test(mOMPIbefore[which(mOMPIbefore$variable == "plotOMparamsBefore.AI.OM."),3])$p.value, 3) #test against zero
+  wilcoxon[2] = signif(wilcox.test(mOMPIbefore[which(mOMPIbefore$variable == "pretestPIs.category"),3])$p.value, 3) #test against zero
+
+#raincloudplots
 CorrPlots[[2]] <- ggplot(mOMPIbefore, aes(variable, value, fill=variable, color=variable)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_rain(point.args = list(size = 3,
@@ -892,6 +899,8 @@ CorrPlots[[2]] <- ggplot(mOMPIbefore, aes(variable, value, fill=variable, color=
                     panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10)) + ylab(paste("Indices [rel. units]"))+
               scale_x_discrete(labels=c("optomotor", "torque")) +
+              samplesizes.annotate(boxes, samplesizes) +
+              wilcox.annotate(boxes, wilcoxon) +
               theme(aspect.ratio=2/1.2)
 
 CorrPlots[[3]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM.)) +          #plot the correlation between PIs and OM asymmetry after training
@@ -918,7 +927,13 @@ mOMPIafter=subset(melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "p
 levels(mOMPIafter$postPIs.group)[match("right",levels(mOMPIafter$postPIs.group))] <- "►" #replace group description
 levels(mOMPIafter$postPIs.group)[match("left",levels(mOMPIafter$postPIs.group))] <- "◄" #replace group description
 
-#raincloudplots of indices after training
+####statistics and raincloudplots of indices before training###   education[which(education$Region == 2)
+#statistics
+wilcoxon<-numeric() 
+wilcoxon[1] = signif(wilcox.test(mOMPIafter[which(mOMPIafter$variable == "plotOMparamsAfter.AI.OM."),3])$p.value, 3) #test against zero
+wilcoxon[2] = signif(wilcox.test(mOMPIafter[which(mOMPIafter$variable == "postPIs.category"),3])$p.value, 3) #test against zero
+
+#raincloudplots
 CorrPlots[[4]] <- ggplot(mOMPIafter, aes(variable, value, fill=variable, color=variable)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
               geom_rain(point.args = list(size = 3,
@@ -942,6 +957,8 @@ CorrPlots[[4]] <- ggplot(mOMPIafter, aes(variable, value, fill=variable, color=v
                     panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
               theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10)) + ylab(paste("Indices [rel. units]"))+
               scale_x_discrete(labels=c("optomotor", "torque"))+
+              samplesizes.annotate(boxes, samplesizes) +
+              wilcox.annotate(boxes, wilcoxon) +
               theme(aspect.ratio=2/1.2)
 
 grid.arrange(grobs = CorrPlots, nrow=2, widths=2:1)
