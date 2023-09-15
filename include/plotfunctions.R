@@ -270,16 +270,34 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                              "Likelihood Ratio")
   
   # plot two optomotor parameters with asterisks
-  plots.2test<-list(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
-                      geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-                      geom_jitter(data = plotOMparams, aes(group, plotOMparams[[OMvariables[v]]]), position=position_jitter(0.3), shape=21, size=3, colour="black", fill="grey50", alpha=0.4) +
-                      ggtitle(paste("U-Test, p=", utest)) +
-                      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
-                      theme(axis.text.y = element_text(size=18))+ ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-                      geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5) +
-                      samplesizes.annotate(boxes, samplesizes))
-  
-  #add table with results
+  plots.2test<-list(  ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]], fill=group, color=group)) +
+                        geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+                        geom_rain(point.args = list(size = 3),
+                                  point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
+                                  boxplot.args = list(fill="white", color = "black", outlier.shape = NA, size=1.1),
+                                  boxplot.args.pos = list(width = 0.12),
+                                  violin.args = list(color = NA, alpha = .8),
+                                  violin.args.pos = list(side = "r", width = 1)) +
+                        stat_summary(fun.y = mean, color = "darkgrey", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
+                        stat_summary(fun.y=median, color="black", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
+                        scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-1.4,1.4)) +
+                        scale_fill_manual(values = boxcolors) + #color of the violin plot
+                        scale_color_manual(values = boxcolors) + #color of the points
+                        guides(fill = 'none', color = 'none')+ # remove legends
+                        ggtitle(paste("U-Test, p=", utest)) +
+                        theme_light(base_size = 16) + 
+                        theme(panel.grid.minor = element_blank(), 
+                              panel.grid.major.x = element_blank(), 
+                              axis.title.x=element_blank(), 
+                              panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+                        theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=18)) +
+                        ylab(paste(OMtitles[v], " [rel. units]", sep = ""))+
+                        theme(aspect.ratio=3/NofGroups)+
+                        ylim(1.2*min(plotOMparams[[OMvariables[v]]]), 1.2*max(plotOMparams[[OMvariables[v]]])) +    
+                        geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5, color="black") +
+                        samplesizes.annotate(boxes, samplesizes))
+
+#add table with results
   plots.2test[[2]]<-tableGrob(results.utest)
   return(plots.2test)
 }
