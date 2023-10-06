@@ -837,7 +837,7 @@ cat("\n# Correlation between Performance Index and Optomotor Asymmetry\n")
 if("right" %in% plotOMparamsBefore$group){ 
 plotOMparamsBefore[plotOMparamsBefore$group=="right",]$AI.OM.=-plotOMparamsBefore[plotOMparamsBefore$group=="right",]$AI.OM.
 plotOMparamsAfter[plotOMparamsBefore$group=="right",]$AI.OM.=-plotOMparamsAfter[plotOMparamsBefore$group=="right",]$AI.OM.
-}
+
 
 #grab optomotor asymmetry values and PIs and put them in a dataframe for correlation analysis
 
@@ -962,10 +962,9 @@ grid.arrange(grobs = CorrPlots, nrow=2, widths=2:1)
 
 
 # change sign of asymmetry index OM back to original, just to be sure
-if("right" %in% plotOMparamsBefore$group){
 plotOMparamsBefore[plotOMparamsBefore$group=="right",]$AI.OM.=-plotOMparamsBefore[plotOMparamsBefore$group=="right",]$AI.OM.
 plotOMparamsAfter[plotOMparamsBefore$group=="right",]$AI.OM.=-plotOMparamsAfter[plotOMparamsBefore$group=="right",]$AI.OM.
-}
+} #ends the if clause that checks for one of the groups being clalled "right". Needs to be fixed when this section is generalized to work with any number and design of groups.
 ```
 
 
