@@ -1,0 +1,1 @@
+python "C:\Users\LocalAdmin\Workbench\DTSevaluations\synchronization\eprints_sword.py" -p C:\Users\LocalAdmin\Workbench\DTSevaluations\example_data\colorlearning -v

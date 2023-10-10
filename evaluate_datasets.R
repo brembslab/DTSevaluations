@@ -24,7 +24,7 @@ source("include/prerequisites.R")
 ## Initialize empty lists where data are collected and some other variables
 source("include/initialize.R")
 
-for(x in 1:NofGroups) #start main loop that colects data in each experimental group
+for(x in 1:NofGroups) #start main loop that collects data in each experimental group
 {
   #gather necessary data and variables
   grp_title = dataset.data[["resources"]][[x]][["title"]] #collect title of the group

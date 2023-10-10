@@ -25,7 +25,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 BASE_URL = 'https://epub-test.uni-regensburg.de'
-VERIFY = False #Verify ssl certificate on request, has to be set false for the test server and should be true with valid ssl certificate
+VERIFY = False # Verify ssl certificate on request, has to be set false for the test server and should be true with valid ssl certificate
 
 #packages that might have to be installed
 try:
@@ -100,13 +100,14 @@ def curl_send_file(file, url, action='POST'):
     
     quote = '"\'"'
     
+    # REMARK: '--next' needed to be removed
     if user:
-        args = ['curl', '-X ' + action, '-ik', '--next', '-u ' + user + ':' + password, '--data-binary "@' + f + '"', '-H "Content-Type: text/html"', '-H "Content-Disposition: attachment; filename=' + filename + '"', url]
+        args = ['curl', '-X ' + action, '-ik', '-u ' + user + ':' + password, '--data-binary "@' + f + '"', '-H "Content-Type: text/html"', '-H "Content-Disposition: attachment; filename=' + filename + '"', url]
     else:
         #user + password can be substituted
-        args = ['curl', '-X ' + action, '-ik', '--next', '--netrc', '--data-binary "@' + f + '"', '-H "Content-Type: text/html"', '-H "Content-Disposition: attachment; filename=' + filename + '"', url]
+        args = ['curl', '-X ' + action, '-ik', '--netrc', '--data-binary "@' + f + '"', '-H "Content-Type: text/html"', '-H "Content-Disposition: attachment; filename=' + filename + '"', url]
     
-    #print(' '.join(args))
+    print(' '.join(args))
     subprocess.call(' '.join(args), shell=True, stdout=subprocess.PIPE)
     #args[3] = '-u BLA:BLA'
    
@@ -345,16 +346,19 @@ except (FileNotFoundError, OSError):
     try:           
         net = netrc.netrc(os.path.join(home, "_netrc"))
     except Exception as err:
-        print(err)
-        
-if user == None:
+        net = None
+        print(f"Netrc error: {err}")
+
+if user == None and net:
     #user = input('Username: ')
     try:           
         (user,accout,password) =  net.authenticators(BASE_URL[8:])
-        print(user)
+        print(f"User for {BASE_URL[8:]}: {user}")
     except:
-        print(sys.exc_info()[0])
+        print(f"Error with {BASE_URL[8:]}: {sys.exc_info()[0]}")
         user = False
+else:
+    user = False
 
 if epid == None:
     epid = False
@@ -520,80 +524,93 @@ if docids:
 thisurl=BASE_URL + "/id/eprint/" + str(epid) + "/contents"
 
 #upload all htmlfiles
-htmlpath = path + "/evaluations/" #'/opt/DTSevaluations/example data/colorlearning/evaluations/'
+htmlpath = path  # + "/evaluations/" oder '/opt/DTSevaluations/example data/colorlearning/evaluations/'
 print(htmlpath)
 
 #indexfile currently has the same name as the messurment
 #upload index first and add the others to its epid
 indexfile = os.path.join(htmlpath, experiment_name + ".html")
 
-#if up_file == indexfile:
-print ("Uploading: " + indexfile)
-if docids and len(docids) >= 1:
-    #response = send_sword_request(indexfile, content_type=get_content_type(indexfile), send_file=True, headers=headers, url=BASE_URL + "/id/file/" + str(docids[0]), action='PUT')
-    curl_send_file(indexfile, BASE_URL + "/id/file/" + str(docids[0]), action='PUT')
+if os.path.isfile(indexfile):
+    #if up_file == indexfile:
+    print ("Uploading: " + indexfile)
+    if docids and len(docids) >= 1:
+        #response = send_sword_request(indexfile, content_type=get_content_type(indexfile), send_file=True, headers=headers, url=BASE_URL + "/id/file/" + str(docids[0]), action='PUT')
+        print("Dateien zu einem bestehenden Eintrag hinzufügen")
+        curl_send_file(indexfile, BASE_URL + "/id/file/" + str(docids[0]), action='PUT')
+    else:
+        #response = send_sword_request(indexfile, content_type=get_content_type(indexfile), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
+        curl_target = BASE_URL + "/id/eprint/" + str(epid) + "/contents"
+        print(f"Dateien zu einem neuen Eintrag {epid} hinzufügen")
+        print(f"File tu upload: {indexfile}")
+        print(f"Target url: {curl_target}")
+        curl_send_file(indexfile, curl_target, action='POST')
+
+    #get main docid
+    #response = send_sword_request("", "", send_file=False, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='GET')
+    response = get_document_ids(epid, False, 'document')
+
+    docid = False
+    if response and len(response) > 0:
+        docid = response[0]
+    else:
+        print("No docid could be requested")
+
+    #get the docid of the uploaded html file
+    #m = re.search('id\/document\/(\d+)\/', response)
+    #if m:
+    #    docid = m.group(1)
+    #else:
+    #    print("Error: Dokument konnte nicht hochgeladen werden")
+    #    cleanup()
+    #    exit()
+        
+    if docid:
+        for root, dirs, files in os.walk(path):
+            for htmlfile in files:
+                headers={}
+                filename, extension = os.path.splitext(htmlfile)
+                    
+                if extension in [".html",".xml",".yml"]:
+                    if verbose:
+                        print("Uploading: " + filename + extension)
+                    
+                    htmlfile = os.path.join(root, htmlfile)
+                    up_file = htmlfile
+                    
+                    if up_file != indexfile:
+                        #send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/document/" + docid + "/contents", action='POST')
+                        curl_send_file(up_file, url=BASE_URL + "/id/document/" + docid + "/contents", action='POST')
+    #TODO: Upload YAML file
+                
+    #upload zipfiles
+    #headers={}
+    #up_file = pdfzip
+    #send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=thisurl", action='POST')
+    #curl_send_file(pdfzip, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents")
+    #docid = send_sword_request_pycurl(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
+    #headers={}
+    #up_file = xmlzip
+    #send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=thisurl, action='POST')
+
+
+    #headers={}
+    #up_file = pdfzip
+    #if docids and len(docids) >= 1:
+    #    send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/file/" + str(docids[0]), action='PUT')
+    #else:
+    #    send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
+
+
+    #headers={}
+    #up_file = xmlzip
+    #if docids and len(docids) >= 2:
+    #    
+    #    send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/file/" + str(docids[1]), action='PUT')
+    #else:
+    #    send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
 else:
-    #response = send_sword_request(indexfile, content_type=get_content_type(indexfile), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
-    curl_send_file(indexfile, BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
-
-#get main docid
-#response = send_sword_request("", "", send_file=False, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='GET')
-response = get_document_ids(epid, False, 'document')
-docid=response[0]
-
-#get the docid of the uploaded html file
-#m = re.search('id\/document\/(\d+)\/', response)
-#if m:
-#    docid = m.group(1)
-#else:
-#    print("Error: Dokument konnte nicht hochgeladen werden")
-#    cleanup()
-#    exit()
-    
-for root, dirs, files in os.walk(path):
-    for htmlfile in files:
-        headers={}
-        filename, extension = os.path.splitext(htmlfile)
-            
-        if extension in [".html",".xml",".yml"]:
-            if verbose:
-                print("Uploading: " + filename + extension)
-            
-            htmlfile = os.path.join(root, htmlfile)
-            up_file = htmlfile
-            
-            if up_file != indexfile:
-                #send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/document/" + docid + "/contents", action='POST')
-                curl_send_file(up_file, url=BASE_URL + "/id/document/" + docid + "/contents", action='POST')
-#TODO: Upload YAML file
-            
-#upload zipfiles
-#headers={}
-#up_file = pdfzip
-#send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=thisurl", action='POST')
-#curl_send_file(pdfzip, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents")
-#docid = send_sword_request_pycurl(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
-#headers={}
-#up_file = xmlzip
-#send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=thisurl, action='POST')
-
-
-#headers={}
-#up_file = pdfzip
-#if docids and len(docids) >= 1:
-#    send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/file/" + str(docids[0]), action='PUT')
-#else:
-#    send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
-
-
-#headers={}
-#up_file = xmlzip
-#if docids and len(docids) >= 2:
-#    
-#    send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/file/" + str(docids[1]), action='PUT')
-#else:
-#    send_sword_request(up_file, content_type=get_content_type(up_file), send_file=True, headers=headers, url=BASE_URL + "/id/eprint/" + str(epid) + "/contents", action='POST')
-
+    print("HTML-Datei existiert nicht")
 
 
 #delete files after upload
