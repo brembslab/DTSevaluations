@@ -1242,8 +1242,20 @@ cat("\n## Statistical tests between two groups - Raincloudplots\n")
 
 ```{r estimationstats, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", comment=NA, results='asis'}
 cat("\n## Estimation statistics\n")
-unpaired_median_diff <- dabest(PIstatCombined, group, PIs, idx = groupnames, paired = FALSE) %>% median_diff() #create estimation results list
-print(plot(unpaired_median_diff)) #plot results
+estimation_stats <- dabestr::load(PIstatCombined, x = group, y = PIs, idx = groupnames) #load PIs into dabestr format
+if(table(PIstatCombined$group)[1]==table(PIstatCombined$group)[2]) {   #make sure both groups have identical N
+  est_meanDiff=mean_diff(estimation_stats)       #calc mean differences
+  est_medianDiff=median_diff(estimation_stats)   #calc median differences
+  est_cohensD=cohens_d(estimation_stats)         #calc Cohen's DD
+  est_hedgesG=hedges_g(estimation_stats)         #calc Hedge's G
+#plot all results
+print(dabest_plot(est_meanDiff))
+print(dabest_plot(est_medianDiff))
+print(dabest_plot(est_cohensD))
+print(dabest_plot(est_hedgesG))
+} else {
+ cat("No plot here because N needs to be equal in both groups")
+}
 ```
 
 ```{r splitviolins, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", comment=NA, results='asis'}
