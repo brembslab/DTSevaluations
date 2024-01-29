@@ -877,7 +877,7 @@ levels(mOMPIbefore$postPIs.group)[match("left",levels(mOMPIbefore$postPIs.group)
 #raincloudplots
 CorrPlots[[2]] <- ggplot(mOMPIbefore, aes(variable, value, fill=variable, color=variable)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_rain(point.args = list(size = 3,
+              geom_rain(point.args = list(size = 5,
                                           shape=as.character(mOMPIbefore$postPIs.group),
                                           alpha=as.integer(as.factor(mOMPIbefore$postPIs.group))/max(as.integer(as.factor(mOMPIbefore$postPIs.group)))),
                       point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
@@ -888,8 +888,8 @@ CorrPlots[[2]] <- ggplot(mOMPIbefore, aes(variable, value, fill=variable, color=
               stat_summary(fun.y = mean, color = "darkgrey", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
               stat_summary(fun.y=median, color="black", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
               scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
-              scale_fill_manual(values = boxcolors) + #color of the violin plot
-              scale_color_manual(values = boxcolors) + #color of the points
+              scale_fill_manual(values = colorrange[3:4]) + #color of the violin plot
+              scale_color_manual(values = colorrange[3:4]) + #color of the points
               guides(fill = 'none', color = 'none')+ # remove legends
               theme_light(base_size = 24) + 
               theme(panel.grid.minor = element_blank(), 
@@ -934,7 +934,7 @@ wilcoxon[2] = signif(wilcox.test(mOMPIafter[which(mOMPIafter$variable == "postPI
 #raincloudplots
 CorrPlots[[4]] <- ggplot(mOMPIafter, aes(variable, value, fill=variable, color=variable)) +
               geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-              geom_rain(point.args = list(size = 3,
+              geom_rain(point.args = list(size = 5,
                                           shape=as.character(mOMPIbefore$postPIs.group),
                                           alpha=as.integer(as.factor(mOMPIbefore$postPIs.group))/max(as.integer(as.factor(mOMPIbefore$postPIs.group)))),
                       point.args.pos = list(position = ggpp::position_jitternudge(width = 0.1, x = -0.22, nudge.from = "jittered")),
@@ -945,8 +945,8 @@ CorrPlots[[4]] <- ggplot(mOMPIafter, aes(variable, value, fill=variable, color=v
               stat_summary(fun.y = mean, color = "darkgrey", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
               stat_summary(fun.y=median, color="black", geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.2, size = 2.1)+
               scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-1,1)) +
-              scale_fill_manual(values = boxcolors) + #color of the violin plot
-              scale_color_manual(values = boxcolors) + #color of the points
+              scale_fill_manual(values = colorrange[3:4]) + #color of the violin plot
+              scale_color_manual(values = colorrange[3:4]) + #color of the points
               guides(fill = 'none', color = 'none')+ # remove legends
               theme_light(base_size = 24) + 
               theme(panel.grid.minor = element_blank(), 
