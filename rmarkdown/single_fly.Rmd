@@ -433,7 +433,7 @@ plotaveOMtraces(OMdataAfter)
 
 ####### Do not separate optomotor parameters at all ##########
 
-tempOMparams <- OMparamextract(OMdata) #call fucntion for parameter estimation
+tempOMparams <- OMparamextract(OMdata) #call function for parameter estimation
 kable(tempOMparams)  #plot table with data
 
 ###collect all coefficients in dataframe for the group

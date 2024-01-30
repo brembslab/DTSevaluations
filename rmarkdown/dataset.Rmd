@@ -1066,62 +1066,9 @@ cat("\n## Statistical tests of single groups against zero - raincloudplots\n")
 
 ```{r Utest, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height=8, comment=NA, results='asis'}
 cat("\n## Statistical tests between two groups\n")
-
-    utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
-    w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)
-    #compute effect size Cohen's D
-    if(samplesizes[1]==samplesizes[2]){equalN=TRUE}else{equalN=FALSE}   #determine if the samplesizes are identical
-    if(fligner.test(PIstatCombined$PIs,PIstatCombined$group)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
-    if(equalN & hv){hedges=FALSE}else{hedges=TRUE}                      #test if we need to apply Hedge's correction
-    if(hedges){
-      cohend = signif(cohen.d(PIstatCombined$PIs, PIstatCombined$group, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
-    }else{
-      cohend = signif((mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
-  }
-    #calculate statistical power
-    alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
-    power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
-    #calculate Bayes Factor
-    bayesF=extractBF(ttestBF(na.omit(PIstat[[1]]), na.omit(PIstat[[2]])))
-    #calculate FPR for priors set in dataset file#
-    #run first prior  
-      prior=priorval[1]
-      out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
-      fpz1=out[1]
-    #run second prior  
-      prior=priorval[2]
-      out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
-      fpz2=out[1]
-    #Power and likelihood ratio: NB for two sided test, need 2*y0
-      LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
-
-      #make tidy table of results
-    results.utest<-data.frame(values=c(signif[1],
-                                       w.statistic,
-                                       utest,
-                                       cohend,
-                                       power,
-                                       signif(bayesF$bf, 3),
-                                       signif(bayesF$error, 3),
-                                       signif(fpz1, 3),
-                                       signif(fpz2, 3),
-                                       signif(LR, 3)))
-    rownames(results.utest)<-c("Significance level",
-                               "MW U-Test, W",
-                               "MW U-Test p",
-                               "Cohen's D",
-                               "stat. Power",
-                               "Bayes Factor",
-                               "Bayes Factor error",
-                               paste("FP risk, prior ",priorval[1]),
-                               paste("FP risk, prior ",priorval[2]),
-                               "Likelihood Ratio")
-
-#prepare Grob with results table
-  plots.2test<-list(tableGrob(results.utest))
         
 # plot two PIs with asterisks
-  plots.2test[[2]]<-ggplot(PIstatCombined, aes(group, PIs)) +
+  plots.2test<-list(ggplot(PIstatCombined, aes(group, PIs)) +
       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
       geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
@@ -1134,18 +1081,9 @@ cat("\n## Statistical tests between two groups\n")
       geom_signif(comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                   textsize=4, vjust=0.1) +
-      samplesizes.annotate(boxes, samplesizes)
-  
+      samplesizes.annotate(boxes, samplesizes))
 
-  #add table with results and plot
-
-  grid.arrange(grobs = plots.2test, ncol=1, nrow=2)
-
-```
-
-```{r UtestRain, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height=8, comment=NA, results='asis'}
-cat("\n## Statistical tests between two groups - Raincloudplots\n")
-
+#calculate statistics  
     utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
     w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)
     #compute effect size Cohen's D
@@ -1197,10 +1135,19 @@ cat("\n## Statistical tests between two groups - Raincloudplots\n")
                                "Likelihood Ratio")
 
 #prepare Grob with results table
-  plots.2test<-list(tableGrob(results.utest))
-        
+  plots.2test[[2]]<-tableGrob(results.utest)
+
+#add table with results and plot
+
+  grid.arrange(grobs = plots.2test, ncol=2, nrow=1)
+
+```
+
+```{r UtestRain, eval=(PIs_present & twogroupstats & NofGroups==2), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height=8, comment=NA, results='asis'}
+cat("\n## Statistical tests between two groups - Raincloudplots\n")
+
 # plot two PIs with asterisks
-  plots.2test[[2]]<-ggplot(PIstatCombined, aes(group, PIs, fill=group, color=group)) +
+  plots.2test<-list(ggplot(PIstatCombined, aes(group, PIs, fill=group, color=group)) +
     geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
     {if(typeof(HeatOn)=="double") #if the shapes are given as numbers (default), give them a black outline
     geom_rain(point.args = list(size = 5, shape=HeatOn, color = "black", alpha=as.integer(as.factor(PIstatCombined$category))/max(as.integer(as.factor(PIstatCombined$category)))),
@@ -1231,12 +1178,65 @@ cat("\n## Statistical tests between two groups - Raincloudplots\n")
       comparisons = list(c(colnames(PIstat[1]), colnames(PIstat[2]))), 
                 map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                 textsize=4, vjust=0.1) +
-    samplesizes.annotate(boxes, samplesizes)
-  
+    samplesizes.annotate(boxes, samplesizes))
 
-  #add table with results and plot
+#calculate statistics
+    utest = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
+    w.statistic = signif(wilcox.test(PIstat[[1]],PIstat[[2]])$statistic, 3)
+    #compute effect size Cohen's D
+    if(samplesizes[1]==samplesizes[2]){equalN=TRUE}else{equalN=FALSE}   #determine if the samplesizes are identical
+    if(fligner.test(PIstatCombined$PIs,PIstatCombined$group)$p.value<0.05){hv=FALSE}else{hv=TRUE}       #test for homogeneity of variance and set hv TRUE/FALSE
+    if(equalN & hv){hedges=FALSE}else{hedges=TRUE}                      #test if we need to apply Hedge's correction
+    if(hedges){
+      cohend = signif(cohen.d(PIstatCombined$PIs, PIstatCombined$group, hedges.correction = hedges)$estimate, 3) #use effsize package for Hedge's correction
+    }else{
+      cohend = signif((mean(na.omit(PIstat[[1]]))-mean(na.omit(PIstat[[2]])))/sqrt((sd(na.omit(PIstat[[1]]))^2+sd(na.omit(PIstat[[2]]))^2)/2), 3) #use simple formula if variances and sample sizes are identical
+  }
+    #calculate statistical power
+    alt = dataset.data[["statistics"]][["two.groups"]][["power"]]
+    power=signif(pwr.t2n.test(n1 = samplesizes[1], n2= samplesizes[2], d = cohend, alternative = alt, sig.level = signif[1])$power, 3)
+    #calculate Bayes Factor
+    bayesF=extractBF(ttestBF(na.omit(PIstat[[1]]), na.omit(PIstat[[2]])))
+    #calculate FPR for priors set in dataset file#
+    #run first prior  
+      prior=priorval[1]
+      out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      fpz1=out[1]
+    #run second prior  
+      prior=priorval[2]
+      out=calc.FPR(samplesizes,utest,prior,abs(cohend))  #output=c(FPR,x0,y0,x1,y1)
+      fpz2=out[1]
+    #Power and likelihood ratio: NB for two sided test, need 2*y0
+      LR=out[5]/(2*out[3])        #lik ratio (Hi1/H0) =y1/2*y0
 
-  grid.arrange(grobs = plots.2test, ncol=1, nrow=2)
+      #make tidy table of results
+    results.utest<-data.frame(values=c(signif[1],
+                                       w.statistic,
+                                       utest,
+                                       cohend,
+                                       power,
+                                       signif(bayesF$bf, 3),
+                                       signif(bayesF$error, 3),
+                                       signif(fpz1, 3),
+                                       signif(fpz2, 3),
+                                       signif(LR, 3)))
+    rownames(results.utest)<-c("Significance level",
+                               "MW U-Test, W",
+                               "MW U-Test p",
+                               "Cohen's D",
+                               "stat. Power",
+                               "Bayes Factor",
+                               "Bayes Factor error",
+                               paste("FP risk, prior ",priorval[1]),
+                               paste("FP risk, prior ",priorval[2]),
+                               "Likelihood Ratio")
+
+#prepare Grob with results table
+  plots.2test[[2]]<-tableGrob(results.utest)
+        
+#add table with results and plot
+
+  grid.arrange(grobs = plots.2test, ncol=2, nrow=1)
 
 ```
 
@@ -1247,14 +1247,21 @@ if(table(PIstatCombined$group)[1]==table(PIstatCombined$group)[2]) {   #make sur
   est_meanDiff=mean_diff(estimation_stats)       #calc mean differences
   est_medianDiff=median_diff(estimation_stats)   #calc median differences
   est_cohensD=cohens_d(estimation_stats)         #calc Cohen's DD
-  est_hedgesG=hedges_g(estimation_stats)         #calc Hedge's G
+  est_hedgesG=hedges_g(estimation_stats)         #calc Hedges' G
 #plot all results
+cat("\n### Mean Difference\n")
 print(dabest_plot(est_meanDiff))
+cat("\n")  #don't ask me why this is needed!
+cat("\n### Median Difference\n")
 print(dabest_plot(est_medianDiff))
+cat("\n")
+cat("\n### Cohen's D\n")
 print(dabest_plot(est_cohensD))
+cat("\n")
+cat("\n### Hedges' G\n")
 print(dabest_plot(est_hedgesG))
 } else {
- cat("No plot here because N needs to be equal in both groups")
+ cat("**No plot here because sample size needs to be equal in both groups**")
 }
 ```
 
