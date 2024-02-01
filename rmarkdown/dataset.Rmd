@@ -1413,6 +1413,23 @@ reactable(PooledGroups,
   compact = TRUE,
   fullWidth = FALSE)
 
+# plot two PIs with asterisks
+  plots.2test<-list(ggplot(PIstatPooled, aes(group, PIs)) +
+      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+      geom_boxplot(fill = boxcolors[1:2], notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+      geom_jitter(data=PIstatPooled, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
+      scale_y_continuous(breaks = seq(-1, 1, .2)) +
+      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom") +
+      scale_fill_discrete(name = "Heat on:")+ #legend title for categories
+      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ theme(aspect.ratio=1)+
+      geom_signif(comparisons = list(c(colnames(PIprofilePooled[1]), colnames(PIprofilePooled[2]))), 
+                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                  textsize=4) +
+      samplesizes.annotate(boxes[1:2], samplesizesPooled)
+  )
+
+
+# calculate statistics
     utest = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$p.value, 3) #compare the two groups with a U-test and collect p-value
     w.statistic = signif(wilcox.test(PIprofilePooled[[1]],PIprofilePooled[[2]])$statistic, 3)
     #compute effect size Cohen's D
@@ -1464,33 +1481,38 @@ reactable(PooledGroups,
                                "Likelihood Ratio")
 
 #prepare Grob with results table
-  plots.2test<-list(tableGrob(results.utest))
+  plots.2test[[2]]<-tableGrob(results.utest)
         
-# plot two PIs with asterisks
-  plots.2test[[2]]<-ggplot(PIstatPooled, aes(group, PIs)) +
-      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-      geom_boxplot(fill = boxcolors[1:2], notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-      geom_jitter(data=PIstatPooled, aes(group, PIs, fill=category), position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
-      scale_y_continuous(breaks = seq(-1, 1, .2)) +
-      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(), panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA), legend.position = "bottom") +
-      scale_fill_discrete(name = "Heat on:")+ #legend title for categories
-      theme(axis.text.y = element_text(size=18))+ ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ theme(aspect.ratio=1)+
-      geom_signif(comparisons = list(c(colnames(PIprofilePooled[1]), colnames(PIprofilePooled[2]))), 
-                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-                  textsize=4) +
-      samplesizes.annotate(boxes[1:2], samplesizesPooled)
   
-
   #plot
-  grid.arrange(grobs = plots.2test, ncol=1, nrow=2)
+  grid.arrange(grobs = plots.2test, ncol=2, nrow=1)
 
 ```
 
 ```{r estimationstatspooled, eval=(PIs_present & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
  cat("\n## Estimation statistics for pooled groups\n")
  dabest_groupnames=unique(groupdescriptions) #rename groupnames to pooled groups specifically for dabestr
- unpaired_median_diff <- dabest(PIstatPooled, group, PIs, idx = dabest_groupnames, paired = FALSE) %>% median_diff() #create estimation results list
- print(plot(unpaired_median_diff)) #plot results
+ estimation_stats <- dabestr::load(PIstatPooled, x = group, y = PIs, idx = dabest_groupnames) #load PIs into dabestr format
+if(table(PIstatPooled$group)[1]==table(PIstatPooled$group)[2]) {   #make sure both groups have identical N
+  est_meanDiff=mean_diff(estimation_stats)       #calc mean differences
+  est_medianDiff=median_diff(estimation_stats)   #calc median differences
+  est_cohensD=cohens_d(estimation_stats)         #calc Cohen's DD
+  est_hedgesG=hedges_g(estimation_stats)         #calc Hedges' G
+#plot all results
+cat("\n### Mean Difference\n")
+print(dabest_plot(est_meanDiff))
+cat("\n")  #don't ask me why this is needed!
+cat("\n### Median Difference\n")
+print(dabest_plot(est_medianDiff))
+cat("\n")
+cat("\n### Cohen's D\n")
+print(dabest_plot(est_cohensD))
+cat("\n")
+cat("\n### Hedges' G\n")
+print(dabest_plot(est_hedgesG))
+} else {
+ cat("**No plot here because sample size needs to be equal in both groups**")
+}
 
 ```
 
