@@ -28,13 +28,9 @@ install.packages(c("ggplot2",
                  "DescTools",
                  "magick",
                 "reactable",
-                "sicegar"))
-
-if (!require(remotes)) {
-  install.packages("remotes")
-}
-remotes::install_github('jorvlan/raincloudplots')
-
+                "sicegar",
+                "wrMisc",
+                "raincloudplots"))
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")

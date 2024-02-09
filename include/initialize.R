@@ -12,6 +12,8 @@ grouped.OMdataBefore <-list()  #Averaged optomotor data traces for each group at
 grouped.OMparamsBefore <-list()#Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()   #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list() #Extracted optomotor parameters for each group at end of experiment
+grouped.OMdataBefore_swapped <-list()  #For swapping left and right OM traces
+grouped.OMdataAfter_swapped <-list()   #For swapping left and right OM traces
 
 flynames = matrix(ncol=NofGroups, nrow=max(samplesizes)) #create a place to collect all flynames
 dwelldata = dwellplots = grouped.dwell = list()          #create dataframes for dwelling data

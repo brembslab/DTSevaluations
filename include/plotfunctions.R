@@ -480,5 +480,8 @@ OMparamextract <- function(OMdata){
   names(tempOMparams) = c("OM","OS","AI(OM)", "AI(OS)")    #set column names
   rownames(tempOMparams)[1]=as.character(flyname)                   #set row names to flynames
   
+#delete used variables
+  rm(OM,OS,AI_OM,AI_OS, fitObjall, DoubleSig, transform, AllOMtraces)
+  
   return(tempOMparams)
 }
