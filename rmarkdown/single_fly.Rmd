@@ -401,24 +401,24 @@ if(!exists("OMdataBefore"))
 ##### collect the data for a plot where left and right  turning is swapped #####
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
-OMperiods = which(grepl("optomotorL", sequence$type))                                     #collect the left turning OM periods
-leftOMdata <- generateOMdata(OMperiods)                                                   #call function which assembles optomotor data for the identified periods
+OMperiods = which(grepl("optomotorL", head(sequence$type)))                               #collect the left turning OM periods
+leftOMdataBefore <- generateOMdata(OMperiods)                                             #call function which assembles optomotor data for the identified periods
 
 ### extract optomotor traces and generate dataframe for right (clockwise) turning arena
-OMperiods = which(grepl("optomotorR", sequence$type))                                     #collect the right turning OM periods
-rightOMdata <- generateOMdata(OMperiods)                                                  #call function which assembles optomotor data for the identified periods
-rightOMdata$time=rightOMdata$time+max(leftOMdata$time)                                    #make right data start after left data
+OMperiods = which(grepl("optomotorR", head(sequence$type)))                               #collect the right turning OM periods
+rightOMdataBefore <- generateOMdata(OMperiods)                                            #call function which assembles optomotor data for the identified periods
+rightOMdataBefore$time=rightOMdataBefore$time+max(leftOMdataBefore$time)                  #make right data start after left data
 
 ### generate averaged optomotor responses over both rotation directions
-tempOMdata=rbind(leftOMdata,rightOMdata)                                                  #combine left and right OMdata in one dataframe
-tempOMdata=aggregate(tempOMdata$fly,FUN=mean,by=list(tempOMdata$time))                    #average across periods
-colnames(tempOMdata) <- c("time", as.character(flyname))                                  #set dataframe names
+tempOMdataBefore=rbind(leftOMdataBefore,rightOMdataBefore)                                #combine left and right OMdata in one dataframe
+tempOMdataBefore=aggregate(tempOMdataBefore$fly,FUN=mean,by=list(tempOMdataBefore$time))  #average across periods
+colnames(tempOMdataBefore) <- c("time", as.character(flyname))                                  #set dataframe names
 
 if(!exists("OMdataBefore_swapped"))
 {
-  OMdataBefore_swapped=tempOMdata
+  OMdataBefore_swapped=tempOMdataBefore
 } else {
-  OMdataBefore_swapped[[as.character(flyname)]]=tempOMdata[[as.character(flyname)]]
+  OMdataBefore_swapped[[as.character(flyname)]]=tempOMdataBefore[[as.character(flyname)]]
 }
 ```
 
@@ -456,24 +456,24 @@ if(!exists("OMdataAfter"))
 ##### collect the data for a plot where left and right  turning is swapped #####
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
-OMperiods = which(grepl("optomotorL", sequence$type))                                     #collect the left turning OM periods
-leftOMdata <- generateOMdata(OMperiods)                                                   #call function which assembles optomotor data for the identified periods
+OMperiods = which(grepl("optomotorL", tail(sequence$type, 8)))+NofPeriods-8               #collect the left turning OM periods
+leftOMdataAfter <- generateOMdata(OMperiods)                                              #call function which assembles optomotor data for the identified periods
 
 ### extract optomotor traces and generate dataframe for right (clockwise) turning arena
-OMperiods = which(grepl("optomotorR", sequence$type))                                     #collect the right turning OM periods
-rightOMdata <- generateOMdata(OMperiods)                                                  #call function which assembles optomotor data for the identified periods
-rightOMdata$time=rightOMdata$time+max(leftOMdata$time)                                    #make right data start after left data
+OMperiods = which(grepl("optomotorR", tail(sequence$type, 8)))+NofPeriods-8               #collect the right turning OM periods
+rightOMdataAfter <- generateOMdata(OMperiods)                                             #call function which assembles optomotor data for the identified periods
+rightOMdataAfter$time=rightOMdataAfter$time+max(leftOMdataAfter$time)                     #make right data start after left data
 
 ### generate averaged optomotor responses over both rotation directions
-tempOMdata=rbind(leftOMdata,rightOMdata)                                                  #combine left and right OMdata in one dataframe
-tempOMdata=aggregate(tempOMdata$fly,FUN=mean,by=list(tempOMdata$time))                    #average across periods
-colnames(tempOMdata) <- c("time", as.character(flyname))                                  #set dataframe names
+tempOMdataAfter=rbind(leftOMdataAfter,rightOMdataAfter)                                   #combine left and right OMdata in one dataframe
+tempOMdataAfter=aggregate(tempOMdataAfter$fly,FUN=mean,by=list(tempOMdataAfter$time))     #average across periods
+colnames(tempOMdataAfter) <- c("time", as.character(flyname))                             #set dataframe names
 
 if(!exists("OMdataAfter_swapped"))
 {
-  OMdataAfter_swapped=tempOMdata
+  OMdataAfter_swapped=tempOMdataAfter
 } else {
-  OMdataAfter_swapped[[as.character(flyname)]]=tempOMdata[[as.character(flyname)]]
+  OMdataAfter_swapped[[as.character(flyname)]]=tempOMdataAfter[[as.character(flyname)]]
 }
 ```
 

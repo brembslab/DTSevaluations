@@ -257,8 +257,8 @@ plotOMtracesSEM <- function(OMdata){
     theme(axis.text.y = element_text(size=12))+
     ylab("Optomotor Response [rel. units]") + 
     xlab("Time [s]")+
-    annotate("text", -Inf, -Inf, label = "Right (clockwise) arena rotations", hjust = -.4, vjust = -1.3)+
-    annotate("text", Inf, Inf, label = "Left (counter-clockwise) arena rotations", hjust =1.1, vjust = 1.5)+ 
+    annotate("text", Inf, -Inf, label = "Right (clockwise) arena rotations", hjust = -.4, vjust = -1.3)+
+    annotate("text", Inf, -Inf, label = "Left (counter-clockwise) arena rotations", hjust =1.1, vjust = 1.5)+ 
     theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
     scale_x_continuous(expand = expand_scale(add = 0))
   return(meanOMtraces)

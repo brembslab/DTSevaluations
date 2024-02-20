@@ -37,8 +37,7 @@ if(any(grepl("optomotor", sequence$type)==TRUE)){    ###determine if there are o
       OMdataAfter_swapped$means=rowMeans(OMdataAfter_swapped[-1])
       OMdataAfter_swapped$sd=rowSds(OMdataAfter_swapped[-1])
       OMdataAfter_swapped$sem=rowSEMs(OMdataAfter_swapped[-1])
-      OMdataAfter_swapped$group=dataset.data_swapped[["resources"]][[x]][["name"]]
-      OMparamsAfter_swapped$desc=dataset.data_swapped[["resources"]][[x]][["description"]]
+      OMdataAfter_swapped$group=dataset.data[["resources"]][[x]][["name"]]
       grouped.OMdataAfter_swapped[[x]] <- OMdataAfter_swapped #save optomotor data to groupwise list
       rm(OMdataAfter_swapped) #remove the optomotor data frame so it can be generated again for the next group
     }
