@@ -185,10 +185,10 @@ plotaveOMtraces <- function(OMdata){
   return(OMtraces)
 }
 
-#########plot averaged optomotor traces of several flies #################
+#########plot averaged optomotor traces and SDs of several flies #################
 plotOMtracesMean <- function(OMdata){
     plotOM=ldply(OMdata, data.frame)            #move the dataframes for each group into a single dataframe
-    plotOM=plotOM[,c("time","means","sd","group")]
+    plotOM=plotOM[,c("time","means","sd","sem","group")]
     
     #plot averaged OM traces
     
@@ -225,6 +225,45 @@ plotOMtracesMean <- function(OMdata){
 
 }
 
+#########plot averaged optomotor traces and SEMs of several flies #################
+plotOMtracesSEM <- function(OMdata){
+  plotOM=ldply(OMdata, data.frame)            #move the dataframes for each group into a single dataframe
+  plotOM=plotOM[,c("time","means","sd","sem","group")]
+  
+  #plot averaged OM traces
+  
+  meanOMtraces <- ggplot(plotOM, aes(x=time/1000, y=means, group = group)) +
+    theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
+    geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
+    geom_hline(yintercept = 0, color="black") +
+    geom_ribbon(aes(ymin=means-sem, ymax=means+sem, fill = group), alpha=0.5) +
+    scale_fill_manual(values = boxcolors) +
+    geom_line(aes(colour = group), size = 1) + 
+    scale_color_manual(values = boxcolors) +
+    ggtitle("Mean Optomotor Traces and Standard Errors") +
+    guides(colour = guide_legend(override.aes = list(size=3))) +
+    theme_light(base_size = 16) + 
+    theme(legend.justification=c(1,0),
+          legend.position="right", 
+          legend.title=element_blank(), 
+          legend.key.size = unit(2, 'lines'),
+          legend.key = element_rect(size = 6),
+          legend.box.background = element_rect(fill="white"),
+          legend.box.margin = margin(4, 4, 4, 4),
+          legend.text=element_text(size=14), 
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA)) +
+    theme(axis.text.y = element_text(size=12))+
+    ylab("Optomotor Response [rel. units]") + 
+    xlab("Time [s]")+
+    annotate("text", -Inf, -Inf, label = "Right (clockwise) arena rotations", hjust = -.4, vjust = -1.3)+
+    annotate("text", Inf, Inf, label = "Left (counter-clockwise) arena rotations", hjust =1.1, vjust = 1.5)+ 
+    theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
+    scale_x_continuous(expand = expand_scale(add = 0))
+  return(meanOMtraces)
+  
+}
 
 ############plot box/whisker plots of optomotor parameters ###############
 plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){

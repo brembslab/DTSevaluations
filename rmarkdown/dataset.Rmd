@@ -202,7 +202,7 @@ if('yt' %in% sequence$type || 'sw' %in% sequence$type)                  #for yt 
 ```{r Optomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
 
 plotOMtracesMean(grouped.OMdata) #call function to plot OM traces averaged over all flies
-plotOMtracesMean(grouped.OMdata_swapped)
+plotOMtracesSEM(grouped.OMdata_swapped)
 ```
 
 `r if (beforeafter) '## Optomotor traces (right/left) at start of experiment'`
@@ -210,12 +210,12 @@ plotOMtracesMean(grouped.OMdata_swapped)
 ```{r OM_BeforeAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
 
 plotOMtracesMean(grouped.OMdataBefore) #call function to plot OM traces at start of experiment averaged over all flies
-plotOMtracesMean(grouped.OMdataBefore_swapped)
+plotOMtracesSEM(grouped.OMdataBefore_swapped)
   
 cat(paste("\n\n## Optomotor traces (right/left) at end of experiment\n\n"))
 
 plotOMtracesMean(grouped.OMdataAfter) #call function to plot OM traces at end of experiment averaged over all flies
-plotOMtracesMean(grouped.OMdataAfter_swapped)
+plotOMtracesSEM(grouped.OMdataAfter_swapped)
 ```
 
 `r if (om | beforeafter) '## Optomotor Parameter Analysis'`
