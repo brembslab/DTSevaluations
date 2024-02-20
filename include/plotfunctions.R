@@ -194,7 +194,7 @@ plotOMtracesMean <- function(OMdata){
     
     meanOMtraces <- ggplot(plotOM, aes(x=time/1000, y=means, group = group)) +
             theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
-            geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
+            geom_rect(aes(xmin = mean(time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
             geom_hline(yintercept = 0, color="black") +
             geom_ribbon(aes(ymin=means-sd, ymax=means+sd, fill = group), alpha=0.5) +
             scale_fill_manual(values = boxcolors) +
@@ -234,7 +234,7 @@ plotOMtracesSEM <- function(OMdata){
   
   meanOMtraces <- ggplot(plotOM, aes(x=time/1000, y=means, group = group)) +
     theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
-    geom_rect(aes(xmin = mean(plotOM$time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
+    geom_rect(aes(xmin = mean(time/1000),xmax = Inf ,ymin = -Inf, ymax = Inf),fill=("grey"), alpha = 0.01)+
     geom_hline(yintercept = 0, color="black") +
     geom_ribbon(aes(ymin=means-sem, ymax=means+sem, fill = group), alpha=0.5) +
     scale_fill_manual(values = boxcolors) +
@@ -257,8 +257,8 @@ plotOMtracesSEM <- function(OMdata){
     theme(axis.text.y = element_text(size=12))+
     ylab("Optomotor Response [rel. units]") + 
     xlab("Time [s]")+
-    annotate("text", Inf, -Inf, label = "Right (clockwise) arena rotations", hjust = -.4, vjust = -1.3)+
-    annotate("text", -Inf, Inf, label = "Left (counter-clockwise) arena rotations", hjust =1.1, vjust = 1.5)+ 
+    annotate("text", Inf, -Inf, label = "Right (clockwise) arena rotations",hjust=1.1, vjust=-1.5)+
+    annotate("text", -Inf, Inf, label = "Left (counter-clockwise) arena rotations", hjust =-.2, vjust = 1.5)+ 
     theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
     scale_x_continuous(expand = expand_scale(add = 0))
   return(meanOMtraces)
