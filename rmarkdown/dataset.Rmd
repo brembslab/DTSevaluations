@@ -667,36 +667,36 @@ print(ggplot(spectemp, aes(x=freq, y=mean, group = group)) +
 
 ```{r Mean dwelling, eval=Dwell, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
 
-# cat("\n# Dwelling Times\n")
-# 
-# dwellmeanplots = list() #create a list to store all the plots
-# 
-# for(x in 1:NofGroups){
-#   grouped.dwell[[x]]$punished = -grouped.dwell[[x]]$punished #invert the punished values to make the bars go downwards
-#   dwellmeans[[x]] = reshape2::melt(grouped.dwell[[x]])       #load each group of data into a dataframe
-#   colnames(dwellmeans[[x]])=c("period","value","Outcome")
-#   dwellmeanplots[[x]] <-   ggplot(dwellmeans[[x]], aes(as.factor(period), value, fill = Outcome)) +
-#   stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
-#    stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
-#   geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
-#   geom_jitter(pch=21, colour="Black", size=2.3, width = 0.25)+
-#   ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
-#   theme_light(base_size = 16) +
-#   theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
-#         ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
-#   theme(axis.text.y = element_text(size=18), legend.position = "none")+
-#   ylab("mean dwelling [sec]")+
-#   labs(fill = "Outcome") +
-#   xlab("Experiment Sequence")+
-#   scale_fill_manual(values=c("red1", "steelblue4"))+
-#   scale_color_manual(values=c("firebrick4", "steelblue3"))+
-#   theme(panel.grid.major = element_line(colour = "#808080")) + 
-#   annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0, 
-#            alpha = .3)+
-#   ylim(dwellrange) +
-#   guides(fill = FALSE, size = FALSE)
-# }
-#  grid.arrange(grobs = dwellmeanplots)
+cat("\n# Dwelling Times\n")
+
+dwellmeanplots = list() #create a list to store all the plots
+
+for(x in 1:NofGroups){
+  grouped.dwell[[x]]$punished = -grouped.dwell[[x]]$punished #invert the punished values to make the bars go downwards
+  dwellmeans[[x]] = reshape2::melt(grouped.dwell[[x]])       #load each group of data into a dataframe
+  colnames(dwellmeans[[x]])=c("period","value","Outcome")
+  dwellmeanplots[[x]] <-   ggplot(dwellmeans[[x]], aes(as.factor(period), value, fill = Outcome)) +
+  stat_summary(geom = "bar", fun = mean, col="black", width = 0.7)+
+   stat_summary(geom = "errorbar", fun.data = mean_se, width = 0.3)+
+  geom_hline(yintercept = 0, colour = "#887000", size = 1.2)+
+  geom_jitter(pch=21, colour="Black", size=2.3, width = 0.25)+
+  ggtitle(paste(dataset.data[["resources"]][[x]][["title"]], ", N=",samplesizes[x]))+
+  theme_light(base_size = 16) +
+  theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank()
+        ,panel.border = element_rect(size = 0.5, linetype = "solid", colour = "black", fill=NA))+
+  theme(axis.text.y = element_text(size=18), legend.position = "none")+
+  ylab("mean dwelling [sec]")+
+  labs(fill = "Outcome") +
+  xlab("Experiment Sequence")+
+  scale_fill_manual(values=c("red1", "steelblue4"))+
+  scale_color_manual(values=c("firebrick4", "steelblue3"))+
+  theme(panel.grid.major = element_line(colour = "#808080")) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0,
+           alpha = .3)+
+  ylim(dwellrange) +
+  guides(fill = FALSE, size = FALSE)
+}
+ grid.arrange(grobs = dwellmeanplots)
 ```
 
 ```{r PIbar, eval=PIs_present, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = len, fig.width = 8, comment=NA, results='asis'}
@@ -867,7 +867,7 @@ CorrPlots[[1]] <- ggplot(OMPIcorr, aes(pretestPIs.category, plotOMparamsBefore.A
               theme(legend.position = "none") +  
               theme(aspect.ratio=1/1.4)
 
-mOMPIbefore=subset(melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", "pretestPIs.category")) # melt dataframes with values before training for rainclodplots
+mOMPIbefore=subset(reshare2::melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", "pretestPIs.category")) # melt dataframes with values before training for raincloudplots
 levels(mOMPIbefore$postPIs.group)[match("right",levels(mOMPIbefore$postPIs.group))] <- "►" #replace group description
 levels(mOMPIbefore$postPIs.group)[match("left",levels(mOMPIbefore$postPIs.group))] <- "◄" #replace group description
 
@@ -924,7 +924,7 @@ CorrPlots[[3]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM
               theme(legend.position = "none") +
               theme(aspect.ratio=1/1.4)
 
-mOMPIafter=subset(melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "postPIs.category"))  # melt dataframes with values after training for rainclodplots
+mOMPIafter=subset(reshare2::melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "postPIs.category"))  # melt dataframes with values after training for rainclodplots
 levels(mOMPIafter$postPIs.group)[match("right",levels(mOMPIafter$postPIs.group))] <- "►" #replace group description
 levels(mOMPIafter$postPIs.group)[match("left",levels(mOMPIafter$postPIs.group))] <- "◄" #replace group description
 
@@ -1299,107 +1299,107 @@ cat("\n## Dyadic statistical tests with three groups\n")
 
 if(NofGroups == 3) { #just to be extra-sure :-)
 
-# PItype <- list() 
-# for (x in 1:NofGroups){
-#   PItype[[x]] = melt(PIstat[[x]])
-#   PItype[[x]]$desc = dataset.data$resources[[x]]$description
-#   PItype[[x]]$name = dataset.data$resources[[x]]$name
-# }
-# 
-# if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descriptions are identical
-#    PItypeSingleton <- na.omit(PItype[[grep(singleton[1], PItype)]])
-#    PItypeDoubleton1 <- na.omit(PItype[[grep(doubleton[1], PItype)[1]]])
-#    PItypeDoubleton2 <- na.omit(PItype[[grep(doubleton[1], PItype)[2]]])
-#    PIname<-c(unique(PItypeSingleton$name), unique(PItypeDoubleton1$name), unique(PItypeDoubleton2$name))
-#    
-#    test1 = statistical_test(PItypeSingleton$value, PItypeDoubleton1$value)
-#    test2 = statistical_test(PItypeSingleton$value, PItypeDoubleton2$value)
-#    results.test <- data.frame(cbind(test1, test2))
-#    colnames(results.test) <- c(paste(PIname[1], PIname[2], sep="\n"),paste(PIname[1], PIname[3], sep="\n")) 
-#    rownames(results.test) <- c("Significance level",
-#                                   "MW U-Test, W",
-#                                   "U-Test p-value", 
-#                                   "Cohen's D",
-#                                   "stat. Power",
-#                                   "Bayes Factor",
-#                                   "Bayes Factor error",
-#                                   paste("FP risk, prior ",priorval[1]),
-#                                   paste("FP risk, prior ",priorval[2]),
-#                                   "Likelihood Ratio")
-# 
-# #plot two PIs with asterisks
-#   plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
-#                       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-#                       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-#                       geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
-#                                   position=position_jitter(0.3), shape=21, size=3) +
-#                       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
-#                                                           panel.border = element_rect(size = 0.5, linetype = "solid",
-#                                                           colour = "black", fill=NA), legend.position = "top",
-#                                                           legend.title = element_blank()) +
-#                       theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
-#                       ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-#                       geom_signif(comparisons = list(c(unique(PItypeSingleton$name), unique(PItypeDoubleton1$name))),
-#                                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-#                                   textsize=5, vjust=0.1) +
-#                       geom_signif(comparisons = list(c(unique(PItypeSingleton$name), unique(PItypeDoubleton2$name))),
-#                                   map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-#                                   textsize=5, vjust=0.1, margin_top=0.15) +
-#                       samplesizes.annotate(boxes, samplesizes)
-# 
-#     #add table with results and plot
-#     plots.2utest<-tableGrob(results.test)
-#     grid.arrange(plots.2test,plots.2utest, nrow = 1)
-#   } else { #if there are less or more than two unique group descriptions
-#     PItype_1 <- na.omit(PItype[[1]])
-#     PItype_2 <- na.omit(PItype[[2]])
-#     PItype_3 <- na.omit(PItype[[3]])
-#     PIname<-c(unique(PItype_1$name), unique(PItype_2$name), unique(PItype_3$name))
-#     
-#     test1 = statistical_test(PItype_1$value, PItype_2$value)
-#     test2 = statistical_test(PItype_1$value, PItype_3$value)
-#     test3 = statistical_test(PItype_2$value, PItype_3$value)
-#     results.test <- data.frame(cbind(test1, test2, test3))
-#     colnames(results.test) = c(paste(PIname[1], PIname[2], sep="\n"),
-#                                 paste(PIname[1], PIname[3], sep="\n"),
-#                                 paste(PIname[2], PIname[3], sep="\n"))
-#     rownames(results.test) <- c("Significance level",
-#                                     "MW U-Test, W",
-#                                     "U-Test p-value", 
-#                                     "Cohen's D",
-#                                     "stat. Power",
-#                                     "Bayes Factor",
-#                                     "Bayes Factor error",
-#                                     paste("FP risk, prior ",priorval[1]),
-#                                     paste("FP risk, prior ",priorval[2]),
-#                                     "Likelihood Ratio")
-#   #plot two PIs with asterisks
-#     plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
-#                         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
-#                         geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
-#                         geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
-#                                     position=position_jitter(0.3), shape=21, size=3) +
-#                         theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
-#                                                             panel.border = element_rect(size = 0.5, linetype = "solid",
-#                                                             colour = "black", fill=NA), legend.position = "top",
-#                                                             legend.title = element_blank()) +
-#                         theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
-#                         ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
-#                         geom_signif(comparisons = list(c(unique(PItype_1$name), unique(PItype_2$name))),
-#                                     map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-#                                     textsize=5, vjust=0.1, margin_top = 0.1) +
-#                         geom_signif(comparisons = list(c(unique(PItype_1$name), unique(PItype_3$name))),
-#                                     map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-#                                     textsize=5, vjust=0.1, margin_top=0.2) +
-#                         geom_signif(comparisons = list(c(unique(PItype_2$name), unique(PItype_3$name))),
-#                                     map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
-#                                     textsize=5, vjust=0.1, margin_top=0.1) +
-#                         samplesizes.annotate(boxes, samplesizes)
-#   
-#       #add table with results and plot
-#       plots.2utest<-tableGrob(results.test)
-#       grid.arrange(plots.2test, plots.2utest, nrow = 1)
-#   }
+PItype <- list()
+for (x in 1:NofGroups){
+  PItype[[x]] = data.frame(PIstat[[x]])
+  PItype[[x]]$desc = dataset.data$resources[[x]]$description
+  PItype[[x]]$name = dataset.data$resources[[x]]$name
+}
+
+if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descriptions are identical
+   PItypeSingleton <- na.omit(PItype[[grep(singleton[1], PItype)]])
+   PItypeDoubleton1 <- na.omit(PItype[[grep(doubleton[1], PItype)[1]]])
+   PItypeDoubleton2 <- na.omit(PItype[[grep(doubleton[1], PItype)[2]]])
+   PIname<-c(unique(PItypeSingleton$name), unique(PItypeDoubleton1$name), unique(PItypeDoubleton2$name))
+
+   test1 = statistical_test(PItypeSingleton$value, PItypeDoubleton1$value)
+   test2 = statistical_test(PItypeSingleton$value, PItypeDoubleton2$value)
+   results.test <- data.frame(cbind(test1, test2))
+   colnames(results.test) <- c(paste(PIname[1], PIname[2], sep="\n"),paste(PIname[1], PIname[3], sep="\n"))
+   rownames(results.test) <- c("Significance level",
+                                  "MW U-Test, W",
+                                  "U-Test p-value",
+                                  "Cohen's D",
+                                  "stat. Power",
+                                  "Bayes Factor",
+                                  "Bayes Factor error",
+                                  paste("FP risk, prior ",priorval[1]),
+                                  paste("FP risk, prior ",priorval[2]),
+                                  "Likelihood Ratio")
+
+#plot two PIs with asterisks
+  plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
+                      geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+                      geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+                      geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
+                                  position=position_jitter(0.3), shape=21, size=3) +
+                      theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
+                                                          panel.border = element_rect(size = 0.5, linetype = "solid",
+                                                          colour = "black", fill=NA), legend.position = "top",
+                                                          legend.title = element_blank()) +
+                      theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
+                      ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+                      geom_signif(comparisons = list(c(unique(PItypeSingleton$name), unique(PItypeDoubleton1$name))),
+                                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                  textsize=5, vjust=0.1) +
+                      geom_signif(comparisons = list(c(unique(PItypeSingleton$name), unique(PItypeDoubleton2$name))),
+                                  map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                  textsize=5, vjust=0.1, margin_top=0.15) +
+                      samplesizes.annotate(boxes, samplesizes)
+
+    #add table with results and plot
+    plots.2utest<-tableGrob(results.test)
+    grid.arrange(plots.2test,plots.2utest, nrow = 1)
+  } else { #if there are less or more than two unique group descriptions
+    PItype_1 <- na.omit(PItype[[1]])
+    PItype_2 <- na.omit(PItype[[2]])
+    PItype_3 <- na.omit(PItype[[3]])
+    PIname<-c(unique(PItype_1$name), unique(PItype_2$name), unique(PItype_3$name))
+
+    test1 = statistical_test(PItype_1$value, PItype_2$value)
+    test2 = statistical_test(PItype_1$value, PItype_3$value)
+    test3 = statistical_test(PItype_2$value, PItype_3$value)
+    results.test <- data.frame(cbind(test1, test2, test3))
+    colnames(results.test) = c(paste(PIname[1], PIname[2], sep="\n"),
+                                paste(PIname[1], PIname[3], sep="\n"),
+                                paste(PIname[2], PIname[3], sep="\n"))
+    rownames(results.test) <- c("Significance level",
+                                    "MW U-Test, W",
+                                    "U-Test p-value",
+                                    "Cohen's D",
+                                    "stat. Power",
+                                    "Bayes Factor",
+                                    "Bayes Factor error",
+                                    paste("FP risk, prior ",priorval[1]),
+                                    paste("FP risk, prior ",priorval[2]),
+                                    "Likelihood Ratio")
+  #plot two PIs with asterisks
+    plots.2test<-ggplot(PIstatCombined, aes(group, PIs)) +
+                        geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
+                        geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
+                        geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
+                                    position=position_jitter(0.3), shape=21, size=3) +
+                        theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
+                                                            panel.border = element_rect(size = 0.5, linetype = "solid",
+                                                            colour = "black", fill=NA), legend.position = "top",
+                                                            legend.title = element_blank()) +
+                        theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size=18))+
+                        ylab(paste("PI", learningscore, " [rel. units]", sep = ""))+ xlab("Groups")+ theme(aspect.ratio=3/NofGroups)+
+                        geom_signif(comparisons = list(c(unique(PItype_1$name), unique(PItype_2$name))),
+                                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                    textsize=5, vjust=0.1, margin_top = 0.1) +
+                        geom_signif(comparisons = list(c(unique(PItype_1$name), unique(PItype_3$name))),
+                                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                    textsize=5, vjust=0.1, margin_top=0.2) +
+                        geom_signif(comparisons = list(c(unique(PItype_2$name), unique(PItype_3$name))),
+                                    map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
+                                    textsize=5, vjust=0.1, margin_top=0.1) +
+                        samplesizes.annotate(boxes, samplesizes)
+
+      #add table with results and plot
+      plots.2utest<-tableGrob(results.test)
+      grid.arrange(plots.2test, plots.2utest, nrow = 1)
+  }
 }
 
 ```
