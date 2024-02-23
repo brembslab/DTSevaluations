@@ -320,14 +320,14 @@ if (om & any(!grepl("optomotor", sequence$type)==TRUE)){   ###if there are non-o
 OMperiods = which(grepl("optomotorR", sequence$type))                                     #collect the right turning OM periods
 rightOMdata <- generateOMdata(OMperiods)                                                  #call function which assembles optomotor data for the identified periods
 omtitle = "Right (clockwise) arena rotations -"                                           #set plot title
-plotrawOMtraces(rightOMdata, omtitle)                                                     #call function to pot the OM traces
+plotrawOMtraces(rightOMdata, omtitle)                                                     #call function to plot the OM traces
 
 ### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
 OMperiods = which(grepl("optomotorL", sequence$type))                                     #collect the left turning OM periods
 leftOMdata <- generateOMdata(OMperiods)                                                   #call function which assembles optomotor data for the identified periods
 leftOMdata$time=leftOMdata$time+max(rightOMdata$time)                                     #make left data start after right data
 omtitle = "Left (counter-clockwise) arena rotations -"                                    #set plot title
-plotrawOMtraces(leftOMdata, omtitle)                                                      #call function to pot the OM traces
+plotrawOMtraces(leftOMdata, omtitle)                                                      #call function to plot the OM traces
 
 ### generate averaged optomotor responses over both rotation directions
 tempOMdata=rbind(rightOMdata,leftOMdata)                                                  #combine left and right OMdata in one dataframe
@@ -340,6 +340,31 @@ if(!exists("OMdata"))
 } else {
   OMdata[[as.character(flyname)]]=tempOMdata[[as.character(flyname)]]
 }
+
+##### collect the data for a plot where left and right  turning is swapped #####
+
+### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
+OMperiods = which(grepl("optomotorL", sequence$type))                                     #collect the left turning OM periods
+leftOMdata <- generateOMdata(OMperiods)                                                   #call function which assembles optomotor data for the identified periods
+
+### extract optomotor traces and generate dataframe for right (clockwise) turning arena
+OMperiods = which(grepl("optomotorR", sequence$type))                                     #collect the right turning OM periods
+rightOMdata <- generateOMdata(OMperiods)                                                  #call function which assembles optomotor data for the identified periods
+rightOMdata$time=rightOMdata$time+max(leftOMdata$time)                                    #make right data start after left data
+
+### generate averaged optomotor responses over both rotation directions
+tempOMdata=rbind(leftOMdata,rightOMdata)                                                  #combine left and right OMdata in one dataframe
+tempOMdata=aggregate(tempOMdata$fly,FUN=mean,by=list(tempOMdata$time))                    #average across periods
+colnames(tempOMdata) <- c("time", as.character(flyname))                                  #set dataframe names
+
+if(!exists("OMdata_swapped"))
+{
+  OMdata_swapped=tempOMdata
+} else {
+  OMdata_swapped[[as.character(flyname)]]=tempOMdata[[as.character(flyname)]]
+}
+
+
 ```
 
 `r if (beforeafter) '### Optomotor traces at start'`
@@ -372,6 +397,29 @@ if(!exists("OMdataBefore"))
 } else {
   OMdataBefore[[as.character(flyname)]]=tempOMdataBefore[[as.character(flyname)]]
 }
+
+##### collect the data for a plot where left and right  turning is swapped #####
+
+### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
+OMperiods = which(grepl("optomotorL", head(sequence$type)))                               #collect the left turning OM periods
+leftOMdataBefore <- generateOMdata(OMperiods)                                             #call function which assembles optomotor data for the identified periods
+
+### extract optomotor traces and generate dataframe for right (clockwise) turning arena
+OMperiods = which(grepl("optomotorR", head(sequence$type)))                               #collect the right turning OM periods
+rightOMdataBefore <- generateOMdata(OMperiods)                                            #call function which assembles optomotor data for the identified periods
+rightOMdataBefore$time=rightOMdataBefore$time+max(leftOMdataBefore$time)                  #make right data start after left data
+
+### generate averaged optomotor responses over both rotation directions
+tempOMdataBefore=rbind(leftOMdataBefore,rightOMdataBefore)                                #combine left and right OMdata in one dataframe
+tempOMdataBefore=aggregate(tempOMdataBefore$fly,FUN=mean,by=list(tempOMdataBefore$time))  #average across periods
+colnames(tempOMdataBefore) <- c("time", as.character(flyname))                                  #set dataframe names
+
+if(!exists("OMdataBefore_swapped"))
+{
+  OMdataBefore_swapped=tempOMdataBefore
+} else {
+  OMdataBefore_swapped[[as.character(flyname)]]=tempOMdataBefore[[as.character(flyname)]]
+}
 ```
 
 `r if (beforeafter) '### Optomotor traces at end'`
@@ -403,6 +451,29 @@ if(!exists("OMdataAfter"))
   OMdataAfter=tempOMdataAfter
 } else {
   OMdataAfter[[as.character(flyname)]]=tempOMdataAfter[[as.character(flyname)]]
+}
+
+##### collect the data for a plot where left and right  turning is swapped #####
+
+### extract optomotor traces and generate dataframe for left turning (counter-clockwise) arena
+OMperiods = which(grepl("optomotorL", tail(sequence$type, 8)))+NofPeriods-8               #collect the left turning OM periods
+leftOMdataAfter <- generateOMdata(OMperiods)                                              #call function which assembles optomotor data for the identified periods
+
+### extract optomotor traces and generate dataframe for right (clockwise) turning arena
+OMperiods = which(grepl("optomotorR", tail(sequence$type, 8)))+NofPeriods-8               #collect the right turning OM periods
+rightOMdataAfter <- generateOMdata(OMperiods)                                             #call function which assembles optomotor data for the identified periods
+rightOMdataAfter$time=rightOMdataAfter$time+max(leftOMdataAfter$time)                     #make right data start after left data
+
+### generate averaged optomotor responses over both rotation directions
+tempOMdataAfter=rbind(leftOMdataAfter,rightOMdataAfter)                                   #combine left and right OMdata in one dataframe
+tempOMdataAfter=aggregate(tempOMdataAfter$fly,FUN=mean,by=list(tempOMdataAfter$time))     #average across periods
+colnames(tempOMdataAfter) <- c("time", as.character(flyname))                             #set dataframe names
+
+if(!exists("OMdataAfter_swapped"))
+{
+  OMdataAfter_swapped=tempOMdataAfter
+} else {
+  OMdataAfter_swapped[[as.character(flyname)]]=tempOMdataAfter[[as.character(flyname)]]
 }
 ```
 
@@ -507,29 +578,29 @@ c=0 #counter to arrange figures
 for (i in nonOMperiods) {
     c=c+1 #increment counter
     dwellperiod[[i]] = rle(dwellperiod[[i]])            #run length encode the punished and unpunished data points
-    dwellperiod[[i]][[1]] = dwellperiod[[i]][[1]]*0.05  #convert run lenghts into seconds. Now we have the raw dwelling times.
-    
+    dwellperiod[[i]][[1]] = dwellperiod[[i]][[1]]*0.05  #convert run lengths into seconds. Now we have the raw dwelling times.
+
     if(is.null(unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["0"]))){dwelldata$unpunished[[i]]=as.integer(0) #if no data points, set to zero seconds
     }else{dwelldata$unpunished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["0"])} #unpunished dwelling times
-      
+
     if(is.null(unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["1"]))){dwelldata$punished[[i]]=as.integer(0) #if no data points, set to zero seconds
     } else{dwelldata$punished[[i]] = unlist(split(dwellperiod[[i]][[1]],dwellperiod[[i]][[2]])["1"])}  #punished dwelling times
 
-#calculate mean dwelling times and add them to the list used in dataset evaluations    
+#calculate mean dwelling times and add them to the list used in dataset evaluations
     dwellmeans$unpunished[l,i] =  mean(dwelldata$unpunished[[i]])
     dwellmeans$punished[l,i] =  mean(dwelldata$punished[[i]])
 
 #Prepare data for plotting cumulative percentages
-#sort dwelling times for x-axis for cumulative distributions    
+#sort dwelling times for x-axis for cumulative distributions
     DwellTpunished = sort(unique(dwelldata$punished[[i]]))
     DwellTunpunished = sort(unique(dwelldata$unpunished[[i]]))
 #calculate the cumulative percentages and shift the data down. Shift moves the data down by the number specified in n, fill=100 replaces the shifted value with 100, type="lag" decides in which direction to shift the data.
-    dwelldata$unpunished[[i]] = melt(shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag")) 
-    dwelldata$punished[[i]] = melt(shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
+    dwelldata$unpunished[[i]] = data.frame(value=shift((100-freq(dwelldata$unpunished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
+    dwelldata$punished[[i]] = data.frame(value=shift((100-freq(dwelldata$punished[[i]], cum = TRUE)$`val%cum`), n=1, fill=100, type="lag"))
 #move x-axes to shifted/melted dwelldata dataframe
     dwelldata$punished[[i]]$times = DwellTpunished
     dwelldata$unpunished[[i]]$times = DwellTunpunished
-  
+
 #plots the cumulative percentage data
   dwellplots[[c]] =ggplot() +
     geom_line(data= dwelldata$unpunished[[i]], aes(x=times, y=value,color="red"))+

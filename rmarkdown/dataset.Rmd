@@ -202,6 +202,7 @@ if('yt' %in% sequence$type || 'sw' %in% sequence$type)                  #for yt 
 ```{r Optomotor, eval=om, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
 
 plotOMtracesMean(grouped.OMdata) #call function to plot OM traces averaged over all flies
+plotOMtracesSEM(grouped.OMdata_swapped)
 ```
 
 `r if (beforeafter) '## Optomotor traces (right/left) at start of experiment'`
@@ -209,10 +210,12 @@ plotOMtracesMean(grouped.OMdata) #call function to plot OM traces averaged over 
 ```{r OM_BeforeAfter, eval=beforeafter, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 10, comment=NA, results='asis'}
 
 plotOMtracesMean(grouped.OMdataBefore) #call function to plot OM traces at start of experiment averaged over all flies
+plotOMtracesSEM(grouped.OMdataBefore_swapped)
   
 cat(paste("\n\n## Optomotor traces (right/left) at end of experiment\n\n"))
 
 plotOMtracesMean(grouped.OMdataAfter) #call function to plot OM traces at end of experiment averaged over all flies
+plotOMtracesSEM(grouped.OMdataAfter_swapped)
 ```
 
 `r if (om | beforeafter) '## Optomotor Parameter Analysis'`
@@ -687,8 +690,8 @@ for(x in 1:NofGroups){
   xlab("Experiment Sequence")+
   scale_fill_manual(values=c("red1", "steelblue4"))+
   scale_color_manual(values=c("firebrick4", "steelblue3"))+
-  theme(panel.grid.major = element_line(colour = "#808080")) + 
-  annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0, 
+  theme(panel.grid.major = element_line(colour = "#808080")) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = 0,
            alpha = .3)+
   ylim(dwellrange) +
   guides(fill = FALSE, size = FALSE)
@@ -864,7 +867,7 @@ CorrPlots[[1]] <- ggplot(OMPIcorr, aes(pretestPIs.category, plotOMparamsBefore.A
               theme(legend.position = "none") +  
               theme(aspect.ratio=1/1.4)
 
-mOMPIbefore=subset(melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", "pretestPIs.category")) # melt dataframes with values before training for rainclodplots
+mOMPIbefore=subset(reshare2::melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", "pretestPIs.category")) # melt dataframes with values before training for raincloudplots
 levels(mOMPIbefore$postPIs.group)[match("right",levels(mOMPIbefore$postPIs.group))] <- "►" #replace group description
 levels(mOMPIbefore$postPIs.group)[match("left",levels(mOMPIbefore$postPIs.group))] <- "◄" #replace group description
 
@@ -921,7 +924,7 @@ CorrPlots[[3]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM
               theme(legend.position = "none") +
               theme(aspect.ratio=1/1.4)
 
-mOMPIafter=subset(melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "postPIs.category"))  # melt dataframes with values after training for rainclodplots
+mOMPIafter=subset(reshare2::melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "postPIs.category"))  # melt dataframes with values after training for rainclodplots
 levels(mOMPIafter$postPIs.group)[match("right",levels(mOMPIafter$postPIs.group))] <- "►" #replace group description
 levels(mOMPIafter$postPIs.group)[match("left",levels(mOMPIafter$postPIs.group))] <- "◄" #replace group description
 
@@ -1290,17 +1293,18 @@ print(raincloud_2x2_repmes(
 
 ```
 
-```{r UtestG3, eval=(PIs_present & threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height=12, comment=NA, results='asis'}
+```{r UtestG3, eval=(PIs_present & threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n## Dyadic statistical tests with three groups\n")
 #creating a list with PIs and condition in on list
 
 if(NofGroups == 3) { #just to be extra-sure :-)
 
-PItype <- list() 
+PItype <- list()
 for (x in 1:NofGroups){
-  PItype[[x]] = melt(PIstat[[x]])
-  PItype[[x]]$desc = dataset.data$resources[[x]]$description
-  PItype[[x]]$name = dataset.data$resources[[x]]$name
+  PItype[[x]] = data.frame(PIstat[[x]])                        #get PIs for each group
+  colnames(PItype[[x]])[1] <- "value"                          #set the right name for the column with the PIs
+  PItype[[x]]$desc = dataset.data$resources[[x]]$description   #add group description
+  PItype[[x]]$name = dataset.data$resources[[x]]$name          #add group name
 }
 
 if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descriptions are identical
@@ -1308,14 +1312,14 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
    PItypeDoubleton1 <- na.omit(PItype[[grep(doubleton[1], PItype)[1]]])
    PItypeDoubleton2 <- na.omit(PItype[[grep(doubleton[1], PItype)[2]]])
    PIname<-c(unique(PItypeSingleton$name), unique(PItypeDoubleton1$name), unique(PItypeDoubleton2$name))
-   
+
    test1 = statistical_test(PItypeSingleton$value, PItypeDoubleton1$value)
    test2 = statistical_test(PItypeSingleton$value, PItypeDoubleton2$value)
    results.test <- data.frame(cbind(test1, test2))
-   colnames(results.test) <- c(paste(PIname[1], PIname[2], sep="\n"),paste(PIname[1], PIname[3], sep="\n")) 
+   colnames(results.test) <- c(paste(PIname[1], PIname[2], sep="\n"),paste(PIname[1], PIname[3], sep="\n"))
    rownames(results.test) <- c("Significance level",
                                   "MW U-Test, W",
-                                  "U-Test p-value", 
+                                  "U-Test p-value",
                                   "Cohen's D",
                                   "stat. Power",
                                   "Bayes Factor",
@@ -1329,7 +1333,7 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
                       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
                       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
                       geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
-                                  position=position_jitter(0.3), shape=21, size=3) +
+                                  position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
                       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                                                           panel.border = element_rect(size = 0.5, linetype = "solid",
                                                           colour = "black", fill=NA), legend.position = "top",
@@ -1352,7 +1356,7 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
     PItype_2 <- na.omit(PItype[[2]])
     PItype_3 <- na.omit(PItype[[3]])
     PIname<-c(unique(PItype_1$name), unique(PItype_2$name), unique(PItype_3$name))
-    
+
     test1 = statistical_test(PItype_1$value, PItype_2$value)
     test2 = statistical_test(PItype_1$value, PItype_3$value)
     test3 = statistical_test(PItype_2$value, PItype_3$value)
@@ -1362,7 +1366,7 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
                                 paste(PIname[2], PIname[3], sep="\n"))
     rownames(results.test) <- c("Significance level",
                                     "MW U-Test, W",
-                                    "U-Test p-value", 
+                                    "U-Test p-value",
                                     "Cohen's D",
                                     "stat. Power",
                                     "Bayes Factor",
@@ -1375,7 +1379,7 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
                         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
                         geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
                         geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
-                                    position=position_jitter(0.3), shape=21, size=3) +
+                                    position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
                         theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                                                             panel.border = element_rect(size = 0.5, linetype = "solid",
                                                             colour = "black", fill=NA), legend.position = "top",
@@ -1392,7 +1396,7 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
                                     map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]),
                                     textsize=5, vjust=0.1, margin_top=0.1) +
                         samplesizes.annotate(boxes, samplesizes)
-  
+
       #add table with results and plot
       plots.2utest<-tableGrob(results.test)
       grid.arrange(plots.2test, plots.2utest, nrow = 1)
@@ -1401,7 +1405,7 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
 
 ```
 
-```{r Utestpooled, eval=(PIs_present & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 6, comment=NA, results='asis'}
+```{r Utestpooled, eval=(PIs_present & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", comment=NA, results='asis'}
 cat("\n## Statistical tests between pooled groups\n")
 
   cat("The following experimental groups were pooled into two groups:\n")
