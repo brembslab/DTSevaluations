@@ -1293,7 +1293,7 @@ print(raincloud_2x2_repmes(
 
 ```
 
-```{r UtestG3, eval=(PIs_present & threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height=12, comment=NA, results='asis'}
+```{r UtestG3, eval=(PIs_present & threegroupstats & NofGroups==3), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 12, comment=NA, results='asis'}
 cat("\n## Dyadic statistical tests with three groups\n")
 #creating a list with PIs and condition in on list
 
@@ -1301,9 +1301,10 @@ if(NofGroups == 3) { #just to be extra-sure :-)
 
 PItype <- list()
 for (x in 1:NofGroups){
-  PItype[[x]] = data.frame(PIstat[[x]])
-  PItype[[x]]$desc = dataset.data$resources[[x]]$description
-  PItype[[x]]$name = dataset.data$resources[[x]]$name
+  PItype[[x]] = data.frame(PIstat[[x]])                        #get PIs for each group
+  colnames(PItype[[x]])[1] <- "value"                          #set the right name for the column with the PIs
+  PItype[[x]]$desc = dataset.data$resources[[x]]$description   #add group description
+  PItype[[x]]$name = dataset.data$resources[[x]]$name          #add group name
 }
 
 if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descriptions are identical
@@ -1332,7 +1333,7 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
                       geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
                       geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
                       geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
-                                  position=position_jitter(0.3), shape=21, size=3) +
+                                  position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
                       theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                                                           panel.border = element_rect(size = 0.5, linetype = "solid",
                                                           colour = "black", fill=NA), legend.position = "top",
@@ -1378,7 +1379,7 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
                         geom_hline(yintercept = 0, colour = "#887000", size = 1.2) +
                         geom_boxplot(fill = boxcolors, notch = TRUE, outlier.color=NA, width=0.8, size=0.6) +
                         geom_jitter(data=PIstatCombined, aes(group, PIs, fill=category),
-                                    position=position_jitter(0.3), shape=21, size=3) +
+                                    position=position_jitter(0.3), shape=21, size=3, alpha=0.5) +
                         theme_light(base_size = 16) + theme(panel.grid.minor = element_blank(), panel.grid.major.x = element_blank(),
                                                             panel.border = element_rect(size = 0.5, linetype = "solid",
                                                             colour = "black", fill=NA), legend.position = "top",
@@ -1404,7 +1405,7 @@ if(length(unique(groupdescriptions))==2 & PIs_present) { #if two group descripti
 
 ```
 
-```{r Utestpooled, eval=(PIs_present & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 10, fig.width = 6, comment=NA, results='asis'}
+```{r Utestpooled, eval=(PIs_present & twogroupstats & PoolGrps), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", comment=NA, results='asis'}
 cat("\n## Statistical tests between pooled groups\n")
 
   cat("The following experimental groups were pooled into two groups:\n")
