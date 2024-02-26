@@ -867,7 +867,7 @@ CorrPlots[[1]] <- ggplot(OMPIcorr, aes(pretestPIs.category, plotOMparamsBefore.A
               theme(legend.position = "none") +  
               theme(aspect.ratio=1/1.4)
 
-mOMPIbefore=subset(reshare2::melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", "pretestPIs.category")) # melt dataframes with values before training for raincloudplots
+mOMPIbefore=subset(reshape2::melt(OMPIcorr), variable %in% c("plotOMparamsBefore.AI.OM.", "pretestPIs.category")) # melt dataframes with values before training for raincloudplots
 levels(mOMPIbefore$postPIs.group)[match("right",levels(mOMPIbefore$postPIs.group))] <- "►" #replace group description
 levels(mOMPIbefore$postPIs.group)[match("left",levels(mOMPIbefore$postPIs.group))] <- "◄" #replace group description
 
@@ -924,7 +924,7 @@ CorrPlots[[3]] <- ggplot(OMPIcorr, aes(postPIs.category, plotOMparamsAfter.AI.OM
               theme(legend.position = "none") +
               theme(aspect.ratio=1/1.4)
 
-mOMPIafter=subset(reshare2::melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "postPIs.category"))  # melt dataframes with values after training for rainclodplots
+mOMPIafter=subset(reshape2::melt(OMPIcorr), variable %in% c("plotOMparamsAfter.AI.OM.", "postPIs.category"))  # melt dataframes with values after training for rainclodplots
 levels(mOMPIafter$postPIs.group)[match("right",levels(mOMPIafter$postPIs.group))] <- "►" #replace group description
 levels(mOMPIafter$postPIs.group)[match("left",levels(mOMPIafter$postPIs.group))] <- "◄" #replace group description
 

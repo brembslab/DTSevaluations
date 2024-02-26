@@ -220,7 +220,8 @@ plotOMtracesMean <- function(OMdata){
             annotate("text", -Inf, -Inf, label = "Right (clockwise) arena rotations", hjust = -.4, vjust = -1.3)+
             annotate("text", Inf, Inf, label = "Left (counter-clockwise) arena rotations", hjust =1.1, vjust = 1.5)+ 
             theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
-            scale_x_continuous(expand = expand_scale(add = 0))
+            scale_x_continuous(expand = expand_scale(add = 0))+
+            scale_y_continuous(n.breaks=8)
     return(meanOMtraces)
 
 }
@@ -260,7 +261,8 @@ plotOMtracesSEM <- function(OMdata){
     annotate("text", Inf, -Inf, label = "Right (clockwise) arena rotations",hjust=1.1, vjust=-1.5)+
     annotate("text", -Inf, Inf, label = "Left (counter-clockwise) arena rotations", hjust =-.2, vjust = 1.5)+ 
     theme(panel.grid.major.x = element_blank(),panel.grid.major.y = element_line( size=.1, color="grey"))+
-    scale_x_continuous(expand = expand_scale(add = 0))
+    scale_x_continuous(expand = expand_scale(add = 0))+
+    scale_y_continuous(n.breaks=8)
   return(meanOMtraces)
   
 }
