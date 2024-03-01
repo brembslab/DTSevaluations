@@ -116,14 +116,14 @@ flyMetaDataImport <- function(xml_name) {
   variables <- xmlToDataFrame(nodes=getNodeSet(flyData,"//timeseries/variables/variable"))
 
   ##list all data
-  singleflymetadata <- list(URIs, 
-                        experimenter,
-                        fly,
-                        experiment,
-                        NofPeriods,
-                        sequence,
-                        CSV_descriptor,
-                        variables)
+  singleflymetadata <- list(URIs=URIs, 
+                        experimenter=experimenter,
+                        fly=fly,
+                        experiment=experiment,
+                        NofPeriods=NofPeriods,
+                        sequence=sequence,
+                        CSV_descriptor=CSV_descriptor,
+                        variables=variables)
   
   return(singleflymetadata)
 }
@@ -143,8 +143,8 @@ for (l in 1:length(xml_list))
     singleflymetadata <- flyMetaDataImport(xml_name)
     
     ##extract meta-data
-    experiment <- singleflymetadata[[4]]
-    sequence <- singleflymetadata[[6]]
+    experiment <- singleflymetadata$experiment
+    sequence <- singleflymetadata$sequence
     flymetadata <- c(as.vector(as.numeric(as.character(experiment$duration))),
                     as.vector(as.numeric(as.character(experiment$sample_rate))),
                     as.vector(experiment$arena_type),
@@ -192,9 +192,9 @@ MultiFlyDuplicateCheck <- function(xml_list)
 collect.metadata <-function(singleflydata)
   {
   #retrieve meta-data
-  experimenter <- singleflydata[[2]]
-  experiment <- singleflydata[[4]]
-  fly <- singleflydata[[3]]
+  experimenter <- singleflydata$experimenter
+  experiment <- singleflydata$experiment
+  fly <- singleflydata$fly
   #create reporting strings
   exp.name = paste("Experimenter:", experimenter$firstname, experimenter$lastname, sep = " ")
   exp.orcid = paste("ORCID: ",experimenter$orcid)
