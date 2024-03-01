@@ -75,20 +75,20 @@ flyDataImport <- function(xml_name) {
     if (length(table(rawdata$period)) > NofPeriods) {rawdata<-rawdata[!(rawdata$period==length(table(rawdata$period))),]}
     
     ##list all data
-    singleflydata <- list(URIs, 
-                          experimenter,
-                          fly,
-                          experiment,
-                          NofPeriods,
-                          sequence,
-                          CSV_descriptor,
-                          variables,
-                          rawdata,
-                          flyrange,
-                          real_sample_rate,
-                          down_sample_rate,
-                          traces,
-                          ExpType)
+    singleflydata <- list(URIs=URIs, 
+                          experimenter=experimenter,
+                          fly=fly,
+                          experiment=experiment,
+                          NofPeriods=NofPeriods,
+                          sequence=sequence,
+                          CSV_descriptor=CSV_descriptor,
+                          variables=variables,
+                          rawdata=rawdata,
+                          flyrange=flyrange,
+                          real_sample_rate=real_sample_rate,
+                          down_sample_rate=down_sample_rate,
+                          traces=traces,
+                          ExpType=ExpType)
   
   return(singleflydata)
 }
