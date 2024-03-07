@@ -24,6 +24,8 @@ if (Dwell){
 #### -- Performance Indices -- ####
 PIs_present <- !all(is.na(sequence$lambda)) ###determine if there are any PIs to be plotted
 
+if (PIs_present)
+{
 #PIprofiles for statistical analysis (PIs alone, periods as column names)
 colnames(PIprofile) <- sprintf("PI%d", 1:NofPeriods)    #make colnames in PIprofile
 grouped.PIprofiles[[x]] = PIprofile                     #add PIprofile to list of grouped PIs
@@ -35,15 +37,14 @@ grouped.Categories[[x]] = Categories                      #add Categories to lis
 Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
 
 #PCombine categories with PIs for plotting (melted, periods as id-variable)
-if (PIs_present)
-{
   PIcombined <- melt(Categories, measure.vars = names(Categories), variable.name = "period", value.name = "category") #melt data frame to create a variable with periods as id values
   PIcombined["PIs"] = melt(PIprofile)$value                 #combine the categories with the PIs
   grouped.PIcombined[[x]] = PIcombined                      #add PIcombined to list of grouped PIs and categories (for plotting)
-}
 
 #Remove some items for reuse in the next group
 rm(PIprofile, PIcombined, Categories)
+
+}
 
 
 #### -- Power spectra -- ####

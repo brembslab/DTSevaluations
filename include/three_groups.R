@@ -1,4 +1,4 @@
-# Organize the groups order and conbination baesd on the description
+# Organize the groups order and combination based on the description
 # e.g. 
 # groupdescription[1] = control
 # groupdescription[2] = control

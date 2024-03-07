@@ -12,6 +12,7 @@ grouped.OMdataBefore <-list()  #Averaged optomotor data traces for each group at
 grouped.OMparamsBefore <-list()#Extracted optomotor parameters for each group at start of experiment
 grouped.OMdataAfter <-list()   #Averaged optomotor data traces for each group at end of experiment
 grouped.OMparamsAfter <-list() #Extracted optomotor parameters for each group at end of experiment
+grouped.OMdata_swapped <-list()        #For swapping left and right OM traces
 grouped.OMdataBefore_swapped <-list()  #For swapping left and right OM traces
 grouped.OMdataAfter_swapped <-list()   #For swapping left and right OM traces
 

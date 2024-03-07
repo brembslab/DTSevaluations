@@ -3,8 +3,8 @@ experiment:
     type: Joystick
     id: none
     name: optomotorT4T5Test
-    title: Optomotor test of of flies with blocked T4T5 neurons 
-    description: Optomotor test of of flies with blocked T4T5 neurons
+    title: Optomotor test of flies with blocked T4T5 neurons 
+    description: Optomotor test of flies with blocked T4T5 neurons on a joystick
 licenses:
     name: ODC-PDDL-1.0
     uri: http://opendatacommons.org/licenses/pddl
