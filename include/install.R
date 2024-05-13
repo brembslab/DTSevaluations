@@ -30,7 +30,9 @@ install.packages(c("ggplot2",
                 "reactable",
                 "sicegar",
                 "wrMisc",
-                "raincloudplots"))
+                "raincloudplots",
+                "ggpmisc",
+                "ggrain"))
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")

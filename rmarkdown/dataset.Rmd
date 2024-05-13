@@ -1013,7 +1013,7 @@ cat("\n# Learning Score Statistics\n## Statistical tests of single groups agains
     grid.arrange(grobs = plots.singles, ncol=1, nrow=2, heights=c(0.2,1))
 ```
 
-```{r WilcoxonRaincloud, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", fig.height=7, comment=NA, results='asis'}
+```{r WilcoxonRaincloud, eval=wil, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, fig.align = "center", comment=NA, results='asis'}
 cat("\n## Statistical tests of single groups against zero - raincloudplots\n")
   
   wilcoxon<-numeric()  
