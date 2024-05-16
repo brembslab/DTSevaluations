@@ -28,7 +28,7 @@ fly_pos_traces <- function(temp)
 
 dytraces <- function(rawdata)
 {
-  traces <- dygraph(rawdata, main = paste("Time Traces", flyname)) %>%
+  traces <- dygraph(rawdata[c("time","a_pos", "fly")], main = paste("Time Traces", flyname)) %>%
     dySeries("a_pos", label = "position", color = "darkred") %>%
     dySeries("fly", axis = 'y2', color = "blue") %>%
     dyAxis("x", drawGrid = FALSE) %>%
