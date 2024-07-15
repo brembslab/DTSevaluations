@@ -624,6 +624,21 @@ grid.arrange(grobs = dwellplots, ncol=2)
 
 ```
 
+```{r tracesheatmarked, eval=('yt' %in% sequence$type || 'sw' %in% sequence$type) , echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12, comment=NA, results='asis'}   
+cat("\n## Interactive Time Traces with heated episodes marked\n")
+    
+    ##dyplot traces with marked heat episodes
+    dygraph(rawdata[c("time","fly","punished")], main = paste("Time Traces", flyname)) %>%
+    dyAxis("x", drawGrid = FALSE) %>%
+    dyAxis("y", label = paste(FlyBehavior, "[arb units]"), independentTicks = TRUE, valueRange = maxfly) %>%
+    dySeries("fly", color = "blue") %>%
+    dyAxis("y2", label = "HeatON/OFF", valueRange = c(-0.1,1.1), drawGrid = FALSE) %>%
+    dySeries("punished", axis = 'y2', label = "Heat", color = "darkred") %>%
+    dyOptions(includeZero = TRUE, gridLineColor = "lightblue") %>%
+    dyRangeSelector()
+
+```
+
 ```{r PIs, eval=(!all(is.na(sequence$lambda))), echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 6, fig.width = 8, comment=NA, results='asis'}
 cat("\n# Learning and avoidance scores\n")
 
