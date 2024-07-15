@@ -624,9 +624,8 @@ grid.arrange(grobs = dwellplots, ncol=2)
 
 ```
 
-```{r tracesheatmarked, eval=('yt' %in% sequence$type || 'sw' %in% sequence$type) , echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12}   
-
-cat("\n## Interactive Time Traces (heated episodes marked)\n")
+```{r tracesheatmarked, eval=('yt' %in% sequence$type || 'sw' %in% sequence$type) , echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = 4, fig.width = 12, comment=NA, results='asis'}   
+cat("\n## Interactive Time Traces with heated episodes marked\n")
     
     ##dyplot traces with marked heat episodes
     dygraph(rawdata[c("time","fly","punished")], main = paste("Time Traces", flyname)) %>%
