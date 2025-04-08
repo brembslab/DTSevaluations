@@ -37,8 +37,8 @@ grouped.Categories[[x]] = Categories                      #add Categories to lis
 Categories <- Categories[colSums(!is.na(Categories)) > 0] #remove empty columns
 
 #PCombine categories with PIs for plotting (melted, periods as id-variable)
-  PIcombined <- melt(Categories, measure.vars = names(Categories), variable.name = "period", value.name = "category") #melt data frame to create a variable with periods as id values
-  PIcombined["PIs"] = melt(PIprofile)$value                 #combine the categories with the PIs
+  PIcombined <- reshape2::melt(Categories, measure.vars = names(Categories), variable.name = "period", value.name = "category") #melt data frame to create a variable with periods as id values
+  PIcombined["PIs"] = reshape2::melt(PIprofile)$value                 #combine the categories with the PIs
   grouped.PIcombined[[x]] = PIcombined                      #add PIcombined to list of grouped PIs and categories (for plotting)
 
 #Remove some items for reuse in the next group

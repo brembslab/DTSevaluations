@@ -15,8 +15,8 @@ if(PIs_present & !is.null(learningscore)){
   SDs<-as.numeric(apply(PIstat, 2, function(x) sd(na.omit(x))))
   
   #combine PIstat and CatStat for plotting learningscores
-  PIstatCombined <- melt(CatStat, measure.vars = names(CatStat), variable.name = "group", value.name = "category") #melt categories into dataframe with group as id-variable
-  PIstatCombined["PIs"] = melt(PIstat)$value                                        #combine the categories with the PIs
+  PIstatCombined <- reshape2::melt(CatStat, measure.vars = names(CatStat), variable.name = "group", value.name = "category") #melt categories into dataframe with group as id-variable
+  PIstatCombined["PIs"] = reshape2::melt(PIstat)$value                                        #combine the categories with the PIs
   PIstat.rcp = PIstatCombined                                                       #save values with NAs for raincloudplots
   PIstatCombined = na.omit(PIstatCombined)                                          #delete NA rows
 }
@@ -30,7 +30,7 @@ pretestPIs <- list()
   }
   pretestPIs <- as.data.frame(t(plyr::ldply(pretestPIs, rbind)))                    #convert PI list to a temproary data.frame
   colnames(pretestPIs) <- unlist(sapply(dataset.data[["resources"]], '[', 'name'))  #add group names as column names to PItemp
-  pretestPIs <- melt(pretestPIs, measure.vars = names(pretestPIs), variable.name = "group", value.name = "category", na.rm = TRUE) #melt categories into dataframe with group as id-variable
+  pretestPIs <- reshape2::melt(pretestPIs, measure.vars = names(pretestPIs), variable.name = "group", value.name = "category", na.rm = TRUE) #melt categories into dataframe with group as id-variable
 }
 
 #Compute average post-training values and create dataframe
@@ -42,7 +42,7 @@ if(PIs_present){
   }
   postPIs <- as.data.frame(t(plyr::ldply(postPIs, rbind)))                    #convert PI list to a temproary data.frame
   colnames(postPIs) <- unlist(sapply(dataset.data[["resources"]], '[', 'name'))  #add group names as column names to PItemp
-  postPIs <- melt(postPIs, measure.vars = names(postPIs), variable.name = "group", value.name = "category", na.rm = TRUE) #melt categories into dataframe with group as id-variable
+  postPIs <- reshape2::melt(postPIs, measure.vars = names(postPIs), variable.name = "group", value.name = "category", na.rm = TRUE) #melt categories into dataframe with group as id-variable
 }
 
 #Create raincloudplot dataframe for 2x2 raincloud plots

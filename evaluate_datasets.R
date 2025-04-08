@@ -34,7 +34,7 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
   #create/empty lists for collecting all single fly data by period
   period.data <- list()     #data grouped by period
   grouped.data <- list()    #total data grouped
-  speclist <- list()        #spectograms
+  speclist <- list()        #spectrograms
   
   #start actually evaluating
   print(paste("Evaluating experiments in group: ",grp_title,sep = ""), quote=FALSE)
