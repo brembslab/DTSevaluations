@@ -38,7 +38,7 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
   
   #start actually evaluating
   print(paste("Evaluating experiments in group: ",grp_title,sep = ""), quote=FALSE)
-  pb <- winProgressBar(title = "progress bar", min = 0, max = length(xml_list), width = 300)
+  ## Doesn't work for Linux pb <- winProgressBar(title = "progress bar", min = 0, max = length(xml_list), width = 300)
 
   for (l in 1:length(xml_list)) #start the loop that evaluates each individual fly, one at a time
     {
@@ -71,7 +71,7 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
       xml_list[[l]] = paste('<a href="',flyname,'_qc.html">', flyname,'</a>', sep = '')  #create link to each single fly quality control HTML document to be used in dataset evaluation
       
       #open window with progress bar
-      setWinProgressBar(pb, l, title=paste(round(l/length(xml_list)*100, 0), "% of",grp_title,"done"))
+      ##Doesn't work on Linux setWinProgressBar(pb, l, title=paste(round(l/length(xml_list)*100, 0), "% of",grp_title,"done"))
       
     } #for number of flies in xml_list - from here on group evaluations
   
