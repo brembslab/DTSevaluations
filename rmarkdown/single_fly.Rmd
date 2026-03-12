@@ -77,6 +77,45 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
     ##dyplot traces
     dytraces(rawdata)
 
+    ## Calculate variance
+    ##install.packages("data.table") ##Installs package needed for frollvar
+    library(data.table) ##Initializes library (can be moved to Includes.R later)
+    span <- 21 ##Sets the span for the rolling variance
+    var_vector <- frollvar(rawdata$fly, n = span, align = "center") ##Takes a rolling variance
+    threshold <- 80 ##Sets the cutoff value for low variance
+    pot_pause <- var_vector < threshold ##Makes a logical vector
+    ##prob_pause[x] <- pot_pause[x] && (pot_pause[x-1] | pot_pause[x+1]) ##Includes only stretches of low variance,     still workshopping
+    num_pause <- sum(pot_pause, na.rm=TRUE) ##Determines number of TRUE values 
+    per_pause <- num_pause/length(pot_pause)*100 ##Calculates the ratio of time in pause
+    result <- paste("Percent of trial not flying", per_pause, "%")
+    print(result) ##Shows the ratio in the singlefly html, will be moved to     a table in the summary later
+    ##dyplot traces with variance in different color
+    library(xts) ##Initializes xts library
+    new_format_data <- xts(rawdata$fly, order.by = as.POSIXct(rawdata$time / 1000, origin = "1970-01-01")) ##Formats     data for dygraphs
+    r <- rle(pot_pause)
+
+    ends <- cumsum(r$lengths)
+    starts <- ends - r$lengths + 1
+
+    pause_segments <- data.frame(
+      start = starts[r$values],
+      end   = ends[r$values]
+    )
+    graph_shaded <- dygraph(new_format_data)
+    for(i in seq_len(nrow(pause_segments))) {
+
+      start_time <- index(new_format_data)[pause_segments$start[i]]
+      end_time   <- index(new_format_data)[pause_segments$end[i]]
+
+    graph_shaded <- graph_shaded %>% dyShading(
+      from = start_time,
+      to = end_time,
+      color = "#B22222"
+      )
+    }
+    graph_shaded ##Prints the graph with flight pauses shaded
+  
+
 ```
 
 ## Time Traces by Period (20Hz)
