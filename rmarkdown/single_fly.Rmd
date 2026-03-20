@@ -80,19 +80,33 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
     ## Calculate variance
     ##install.packages("data.table") ##Installs package needed for frollvar
     library(data.table) ##Initializes library (can be moved to Includes.R later)
-    span <- 21 ##Sets the span for the rolling variance
+    span <- 11 ##Sets the span for the rolling variance
     var_vector <- frollvar(rawdata$fly, n = span, align = "center") ##Takes a rolling variance
-    threshold <- 80 ##Sets the cutoff value for low variance
+    ##threshold <- 40 ##Sets the cutoff value for low variance
+    ##Implement comparison to average var
+    avg <- mean(var_vector, na.rm=TRUE)
+    low <- sort(var_vector)##Sorts the variance vector
+    ratio <- length(low)/20 ##Finds bottom 5% of variance
+    low <- low[1:ratio]
+    threshold <- mean(low, na.rm=TRUE)
     pot_pause <- var_vector < threshold ##Makes a logical vector
-    ##prob_pause[x] <- pot_pause[x] && (pot_pause[x-1] | pot_pause[x+1]) ##Includes only stretches of low variance,     still workshopping
-    num_pause <- sum(pot_pause, na.rm=TRUE) ##Determines number of TRUE values 
-    per_pause <- num_pause/length(pot_pause)*100 ##Calculates the ratio of time in pause
+    ##prob_pause <- pot_pause & (c(pot_pause[-1], FALSE)|c(pot_pause[+1], FALSE))
+    ##hmm_pause <- prob_pause & (c(prob_pause[-1], FALSE)|c(prob_pause[+1], FALSE))
+    ##def_pause <- hmm_pause & (c(hmm_pause[-1], FALSE)|c(hmm_pause[+1], FALSE))
+    ##Includes only stretches of low variance, still workshopping
+    min_length <- 40 ##Sets the minimum length considered a flight pause
+    def_pause <- rle(pot_pause) ##Analyzes run length of TRUE on pot_pause
+    too_short <- def_pause$values & def_pause$lengths < min_length
+    def_pause$values[too_short] <- FALSE
+    def_pause <- inverse.rle(def_pause)
+    num_pause <- sum(def_pause, na.rm=TRUE) ##Determines number of TRUE values 
+    per_pause <- num_pause/length(def_pause)*100 ##Calculates the ratio of time in pause
     result <- paste("Percent of trial not flying", per_pause, "%")
     print(result) ##Shows the ratio in the singlefly html, will be moved to     a table in the summary later
     ##dyplot traces with variance in different color
     library(xts) ##Initializes xts library
     new_format_data <- xts(rawdata$fly, order.by = as.POSIXct(rawdata$time / 1000, origin = "1970-01-01")) ##Formats     data for dygraphs
-    r <- rle(pot_pause)
+    r <- rle(def_pause)
 
     ends <- cumsum(r$lengths)
     starts <- ends - r$lengths + 1
@@ -112,6 +126,7 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
       to = end_time,
       color = "#B22222"
       )
+    graph_shaded <- dyRangeSelector(graph_shaded)
     }
     graph_shaded ##Prints the graph with flight pauses shaded
   
