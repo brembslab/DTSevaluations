@@ -80,24 +80,25 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
     ## Calculate variance
     ##install.packages("data.table") ##Installs package needed for frollvar
     library(data.table) ##Initializes library (can be moved to Includes.R later)
-    span <- 11 ##Sets the span for the rolling variance
-    var_vector <- frollvar(rawdata$fly, n = span, align = "center") ##Takes a rolling variance
+    span <- 21 ##Sets the span for the rolling variance
+    var_vector <- frollvar(rawdata$fly, n = span, align = "center") ##Takes a rolling variance, center means in both directions
     ##threshold <- 40 ##Sets the cutoff value for low variance
     ##Implement comparison to average var
     avg <- mean(var_vector, na.rm=TRUE)
     low <- sort(var_vector)##Sorts the variance vector
-    ratio <- length(low)/20 ##Finds bottom 5% of variance
-    low <- low[1:ratio]
-    threshold <- mean(low, na.rm=TRUE)
+    ratio <- length(low)/10 ##Finds bottom 10% of variance
+    low <- low[1:ratio] ##Includes only the lowest variance
+    ##threshold <- mean(low, na.rm=TRUE) ##Sets the threshold to the mean of the lowest variance
+    threshold <- 30
     pot_pause <- var_vector < threshold ##Makes a logical vector
     ##prob_pause <- pot_pause & (c(pot_pause[-1], FALSE)|c(pot_pause[+1], FALSE))
     ##hmm_pause <- prob_pause & (c(prob_pause[-1], FALSE)|c(prob_pause[+1], FALSE))
     ##def_pause <- hmm_pause & (c(hmm_pause[-1], FALSE)|c(hmm_pause[+1], FALSE))
     ##Includes only stretches of low variance, still workshopping
-    min_length <- 40 ##Sets the minimum length considered a flight pause
+    min_length <- 60 ##Sets the minimum length considered a flight pause
     def_pause <- rle(pot_pause) ##Analyzes run length of TRUE on pot_pause
-    too_short <- def_pause$values & def_pause$lengths < min_length
-    def_pause$values[too_short] <- FALSE
+    too_short <- def_pause$values & def_pause$lengths < min_length ##Defines stretches of TRUE runs that are too short too be pauses
+    def_pause$values[too_short] <- FALSE ##Sets short runs to FALSE
     def_pause <- inverse.rle(def_pause)
     num_pause <- sum(def_pause, na.rm=TRUE) ##Determines number of TRUE values 
     per_pause <- num_pause/length(def_pause)*100 ##Calculates the ratio of time in pause
