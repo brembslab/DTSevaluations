@@ -18,6 +18,17 @@ threegroupstats <- identical(1,as.numeric(dataset.data[["statistics"]][["three.g
 wil <- identical(1,as.numeric(dataset.data[["statistics"]][["single.groups"]][["data"]]))            #determine if we need to do single tests
 learningscore = dataset.data[["statistics"]][["learning-score"]][["data"]]                           #get the PI that is going to be tested
 colorrange = dataset.data[["statistics"]][["color-range"]]                                           #get the color range for plots
-if(!is.null(unlist(sapply(dataset.data[["resources"]], function(x) x["id"])))){
-  groupids <- hyperlinks.FBids(unlist(sapply(dataset.data[["resources"]], function(x) x["id"])))     #get a vector with all group FlyBase IDs and hyperlinks
-} else groupids=NULL
+
+
+ids <- sapply(dataset.data[["resources"]], function(x) {
+  list(
+    male = x[["id"]][["flybasemale"]],
+    female = x[["id"]][["flybasefemale"]]
+  )
+})
+
+if(!is.null(unlist(ids["male",])) && !is.null(unlist(ids["female",]))){
+  groupids_male <- hyperlinks.FBidsmale(unlist(ids["male",]))
+  groupids_female <- hyperlinks.FBidsfemale(unlist(ids["female",]))
+  groupids <- paste(groupids_male, groupids_female, sep = " x ")
+}else groupids=NULL
