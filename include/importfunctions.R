@@ -104,7 +104,6 @@ flyMetaDataImport <- function(xml_name) {
   
   ##parse the metadata
   URIs <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/URIs"))
-  
   experimenter <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experimenter"))
   fly <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/fly"))
   experiment <- xmlToDataFrame(nodes=getNodeSet(flyData,"//metadata/experiment"))

@@ -1,0 +1,61 @@
+---
+experiment:
+    type: Torquemeter
+    id: SCR_017276
+    name: wtb-rut-colorlearning
+    title: rutabaga vs. wtb in closed-loop color learning
+    description: Comparison of rutabaga mutants and wild type 'Berlin' flies in closed-loop blue-green color learning, requiring angle-integration
+licenses:
+    name: ODC-PDDL-1.0
+    uri: http://opendatacommons.org/licenses/pddl
+author:
+    name: bjoern-brembs
+    description: Björn Brembs
+    firstName: Björn
+    lastName: Brembs
+    id: 0000-0001-7824-7650
+resources:
+- name: WTB
+  title: wild type Berlin
+  description: control
+  data:
+  - rut_color_01.xml
+  - rut_color_02.xml
+  - rut_color_03.xml
+  - rut_color_04.xml
+  - rut_color_05.xml
+statistics:
+  significance-levels:
+    - 0.005
+    - 0.001
+    - 0.0001
+  priors:
+    - 0.5
+    - 0.9
+  color-range:
+    - cornflowerblue
+    - goldenrod1
+    - khaki
+    - olivedrab3
+    - indianred1
+    - plum3
+  learning-score:
+    title: PI8
+    description: First test after last training
+    data: 8
+  single.groups:
+    title: several single group tests against zero
+    description: one sided Wilcoxon-Tests and Bayes Factors
+    data: 1 #yes
+  two.groups:
+    title: several two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test) and Bayes Factor
+    power: greater #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 0 #yes
+  three.groups:
+    title: two-sided tests
+    description: Wilcoxon rank sum test with continuity correction (U-Test)
+    power: less #first group is tested for being lower than second group (alternatives: greater, two.sided)
+    data: 0 #yes      
+mediatype: text/csv/xml
+epid: 245

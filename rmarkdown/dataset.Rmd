@@ -32,6 +32,9 @@ setwd(dataset.path)
 
 **dataset file (YAML):** `r paste('<a href="', basename(dataset.file), '">', dataset.data$experiment$title, '</a>', sep = "")`  
 **Description:** `r paste(dataset.data$experiment$description)`  
+**Recording:** [`r paste(URIs$recording)`](https://doi.org/`r paste(URIs$recording)`)
+**Analysis:** [`r paste(URIs$analysis)`](https://doi.org/`r paste(URIs$analysis)`)
+**Datamodel:** [`r paste(URIs$datamodel)`](https://doi.org/`r paste(URIs$datamodel)`)
 **Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', dataset.data$experiment$id, '">', dataset.data$experiment$id, '</a>', sep = "")`  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
