@@ -36,6 +36,7 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
   grouped.data <- list()    #total data grouped
   speclist <- list()        #spectrograms
   
+  
   #start actually evaluating
   print(paste("Evaluating experiments in group: ",grp_title,sep = ""), quote=FALSE)
   pb <- winProgressBar(title = "progress bar", min = 0, max = length(xml_list), width = 300)
@@ -48,8 +49,12 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
       # read the data with the corresponding function #######
       singleflydata <- flyDataImport(xml_name)
   
+      ##collect URIs from each xml file
+      xml_URIs_list[[xml_name]] <- as.list(singleflydata$URIs)
+      
       #extract single fly data
       source("include/extractsingleflydata.R")
+      
   
       #progress bar
       source("include/progressbar.R")    
@@ -77,6 +82,11 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
   
   #close progress bar window
   close(pb)
+  
+  #check if the URIs between yaml file and xmls files   are the same
+  URIs_match <- all(sapply(xml_URIs_list, function(xml_URIs) {
+    identical(yaml_URIs[sort(names(yaml_URIs))], xml_URIs[sort(names(xml_URIs))])
+  }))
   
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in dataset evaluation document
   

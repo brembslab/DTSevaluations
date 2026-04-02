@@ -8,6 +8,10 @@ experiment:
 licenses:
     name: ODC-PDDL-1.0
     uri: http://opendatacommons.org/licenses/pddl
+URIs:
+    recording: 10.5281/zenodo.7102195
+    analysis: 10.5281/zenodo.7101742
+    datamodel: 10.5281/zenodo.7101734
 author:
     name: bjoern-brembs
     description: Björn Brembs

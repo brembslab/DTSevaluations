@@ -185,29 +185,6 @@ MultiFlyDuplicateCheck <- function(xml_list)
   if(!is_empty(offending_behavnames)){return(offending_behavnames)}else{return(NULL)} #return vector with offending filenames or NULL if empty
 }
 
-
-
-##gather experimental metadata in a single vector for plotting in summary pages
-collect.metadata <-function(singleflydata)
-  {
-  #retrieve meta-data
-  experimenter <- singleflydata$experimenter
-  experiment <- singleflydata$experiment
-  fly <- singleflydata$fly
-  #create reporting strings
-  exp.name = paste("Experimenter:", experimenter$firstname, experimenter$lastname, sep = " ")
-  exp.orcid = paste("ORCID: ",experimenter$orcid)
-  exp.date = paste("Date and time of the experiment: ",experiment$dateTime )
-  exp.duration = paste("Experiment duration:", experiment$duration, "s", sep = " ")
-  exp.description = paste("Experiment description: ", experiment$description)
-  exp.setup = paste("Samplingrate: ", experiment$sample_rate, "Hz. Arena type:", experiment$arena_type, ". Torquemeter type: ", experiment$meter_type)
-  fly = paste("Fly description: ", fly$description, ". FlybaseID: ", fly$flybase)
-  mdata = c(exp.name, exp.orcid, exp.date, exp.duration, exp.description, exp.setup, fly)
-  return(mdata)
-}
-
-
-
 ### Downsample the rawdata using approx function (for data with period/time jitter)
 downsampleapprox <- function(rawdata, sequence, experiment, NofPeriods, NofDatapoints) {
 
