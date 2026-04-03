@@ -128,6 +128,7 @@ geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", po
 
 hyperlinks.FBidsmale <- function(FBidsmale){
   #generate dataframe with hyperlinked FBids where each group gets one row
+<<<<<<< Updated upstream
     id.frame<-as.data.frame(lapply(read.csv(text = FBidsmale, header = FALSE, na.strings=c("","NA")), function(x) ifelse(!is.na(x), paste('<a href="http://flybase.org/reports/',x,'">',x,'</a>', sep = ''),NA)))
     id.frame[is.na(id.frame)]<-""                     #remove NAs
     FBidsmale=apply(id.frame,1,paste,collapse=",")        #create strings
@@ -143,6 +144,14 @@ hyperlinks.FBidsfemale <- function(FBidsfemale){
   FBidsfemale=gsub("^,*|(?<=,),|,*$", "", FBidsfemale, perl=T)  #remove trailing/leading commas
   FBidsfemale=gsub('<a href="http://flybase.org/reports/none">none</a>', "none", FBidsfemale) #remove the link from 'none' FBidsfemale
   return(FBidsfemale)
+=======
+  id.frame<-as.data.frame(lapply(read.csv(text = FBids, header = FALSE, na.strings=c("","NA")), function(x) ifelse(!is.na(x), paste('<a href="http://flybase.org/reports/',x,'">',x,'</a>', sep = ''),NA)))
+  id.frame[is.na(id.frame)]<-""                     #remove NAs
+  FBids=apply(id.frame,1,paste,collapse=",")        #create strings
+  FBids=gsub("^,*|(?<=,),|,*$", "", FBids, perl=T)  #remove trailing/leading commas
+  FBids=gsub('<a href="http://flybase.org/reports/none">none</a>', "none", FBids) #remove the link from 'none' FBids
+  return(FBids)
+>>>>>>> Stashed changes
 }
 
 ###########################################################################

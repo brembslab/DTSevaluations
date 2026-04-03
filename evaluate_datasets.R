@@ -44,9 +44,15 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
     {
       #load current fly name
       xml_name=xml_list[[l]]
-      
+
       # read the data with the corresponding function #######
       singleflydata <- flyDataImport(xml_name)
+      
+      ## collect flybaseids from each xml file to compare with each other
+      xml_flybaseid_list[[grp_title]][[xml_name]] <- list(
+        flybasemale   = singleflydata$fly$flybasemale,
+        flybasefemale = singleflydata$fly$flybasefemale
+      )
   
       #extract single fly data
       source("include/extractsingleflydata.R")
@@ -77,6 +83,27 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
   
   #close progress bar window
   close(pb)
+
+  ##check if the flybaseids from xml files match with the yaml file
+  flybaseid_match <- all(sapply(names(yaml_flybaseids), function(idgroup) {
+    grp_xml <- xml_flybaseid_list[[idgroup]]
+    if (is.null(grp_xml)) return(FALSE)
+    
+    # check if all flybasemale and flybasefemale values are the same within the group
+    flybasemale_values   <- sapply(grp_xml, function(x) x$flybasemale)
+    flybasefemale_values <- sapply(grp_xml, function(x) x$flybasefemale)
+    innercheck_match <- length(unique(flybasemale_values)) == 1 && length(unique(flybasefemale_values)) == 1
+    
+    if (!innercheck_match) return(FALSE)
+    
+    # if all values are consistent within group, compare against yaml
+    xml_flybaseid <- list(
+      flybasemale   = flybasemale_values[[1]],
+      flybasefemale = flybasefemale_values[[1]]
+    )
+    identical(yaml_flybaseids[[idgroup]][sort(names(yaml_flybaseids[[idgroup]]))], 
+              xml_flybaseid[sort(names(xml_flybaseid))])
+  }))
   
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in dataset evaluation document
   
@@ -105,6 +132,10 @@ source("include/three_groups.R")
 
 ## if there are more than two groups, attempt to pool some PI data into two groups
 source("include/poolgroups.R")
+
+if (!flybaseid_match) {
+  groupids <- NULL
+}
 
 #### ----- call RMarkdown for dataset evaluations ----- ################################################
 rmarkdown::render(paste(start.wd,"/rmarkdown/dataset.Rmd", sep=""),                                #####

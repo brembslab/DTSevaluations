@@ -15,8 +15,13 @@ author:
     lastName: Brembs
     id: 0000-0001-7824-7650
 resources:
+<<<<<<< Updated upstream
 - name: WTB
   title: wild type Berlin
+=======
+- name: rut
+  title: rutabaga mutant
+>>>>>>> Stashed changes
   description: control
   data:
   - rut_color_01.xml
@@ -27,6 +32,21 @@ resources:
   id: 
     flybasemale: "FBal0032625"
     flybasefemale: "FBal0032625"
+<<<<<<< Updated upstream
+=======
+- name: WTB
+  title: wild type Berlin
+  description: control
+  data:
+  - wtb_color_01.xml
+  - wtb_color_02.xml
+  - wtb_color_03.xml
+  - wtb_color_04.xml
+  - wtb_color_05.xml
+  id: 
+    flybasemale: "FBal0032616"
+    flybasefemale: "FBal0032616"
+>>>>>>> Stashed changes
 statistics:
   significance-levels:
     - 0.005

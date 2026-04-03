@@ -36,6 +36,11 @@ setwd(dataset.path)
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
 
+```{r flybaseid_match, echo=FALSE, results='asis'}
+if (!flybaseid_match) {cat("**WARNING: flybaseids in yaml file does not match with individual xml files. Please check each file manually.**")
+}
+```
+
 # Experimental Sequence
 ```{r expdesign, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE, fig.align = "center", fig.height = (round(NofPeriods/3)), fig.width = NofPeriods+1}
 #Write table of period design
