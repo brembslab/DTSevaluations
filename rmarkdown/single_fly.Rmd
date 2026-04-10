@@ -80,22 +80,22 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
  
 ## Calculate variance
 span <- 21 ##Sets the span for the rolling variance
-threshold <- 50
+threshold <- 50 ##Sets threshold for low variance
 min_length <- 30 ##Sets the minimum length considered a flight pause
-direc_vec <- c("left", "right", "center")
-def_pause_list <- vector("list", length(direc_vec))
-names(def_pause_list) <- direc_vec
-for (x in direc_vec) {
-  var_vec <- frollvar(rawdata$fly, n = span, align = x, fill = NA) ##Takes a rolling variance
+direc_vec <- c("left", "right", "center") #number of alignments
+def_pause_list <- vector("list", length(direc_vec)) #Creates a list
+names(def_pause_list) <- direc_vec #Assigns names to list
+for (i in direc_vec) {
+  var_vec <- frollvar(rawdata$fly, n = span, align = i, fill = NA) ##Takes a rolling variance
   pot_pause <- var_vec < threshold ##Finds variance below threshold
   pot_pause[is.na(pot_pause)] <- FALSE ##Sets NA to FALSE
   def_pause_temp <- rle(pot_pause) ##Analyzes run length of TRUE on pot_pause
-  def_pause_temp$values[is.na(def_pause_temp$values)] <- FALSE
+  def_pause_temp$values[is.na(def_pause_temp$values)] <- FALSE ##Sets NA values to FALSE
   too_short <- def_pause_temp$values & def_pause_temp$lengths < min_length ##Defines stretches of TRUE runs that are too short too be pauses
   def_pause_temp$values[too_short] <- FALSE ##Sets short runs to FALSE
   def_pause_temp <- inverse.rle(def_pause_temp) ##Rebuilds logical vector
   def_pause_temp[is.na(def_pause_temp)] <- FALSE ##Sets NA to FALSE
-  def_pause_list[[x]] <-def_pause_temp
+  def_pause_list[[i]] <-def_pause_temp #Puts output in a list
 }
 def_pause <- Reduce("|", def_pause_list) ##creates a logical vector including both left and right variance pauses
 def_pause[is.na(def_pause)] <- FALSE ##Sets NA to FALSE
