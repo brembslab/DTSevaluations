@@ -77,59 +77,71 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
     ##dyplot traces
     dytraces(rawdata)
 
-    ## Calculate variance
-    ##install.packages("data.table") ##Installs package needed for frollvar
-    library(data.table) ##Initializes library (can be moved to Includes.R later)
-    span <- 21 ##Sets the span for the rolling variance
-    var_vector <- frollvar(rawdata$fly, n = span, align = "center") ##Takes a rolling variance, center means in both directions
-    ##threshold <- 40 ##Sets the cutoff value for low variance
-    ##Implement comparison to average var
-    avg <- mean(var_vector, na.rm=TRUE)
-    low <- sort(var_vector)##Sorts the variance vector
-    ratio <- length(low)/10 ##Finds bottom 10% of variance
-    low <- low[1:ratio] ##Includes only the lowest variance
-    ##threshold <- mean(low, na.rm=TRUE) ##Sets the threshold to the mean of the lowest variance
-    threshold <- 30
-    pot_pause <- var_vector < threshold ##Makes a logical vector
-    ##prob_pause <- pot_pause & (c(pot_pause[-1], FALSE)|c(pot_pause[+1], FALSE))
-    ##hmm_pause <- prob_pause & (c(prob_pause[-1], FALSE)|c(prob_pause[+1], FALSE))
-    ##def_pause <- hmm_pause & (c(hmm_pause[-1], FALSE)|c(hmm_pause[+1], FALSE))
-    ##Includes only stretches of low variance, still workshopping
-    min_length <- 60 ##Sets the minimum length considered a flight pause
-    def_pause <- rle(pot_pause) ##Analyzes run length of TRUE on pot_pause
-    too_short <- def_pause$values & def_pause$lengths < min_length ##Defines stretches of TRUE runs that are too short too be pauses
-    def_pause$values[too_short] <- FALSE ##Sets short runs to FALSE
-    def_pause <- inverse.rle(def_pause)
-    num_pause <- sum(def_pause, na.rm=TRUE) ##Determines number of TRUE values 
-    per_pause <- num_pause/length(def_pause)*100 ##Calculates the ratio of time in pause
-    result <- paste("Percent of trial not flying", per_pause, "%")
-    print(result) ##Shows the ratio in the singlefly html, will be moved to     a table in the summary later
-    ##dyplot traces with variance in different color
-    library(xts) ##Initializes xts library
-    new_format_data <- xts(rawdata$fly, order.by = as.POSIXct(rawdata$time / 1000, origin = "1970-01-01")) ##Formats     data for dygraphs
-    r <- rle(def_pause)
+ 
+## Calculate variance
+span <- 21 ##Sets the span for the rolling variance
+threshold <- 50
+min_length <- 30 ##Sets the minimum length considered a flight pause
+direc_vec <- c("left", "right", "center")
+def_pause_list <- vector("list", length(direc_vec))
+names(def_pause_list) <- direc_vec
+for (x in direc_vec) {
+  var_vec <- frollvar(rawdata$fly, n = span, align = x, fill = NA) ##Takes a rolling variance
+  pot_pause <- var_vec < threshold ##Finds variance below threshold
+  pot_pause[is.na(pot_pause)] <- FALSE ##Sets NA to FALSE
+  def_pause_temp <- rle(pot_pause) ##Analyzes run length of TRUE on pot_pause
+  def_pause_temp$values[is.na(def_pause_temp$values)] <- FALSE
+  too_short <- def_pause_temp$values & def_pause_temp$lengths < min_length ##Defines stretches of TRUE runs that are too short too be pauses
+  def_pause_temp$values[too_short] <- FALSE ##Sets short runs to FALSE
+  def_pause_temp <- inverse.rle(def_pause_temp) ##Rebuilds logical vector
+  def_pause_temp[is.na(def_pause_temp)] <- FALSE ##Sets NA to FALSE
+  def_pause_list[[x]] <-def_pause_temp
+}
+def_pause <- Reduce("|", def_pause_list) ##creates a logical vector including both left and right variance pauses
+def_pause[is.na(def_pause)] <- FALSE ##Sets NA to FALSE
+num_pause <- sum(def_pause, na.rm=TRUE) ##Determines number of TRUE values
+per_pause <- num_pause/length(def_pause)*100 ##Calculates the ratio of time in pause
+result <- paste("Percent of trial not flying", per_pause, "%")
+print(result) ##Shows the ratio in the singlefly html, will be moved to     a table in the summary later
+##dyplot traces with variance in different color
+new_format_data <- xts::xts(as.numeric(rawdata$fly), order.by = as.POSIXct(rawdata$time / 1000, origin = "1970-01-01")) ##Formats     data for dygraphs
+colnames(new_format_data) <- "fly"
+r <- rle(def_pause)
+r$values[is.na(r$values)] <- FALSE
 
-    ends <- cumsum(r$lengths)
-    starts <- ends - r$lengths + 1
+ends <- cumsum(r$lengths)
+starts <- ends - r$lengths + 1
 
-    pause_segments <- data.frame(
-      start = starts[r$values],
-      end   = ends[r$values]
-    )
-    graph_shaded <- dygraph(new_format_data)
-    for(i in seq_len(nrow(pause_segments))) {
+pause_segments <- data.frame(
+  start = starts[r$values],
+  end   = ends[r$values]
+)
+stopifnot(xts::is.xts(new_format_data)) ##Safety break
+graph_shaded <- dygraph(new_format_data)
+for(i in seq_len(nrow(pause_segments))) {
+  
+  start_idx <- pause_segments$start[i]
+  end_idx   <- pause_segments$end[i]
+  
+  if (!is.na(start_idx) && !is.na(end_idx) &&
+  start_idx > 0 && end_idx <= NROW(new_format_data)) {
 
-      start_time <- index(new_format_data)[pause_segments$start[i]]
-      end_time   <- index(new_format_data)[pause_segments$end[i]]
-
-    graph_shaded <- graph_shaded %>% dyShading(
-      from = start_time,
-      to = end_time,
-      color = "#B22222"
+  start_time <- index(new_format_data)[start_idx]
+  end_time   <- index(new_format_data)[end_idx]
+  
+  if (!is.na(start_time) && !is.na(end_time)) {
+  graph_shaded <- graph_shaded %>% dyShading(
+    from = start_time,
+    to = end_time,
+    color = "#B22222"
       )
-    graph_shaded <- dyRangeSelector(graph_shaded)
     }
-    graph_shaded ##Prints the graph with flight pauses shaded
+  }
+}
+graph_shaded <- dyRangeSelector(graph_shaded)
+graph_shaded ##Prints the graph with flight pauses shaded
+rm(graph_shaded) ##deletes old dygraph
+gc()
   
 
 ```
