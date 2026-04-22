@@ -31,18 +31,19 @@ setwd(dataset.path)
 # Metadata
 
 **dataset file (YAML):** `r paste('<a href="', basename(dataset.file), '">', dataset.data$experiment$title, '</a>', sep = "")`  
-**Description:** `r paste(dataset.data$experiment$description)` 
+**Description:** `r paste(dataset.data$experiment$description)`   
+**Resource Identifiers:**
 ```{r URIs_check, echo=FALSE, results='asis'}
 if (URIs_match) {
   cat("**Recording:** [", paste(singleflydata$URIs$recording), "](https://doi.org/", paste(singleflydata$URIs$recording), ") ",
       "**Analysis:** [", paste(singleflydata$URIs$analysis), "](https://doi.org/", paste(singleflydata$URIs$analysis), ") ",
-      "**Datamodel:** [", paste(singleflydata$URIs$datamodel), "](https://doi.org/", paste(singleflydata$URIs$datamodel), ") ",
+      "**Datamodel: ** [", paste(singleflydata$URIs$datamodel), "](https://doi.org/", paste(singleflydata$URIs$datamodel), ") ",
       sep="")
 } else {
-  cat("WARNING: URIs in YAML and XML files do not match!")
+  cat("WARNING: URIs in YAML and XML files do not match! ")
 }
 ```
-**Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', dataset.data$experiment$id, '">', dataset.data$experiment$id, '</a>', sep = "")`  
+**Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', dataset.data$experiment$id, '">', dataset.data$experiment$id, '</a>', sep = "")`    
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment duration:** `r paste(seconds_to_period(as.numeric(as.character(experiment$duration))))`  
 

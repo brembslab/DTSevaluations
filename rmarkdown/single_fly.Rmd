@@ -29,9 +29,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Date and time of the experiment:** `r format(as.POSIXct(gsub("T", " ", experiment$dateTime)),'%A, %B %d, %Y %H:%M:%S')`  
 **Raw data file (XML):** `r paste('<a href="', basename(xml_name), '">', flyname, '</a>', sep = "")`  
+**Resource Identifiers:**
 **Recording:** [`r paste(singleflydata$URIs$recording)`](https://doi.org/`r paste(singleflydata$URIs$recording)`)
 **Analysis:** [`r paste(singleflydata$URIs$analysis)`](https://doi.org/`r paste(singleflydata$URIs$analysis)`)
-**Datamodel:** [`r paste(singleflydata$URIs$datamodel)`](https://doi.org/`r paste(singleflydata$URIs$datamodel)`)
+**Datamodel:** [`r paste(singleflydata$URIs$datamodel)`](https://doi.org/`r paste(singleflydata$URIs$datamodel)`)  
 **Experimenter:** `r paste(experimenter$firstname, experimenter$lastname, sep = " ")`; **ORCID:** [`r paste(experimenter$orcid)`](http://orcid.org/`r paste(experimenter$orcid)`)  
 **Experiment description:** `r paste(experiment$description)`  
 **Experiment duration:** `r paste(experiment$duration)`s  

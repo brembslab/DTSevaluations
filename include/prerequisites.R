@@ -15,4 +15,3 @@ if(anyDuplicated(groupnames)>0) stop("There is a duplicate group name!", cat("Er
 #what kind of experiment are we dealing with? Default is torquemeter
 if (exists('type', where=dataset.data$experiment)){ExpType = dataset.data$experiment$type} else ExpType = "Torquemeter"
 if (tolower(ExpType)=="torquemeter"){FlyBehavior="Torque"} else {FlyBehavior="Platform Position"}
-
