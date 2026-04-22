@@ -17,8 +17,6 @@ tempL=length(split(testperiods, cumsum(c(1, diff(testperiods) != 1))))
 postperiods=as.vector(unlist(split(testperiods, cumsum(c(1, diff(testperiods) != 1)))[tempL]))
 
 #extract experiment meta-data
-flyidmale <- singleflydata$fly$flybasemale
-flyidfemale <- singleflydata$fly$flybasefemale
 experimenter <- singleflydata$experimenter
 experiment <- singleflydata$experiment
 

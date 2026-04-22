@@ -526,3 +526,27 @@ OMparamextract <- function(OMdata){
   
   return(tempOMparams)
 }
+
+#Compare flybase ids between xml files and yaml file
+
+check_flybaseid_match <- function(yaml_flybaseids, xml_flybaseid_list) {
+  all(sapply(names(yaml_flybaseids), function(idgroup) {
+    grp_xml <- xml_flybaseid_list[[idgroup]]
+    if (is.null(grp_xml)) return(FALSE)
+    
+    # check if all flybasemale and flybasefemale values are the same within the group
+    flybasemale_values   <- sapply(grp_xml, function(x) x$flybasemale)
+    flybasefemale_values <- sapply(grp_xml, function(x) x$flybasefemale)
+    innercheck_match <- length(unique(flybasemale_values)) == 1 && length(unique(flybasefemale_values)) == 1
+    
+    if (!innercheck_match) return(FALSE)
+    
+    # if all values are consistent within group, compare against yaml
+    xml_flybaseid <- list(
+      flybasemale   = flybasemale_values[[1]],
+      flybasefemale = flybasefemale_values[[1]]
+    )
+    identical(yaml_flybaseids[[idgroup]][sort(names(yaml_flybaseids[[idgroup]]))], 
+              xml_flybaseid[sort(names(xml_flybaseid))])
+  }))
+}

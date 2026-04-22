@@ -21,4 +21,3 @@ dwelldata = dwellplots = grouped.dwell = list()          #create dataframes for 
 flies = 0                                                #initialize progress bar
 
 xml_flybaseid_list <- list()  ##For collecting flybaseids from each xml file
-xml_flybaseid <- list()  ##For collecting flybaseids from each xml file

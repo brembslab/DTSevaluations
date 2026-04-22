@@ -28,12 +28,6 @@ ids <- sapply(dataset.data[["resources"]], function(x) {
 })
 
 if(!is.null(unlist(ids["male",])) && !is.null(unlist(ids["female",]))){
-<<<<<<< Updated upstream
-  groupids_male <- hyperlinks.FBidsmale(unlist(ids["male",]))
-  groupids_female <- hyperlinks.FBidsfemale(unlist(ids["female",]))
-  groupids <- paste(groupids_male, groupids_female, sep = " x ")
-}else groupids=NULL
-=======
   groupids_male <- hyperlinks.FBids(unlist(ids["male",]))
   groupids_female <- hyperlinks.FBids(unlist(ids["female",]))
   groupids <- paste(groupids_male, groupids_female, sep = " x ")
@@ -41,4 +35,3 @@ if(!is.null(unlist(ids["male",])) && !is.null(unlist(ids["female",]))){
 
 yaml_flybaseids <- lapply(dataset.data[["resources"]], function(x) x[["id"]])  ##Collect flybase ids from yaml file
 names(yaml_flybaseids) <- sapply(dataset.data[["resources"]], function(x) x[["title"]])
->>>>>>> Stashed changes

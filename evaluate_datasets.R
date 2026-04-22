@@ -49,7 +49,7 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
       singleflydata <- flyDataImport(xml_name)
       
       ## collect flybaseids from each xml file to compare with each other
-      xml_flybaseid_list[[grp_title]][[xml_name]] <- list(
+      xml_flybaseid_list[[grp_title]][[singleflydata$fly$name]] <- list(
         flybasemale   = singleflydata$fly$flybasemale,
         flybasefemale = singleflydata$fly$flybasefemale
       )
@@ -85,25 +85,8 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
   close(pb)
 
   ##check if the flybaseids from xml files match with the yaml file
-  flybaseid_match <- all(sapply(names(yaml_flybaseids), function(idgroup) {
-    grp_xml <- xml_flybaseid_list[[idgroup]]
-    if (is.null(grp_xml)) return(FALSE)
-    
-    # check if all flybasemale and flybasefemale values are the same within the group
-    flybasemale_values   <- sapply(grp_xml, function(x) x$flybasemale)
-    flybasefemale_values <- sapply(grp_xml, function(x) x$flybasefemale)
-    innercheck_match <- length(unique(flybasemale_values)) == 1 && length(unique(flybasefemale_values)) == 1
-    
-    if (!innercheck_match) return(FALSE)
-    
-    # if all values are consistent within group, compare against yaml
-    xml_flybaseid <- list(
-      flybasemale   = flybasemale_values[[1]],
-      flybasefemale = flybasefemale_values[[1]]
-    )
-    identical(yaml_flybaseids[[idgroup]][sort(names(yaml_flybaseids[[idgroup]]))], 
-              xml_flybaseid[sort(names(xml_flybaseid))])
-  }))
+  flybaseid_match <- check_flybaseid_match(yaml_flybaseids, xml_flybaseid_list)
+  
   
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in dataset evaluation document
   
