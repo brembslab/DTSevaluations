@@ -202,7 +202,7 @@ collect.metadata <-function(singleflydata)
   exp.duration = paste("Experiment duration:", experiment$duration, "s", sep = " ")
   exp.description = paste("Experiment description: ", experiment$description)
   exp.setup = paste("Samplingrate: ", experiment$sample_rate, "Hz. Arena type:", experiment$arena_type, ". Torquemeter type: ", experiment$meter_type)
-  fly = paste("Fly description: ", fly$description, ". FlybaseID: ", fly$flybase)
+  fly = paste("Fly description: ", fly$description, ". FlybaseID: Male ", fly$flybasemale, "X Female", fly$flybasefemale)
   mdata = c(exp.name, exp.orcid, exp.date, exp.duration, exp.description, exp.setup, fly)
   return(mdata)
 }

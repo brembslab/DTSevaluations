@@ -128,11 +128,11 @@ geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", po
 
 hyperlinks.FBids <- function(FBids){
   #generate dataframe with hyperlinked FBids where each group gets one row
-    id.frame<-as.data.frame(lapply(read.csv(text = FBids, header = FALSE, na.strings=c("","NA")), function(x) ifelse(!is.na(x), paste('<a href="http://flybase.org/reports/',x,'">',x,'</a>', sep = ''),NA)))
-    id.frame[is.na(id.frame)]<-""                     #remove NAs
-    FBids=apply(id.frame,1,paste,collapse=",")        #create strings
-    FBids=gsub("^,*|(?<=,),|,*$", "", FBids, perl=T)  #remove trailing/leading commas
-    FBids=gsub('<a href="http://flybase.org/reports/none">none</a>', "none", FBids) #remove the link from 'none' FBids
+  id.frame<-as.data.frame(lapply(read.csv(text = FBids, header = FALSE, na.strings=c("","NA")), function(x) ifelse(!is.na(x), paste('<a href="http://flybase.org/reports/',x,'">',x,'</a>', sep = ''),NA)))
+  id.frame[is.na(id.frame)]<-""                     #remove NAs
+  FBids=apply(id.frame,1,paste,collapse=",")        #create strings
+  FBids=gsub("^,*|(?<=,),|,*$", "", FBids, perl=T)  #remove trailing/leading commas
+  FBids=gsub('<a href="http://flybase.org/reports/none">none</a>', "none", FBids) #remove the link from 'none' FBids
   return(FBids)
 }
 
@@ -525,4 +525,28 @@ OMparamextract <- function(OMdata){
   rm(OM,OS,AI_OM,AI_OS, fitObjall, DoubleSig, transform, AllOMtraces)
   
   return(tempOMparams)
+}
+
+#Compare flybase ids between xml files and yaml file
+
+check_flybaseid_match <- function(yaml_flybaseids, xml_flybaseid_list) {
+  all(sapply(names(yaml_flybaseids), function(idgroup) {
+    grp_xml <- xml_flybaseid_list[[idgroup]]
+    if (is.null(grp_xml)) return(FALSE)
+    
+    # check if all flybasemale and flybasefemale values are the same within the group
+    flybasemale_values   <- sapply(grp_xml, function(x) x$flybasemale)
+    flybasefemale_values <- sapply(grp_xml, function(x) x$flybasefemale)
+    innercheck_match <- length(unique(flybasemale_values)) == 1 && length(unique(flybasefemale_values)) == 1
+    
+    if (!innercheck_match) return(FALSE)
+    
+    # if all values are consistent within group, compare against yaml
+    xml_flybaseid <- list(
+      flybasemale   = flybasemale_values[[1]],
+      flybasefemale = flybasefemale_values[[1]]
+    )
+    identical(yaml_flybaseids[[idgroup]][sort(names(yaml_flybaseids[[idgroup]]))], 
+              xml_flybaseid[sort(names(xml_flybaseid))])
+  }))
 }

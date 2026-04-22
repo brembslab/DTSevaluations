@@ -44,9 +44,15 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
     {
       #load current fly name
       xml_name=xml_list[[l]]
-      
+
       # read the data with the corresponding function #######
       singleflydata <- flyDataImport(xml_name)
+      
+      ## collect flybaseids from each xml file to compare with each other
+      xml_flybaseid_list[[grp_title]][[singleflydata$fly$name]] <- list(
+        flybasemale   = singleflydata$fly$flybasemale,
+        flybasefemale = singleflydata$fly$flybasefemale
+      )
   
       #extract single fly data
       source("include/extractsingleflydata.R")
@@ -77,6 +83,10 @@ for(x in 1:NofGroups) #start main loop that collects data in each experimental g
   
   #close progress bar window
   close(pb)
+
+  ##check if the flybaseids from xml files match with the yaml file
+  flybaseid_match <- check_flybaseid_match(yaml_flybaseids, xml_flybaseid_list)
+  
   
   exp_groups[[x]] <- c(grp_title, grp_description, xml_list) #add name and description and file links to dataframe to be used in dataset evaluation document
   
@@ -105,6 +115,10 @@ source("include/three_groups.R")
 
 ## if there are more than two groups, attempt to pool some PI data into two groups
 source("include/poolgroups.R")
+
+if (!flybaseid_match) {
+  groupids <- NULL
+}
 
 #### ----- call RMarkdown for dataset evaluations ----- ################################################
 rmarkdown::render(paste(start.wd,"/rmarkdown/dataset.Rmd", sep=""),                                #####
