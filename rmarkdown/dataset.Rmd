@@ -40,7 +40,7 @@ if (URIs_match) {
       "**Datamodel: ** [", paste(singleflydata$URIs$datamodel), "](https://doi.org/", paste(singleflydata$URIs$datamodel), ") ",
       sep="")
 } else {
-  cat("WARNING: URIs in YAML and XML files do not match! ")
+  cat("WARNING: URIs in YAML and XML files do not match! Please check html files created for individual flies to access the Recording and Datamodel identifiers. ", "**Analysis:** [", paste(yaml_URIs$analysis), "](https://doi.org/", paste(singleflydata$URIs$analysis), ") ")
 }
 ```
 **Measurement RRID:** `r paste('<a href="https://scicrunch.org/resolver/RRID:', dataset.data$experiment$id, '">', dataset.data$experiment$id, '</a>', sep = "")`    
