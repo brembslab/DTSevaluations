@@ -550,3 +550,11 @@ check_flybaseid_match <- function(yaml_flybaseids, xml_flybaseid_list) {
               xml_flybaseid[sort(names(xml_flybaseid))])
   }))
 }
+
+id_rescue <- function(x){ 
+  
+  if (is.null(x) || !nzchar(x)) return("")
+  hyperlinks.FBids(x)
+}
+
+
