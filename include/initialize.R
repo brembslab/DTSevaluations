@@ -19,3 +19,5 @@ grouped.OMdataAfter_swapped <-list()   #For swapping left and right OM traces
 flynames = matrix(ncol=NofGroups, nrow=max(samplesizes)) #create a place to collect all flynames
 dwelldata = dwellplots = grouped.dwell = list()          #create dataframes for dwelling data
 flies = 0                                                #initialize progress bar
+
+xml_URIs_list <- list()  ##For collecting URIs from each xml file

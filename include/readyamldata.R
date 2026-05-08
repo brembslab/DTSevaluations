@@ -21,3 +21,4 @@ colorrange = dataset.data[["statistics"]][["color-range"]]                      
 if(!is.null(unlist(sapply(dataset.data[["resources"]], function(x) x["id"])))){
   groupids <- hyperlinks.FBids(unlist(sapply(dataset.data[["resources"]], function(x) x["id"])))     #get a vector with all group FlyBase IDs and hyperlinks
 } else groupids=NULL
+yaml_URIs <- as.list(dataset.data$URIs)                                                              #read URIs from YAML file
