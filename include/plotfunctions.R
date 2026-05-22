@@ -553,7 +553,7 @@ check_flybaseid_match <- function(yaml_flybaseids, xml_flybaseid_list) {
 
 id_rescue <- function(x){ 
   
-  if (is.null(x) || !nzchar(x)) return("")
+  if (!nzchar(x)) return("")
   hyperlinks.FBids(x)
 }
 

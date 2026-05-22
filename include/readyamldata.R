@@ -19,19 +19,23 @@ wil <- identical(1,as.numeric(dataset.data[["statistics"]][["single.groups"]][["
 learningscore = dataset.data[["statistics"]][["learning-score"]][["data"]]                           #get the PI that is going to be tested
 colorrange = dataset.data[["statistics"]][["color-range"]]                                           #get the color range for plots
 
-
 ids <- sapply(dataset.data[["resources"]], function(x) {
   list(
     male = x[["id"]][["flybasemale"]],
     female = x[["id"]][["flybasefemale"]]
   )
 })
-
+#Create links for ids and replace empty values with empty strings
 if(!is.null(unlist(ids["male",])) && !is.null(unlist(ids["female",]))){
-  groupids_male <- hyperlinks.FBids(unlist(ids["male",]))
-  groupids_female <- hyperlinks.FBids(unlist(ids["female",]))
-  groupids <- paste(groupids_male, groupids_female, sep = " x ")
-}else groupids=NULL
-
+  
+  groupids <- sapply(seq_len(ncol(ids)), function(i) {
+   
+    malelink <- if (nzchar(as.character(ids["male", i]))) hyperlinks.FBids(as.character(ids["male", i])) else ""
+    femalelink <- if (nzchar(as.character(ids["female", i]))) hyperlinks.FBids(as.character(ids["female", i])) else ""
+    
+    paste(malelink, femalelink, sep = " x ")
+  })
+  
+} else groupids <- NULL
 yaml_flybaseids <- lapply(dataset.data[["resources"]], function(x) x[["id"]])  ##Collect flybase ids from yaml file
 names(yaml_flybaseids) <- sapply(dataset.data[["resources"]], function(x) x[["title"]])
