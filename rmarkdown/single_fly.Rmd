@@ -124,10 +124,42 @@ pause_segments <- data.frame(
   start = starts[r$values],
   end   = ends[r$values]
 )
+
+runs <- data.frame(
+  value = r$values,
+  start = starts,
+  end = ends,
+  length = r$lengths
+)
+#builds data.frame for visualizing run lengths
+
+true_runs <- subset(runs, value) #runs of TRUE
+
+segments <- lapply(
+  seq_len(nrow(true_runs)),
+  function(i) true_runs$start[i]:true_runs$end[i]
+)
+
+#Creates a list of TRUE runs
+
 ##To do: Take average var for each segment, left to half, right to second half, compare to var before and after, remove if not sig diff.
 lst <- var_vec_list
 lowest_var_vec <- do.call(pmin, lst) #Make a variance vector containing the lowest of the three variences 
 stopmean <- mean(lowest_var_vec[def_pause])
+
+df_list <- lapply(seq_along(segments), function(i) {
+  idx <- segments[[i]]
+
+  data.frame(
+    segment = i,
+    list_index = idx,
+    torque = rawdata$fly[idx],
+    time = rawdata$time[idx],
+    lowest_var = lowest_var_vec[idx]
+  )
+})
+
+#Makes a list of data.frames for working with further
 
 stopifnot(xts::is.xts(new_format_data)) ##Safety break
 graph_shaded <- dygraph(new_format_data) %>%
