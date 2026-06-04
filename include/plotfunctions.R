@@ -336,7 +336,7 @@ plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
                         theme(aspect.ratio=3/NofGroups)+
                         ylim(1.2*min(plotOMparams[[OMvariables[v]]]), 1.2*max(plotOMparams[[OMvariables[v]]])) +    
                         geom_signif(comparisons = list(c(groupnames)), map_signif_level= c("***"= signif[3],"**"= signif[2], "*"= signif[1]), textsize=8, vjust=0.5, color="black") +
-                        samplesizes.annotate(boxes, samplesizes))
+                        samplesizes.annotate(boxes, rev(samplesizes)))
 
 #add table with results
   plots.2test[[2]]<-tableGrob(results.utest)
