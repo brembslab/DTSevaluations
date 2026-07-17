@@ -79,18 +79,19 @@ reactable(setDT(as.data.frame(periods), keep.rownames = "property")[],
 
  
 ## Plot flight pauses
-vel <- c(NA, diff(rawdata$fly, lag = 4))
-abvel <- abs(vel)
-avgvel <- mean(abvel, na.rm=TRUE)
-lowvel <- sort(abvel)##Sorts the velocity vector
-ratiovel <- length(lowvel)/5 ##Finds bottom 20% of velocity
-lowvel <- lowvel[1:ratio]
-cutoff <- mean(lowvel, na.rm=TRUE)
-lowvel <- vel < cutoff
-velvar <- frollvar(abvel, n = span, align = "right", fill = NA) ##Takes a rolling variance
-span <- 21 ##Sets the span for the rolling variance
+#vel <- c(NA, diff(rawdata$fly, lag = 4))
+#abvel <- abs(vel)
+#avgvel <- mean(abvel, na.rm=TRUE)
+##lowvel <- sort(abvel)##Sorts the velocity vector
+#ratiovel <- length(lowvel)/500 ##Finds bottom 0.2% of velocity
+##lowvel <- lowvel[1:ratiovel]
+##cutoff <- mean(lowvel, na.rm=TRUE)
+##cutoff <- 10
+##lowvel <- vel < cutoff
+span <- 31 ##Sets the span for the rolling variance
+##velvar <- frollvar(abvel, n= span, align = "right", fill = NA) ##Takes a rolling variance
 threshold <- 200 ##Sets threshold for low variance
-min_length <- 20 ##Sets the minimum length considered a flight pause
+min_length <- 15 ##Sets the minimum length considered a flight pause
 direc_vec <- c("left", "right", "center") #number of alignments
 var_vec_list <- vector("list", length(direc_vec)) #Creates variance vector list
 def_pause_list <- vector("list", length(direc_vec)) #Creates logical vector list
@@ -98,11 +99,11 @@ names(def_pause_list) <- direc_vec #Assigns names to list
 names(var_vec_list) <- direc_vec #Assigns names to list
 for (y in direc_vec) {
   var_vec_list[[y]] <- frollvar(rawdata$fly, n = span, align = y, fill = NA) ##Takes a rolling variance
-  avg <- mean(var_vec_list[[y]], na.rm=TRUE)
-  low <- sort(var_vec_list[[y]])##Sorts the variance vector
-  ratio <- length(low)/5 ##Finds bottom 10% of variance
-  low <- low[1:ratio]
-  threshold <- mean(low, na.rm=TRUE)
+  # avg <- mean(var_vec_list[[y]], na.rm=TRUE)
+  # low <- sort(var_vec_list[[y]])##Sorts the variance vector
+  # ratio <- length(low)/3 ##Finds bottom 10% of variance
+  # low <- low[1:ratio]
+  # threshold <- mean(low, na.rm=TRUE)
   pot_pause <- var_vec_list[[y]] < threshold ##Finds variance below threshold
   pot_pause[is.na(pot_pause)] <- FALSE ##Sets NA to FALSE
   def_pause_temp <- rle(pot_pause) ##Analyzes run length of TRUE on pot_pause
@@ -141,6 +142,23 @@ runs <- data.frame(
   length = r$lengths
 )
 #builds data.frame for visualizing run lengths
+# r <- rle(lowvel)
+# r$values[is.na(r$values)] <- FALSE
+# 
+# ends <- cumsum(r$lengths)
+# starts <- ends - r$lengths + 1
+# 
+# pause_segments <- data.frame(
+#   start = starts[r$values],
+#   end   = ends[r$values]
+# )
+# 
+# runs <- data.frame(
+#   value = r$values,
+#   start = starts,
+#   end = ends,
+#   length = r$lengths
+# )
 
 true_runs <- subset(runs, value) #runs of TRUE
 
@@ -172,6 +190,13 @@ df_list <- lapply(seq_along(segments), function(i) {
 #Makes a list of TRUE segments, including other data for working with further
 average_list <- sapply(df_list, function(df) mean(df$torque))
 average_var <- sapply(df_list, function(df) var(df$torque))
+median_list <- sapply(df_list, function(df) median(df$torque))
+##To do: Make an if clause to limit centers to number in list, determine max by trial and error.
+n_centers <- min(10, length(unique(as.data.frame(median_list))))
+clusters <- kmeans(median_list, centers = n_centers, nstart = 25) ##groups them into clusters
+largest_cluster <- which.max(clusters$size) ##Finds the largest cluster, ##To do: If all clusters same size, use one with lowest variance 
+idx <- which(clusters$cluster == largest_cluster)
+df_list_largest <- df_list[idx]
 
 stopifnot(xts::is.xts(new_format_data)) ##Safety break
 graph_shaded <- dygraph(new_format_data) %>%
@@ -191,16 +216,16 @@ graph_shaded <- dygraph(new_format_data) %>%
     ##Creates the graph and labels the x- & y-axis
     
 for(i in seq_len(nrow(pause_segments))) {
-  
+
   start_idx <- pause_segments$start[i]
   end_idx   <- pause_segments$end[i]
-  
+
   if (!is.na(start_idx) && !is.na(end_idx) &&
   start_idx > 0 && end_idx <= NROW(new_format_data)) {
 
   start_time <- index(new_format_data)[start_idx]
   end_time   <- index(new_format_data)[end_idx]
-  
+
   if (!is.na(start_time) && !is.na(end_time)) {
   graph_shaded <- graph_shaded %>% dyShading(
     from = start_time,
@@ -211,9 +236,27 @@ for(i in seq_len(nrow(pause_segments))) {
   }
 }
 
+for (seg in df_list_largest) {
+
+  start_time <- as.POSIXct(min(seg$time) / 1000,
+                           origin = "1970-01-01",
+                           tz = "UTC")
+
+  end_time <- as.POSIXct(max(seg$time) / 1000,
+                         origin = "1970-01-01",
+                         tz = "UTC")
+
+  graph_shaded <- graph_shaded %>%
+    dyShading(
+      from = start_time,
+      to = end_time,
+      color = "#B22222"
+    )
+}
+
 graph_shaded <- dyRangeSelector(graph_shaded)
 graph_shaded ##Prints the graph with flight pauses shaded
-plot(abvel)
+#plot(abvel)
 
 ```
 
