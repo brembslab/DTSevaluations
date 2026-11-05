@@ -269,6 +269,7 @@ plotOMtracesSEM <- function(OMdata){
 
 ############plot box/whisker plots of optomotor parameters ###############
 plotOMParamBox <- function(v, plotOMparams, samplesizes, OMvariables, OMtitles){
+  plotOMparams$group <- factor(plotOMparams$group, levels = groupnames)  #Enforce given order to avoid alphabetical plotting. if an error occurs in the future try using unique levels
   utest = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$p.value, 3) #compare the two groups with a U-test and collect p-value
   w.statistic = signif(wilcox.test(plotOMparams[[OMvariables[v]]] ~ plotOMparams$group)$statistic, 3)
   #compute effect size Cohen's D
