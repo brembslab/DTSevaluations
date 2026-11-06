@@ -54,8 +54,12 @@ extract_pause_features <- function(rawdata, annotations,
   # Create feature data frame
   features <- data.frame(
     time = time,
-    variance = frollvar(position, n = span,
+    variancemid = frollvar(position, n = span,
                         align = "center", fill = NA),
+    varianceright = frollvar(position, n = span,
+                           align = "right", fill = NA),
+    varianceleft = frollvar(position, n = span,
+                           align = "left", fill = NA),
     sd = sqrt(frollvar(position, n = span,
                        align = "center", fill = NA)),
     mean_abs_velocity = frollmean(
@@ -111,32 +115,120 @@ extract_pause_features <- function(rawdata, annotations,
   return(features)
 }
 
-rawdata <- trainingdata[[2]]$rawdata
-annotations <- pause_annotations[[2]]
+# Store features from each annotated recording
+feature_list <- list()
 
-features_2 <- extract_pause_features(
-  rawdata,
-  annotations
+for (i in seq_along(trainingdata)) {
+  
+  # Skip recordings without annotations
+  if (i > length(pause_annotations) ||
+      is.null(pause_annotations[[i]]) ||
+      nrow(pause_annotations[[i]]) == 0) {
+    next
+  }
+  
+  # Extract raw data and annotations
+  rawdata <- trainingdata[[i]]$rawdata
+  annotations <- pause_annotations[[i]]
+  
+  # Extract features
+  features <- extract_pause_features(
+    rawdata,
+    annotations
+  )
+  
+  # Keep track of the source recording
+  features$recording <- i
+  
+  # Store the result
+  feature_list[[as.character(i)]] <- features
+}
+
+# Combine all recordings
+training_features <- do.call(rbind, feature_list)
+
+# Check the results
+dim(training_features)
+table(training_features$pause)
+length(unique(training_features$recording))
+
+set.seed(123)
+
+# Identify the available recordings
+recording_ids <- unique(training_features$recording)
+
+# Randomly select 20% of recordings for validation
+validation_ids <- sample(
+  recording_ids,
+  size = ceiling(0.2 * length(recording_ids))
 )
 
-# Inspect the resulting data frame
-head(features_2)
+# Split the data by recording
+train_data <- training_features[
+  !training_features$recording %in% validation_ids,
+]
 
-# Check the number of windows assigned to each class
-table(features_2$pause)
+validation_data <- training_features[
+  training_features$recording %in% validation_ids,
+]
 
-# Inspect the feature distributions
-summary(features_2)
+# Check the split
+length(unique(train_data$recording))
+length(unique(validation_data$recording))
 
-# Compare feature values for pauses and flight
-aggregate(
-  cbind(
-    variance,
-    sd,
-    mean_abs_velocity,
-    max_abs_velocity,
-    mean_abs_acceleration
-  ) ~ pause,
-  data = features_2,
-  FUN = median
+table(train_data$pause)
+table(validation_data$pause)
+
+library(randomForest)
+
+set.seed(123)
+
+#Trains random forest model
+rf_model <- randomForest(
+  pause ~ variancemid +
+    varianceright + 
+    varianceleft +
+    sd +
+    mean_abs_velocity +
+    max_abs_velocity +
+    mean_abs_acceleration,
+  data = train_data,
+  ntree = 500,
+  importance = TRUE,
+  classwt = c("flight" = 1, "pause" = 5)
+)
+
+print(rf_model)
+
+# Predict the held-out recordings
+predictions <- predict(
+  rf_model,
+  newdata = validation_data
+)
+
+# Compare predictions with manual labels
+confusion_matrix <- table(
+  Actual = validation_data$pause,
+  Predicted = predictions
+)
+
+confusion_matrix
+
+# Extract confusion-matrix values
+TP <- confusion_matrix["pause", "pause"]
+FN <- confusion_matrix["pause", "flight"]
+FP <- confusion_matrix["flight", "pause"]
+TN <- confusion_matrix["flight", "flight"]
+
+# Performance metrics
+precision <- TP / (TP + FP)
+recall <- TP / (TP + FN)
+F1 <- 2 * precision * recall / (precision + recall)
+accuracy <- (TP + TN) / sum(confusion_matrix)
+
+data.frame(
+  Accuracy = accuracy,
+  Precision = precision,
+  Recall = recall,
+  F1 = F1
 )
