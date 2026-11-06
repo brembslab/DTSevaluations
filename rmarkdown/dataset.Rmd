@@ -243,6 +243,7 @@ OMtitles = c("Optomotor Magnitude", "Optomotor Slope", "Asymmetry Index Magn.", 
 #for one group or more than three groups without statistics
 if(NofGroups==1|NofGroups>3)
   {
+        plotOMparams$group <- factor(plotOMparams$group, levels = groupnames) #Enforce given order to avoid alphabetical plotting. if an error occurs in the future try using unique levels
         for (v in 1:4) {
            cat(paste("\n\n## ", OMtitles[v], "\n\n", sep = ""))
            print(ggplot(plotOMparams, aes(group, plotOMparams[[OMvariables[v]]])) +
